@@ -69,13 +69,13 @@ export function Hero({ onGetQuote }: HeroProps) {
 
       {sceneEnabled && (
         <div
-          className="absolute left-1/2 top-16 md:top-20 -translate-x-1/2 h-[520px] w-[520px] md:h-[640px] md:w-[640px] pointer-events-none opacity-70 mix-blend-screen"
+          className="absolute left-1/2 -top-8 md:-top-16 -translate-x-1/2 h-[640px] w-[640px] md:h-[860px] md:w-[860px] pointer-events-none"
           aria-hidden
           style={{
             maskImage:
-              "radial-gradient(circle at center, black 35%, transparent 75%)",
+              "radial-gradient(circle at center, black 50%, transparent 85%)",
             WebkitMaskImage:
-              "radial-gradient(circle at center, black 35%, transparent 75%)",
+              "radial-gradient(circle at center, black 50%, transparent 85%)",
           }}
         >
           <SceneBoundary>
