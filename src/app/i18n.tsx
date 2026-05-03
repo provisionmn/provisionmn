@@ -32,7 +32,7 @@ const dicts = {
     services: {
       tag: "// Services",
       title: "Нэг багаар инженерийн бүх давхарга",
-      sub: "Идея → архитектур → код → launch → scale. Хэсэгчилсэн vendor хайх шаардлагагүй.",
+      sub: "Санаа → архитектур → код → launch → scale. Хэсэгчилсэн vendor хайх шаардлагагүй.",
       detailBtn: "Үйлчилгээ дэлгэрэнгүй",
       items: [
         {
@@ -154,7 +154,7 @@ const dicts = {
       tag: "// About",
       title1: "Startup-ийн хурд,",
       title2: "том багийн инженерийн стандарт",
-      p1: "Provision.mn нь 2019 онд үүсгэн байгуулагдсан. Бид идеяг production-д хүргэж, scale-д ороход шаардлагатай бүх давхаргыг нэг газраас өгдөг.",
+      p1: "Provision.mn нь 2019 онд үүсгэн байгуулагдсан. Бид санааг production-д хүргэж, scale-д ороход шаардлагатай бүх давхаргыг нэг газраас өгдөг.",
       p2: "Fullstack-аас AI хүртэл, UX-ээс автоматжуулалт хүртэл — хэд хэдэн vendor-тэй ярих шаардлагагүй, нэг engineering team-тэй ажиллана.",
       highlights: [
         "Монголын Odoo implementation partner",
