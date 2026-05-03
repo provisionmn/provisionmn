@@ -164,8 +164,8 @@ const dicts = {
       ],
       stats: [
         { number: "60+", label: "Launch хийсэн төсөл" },
-        { number: "12", label: "Full-time инженер" },
-        { number: "7", label: "Жилийн туршлага" },
+        { number: "6", label: "Full-time хөгжүүлэгч" },
+        { number: "10+", label: "Жилийн туршлага" },
         { number: "99.9%", label: "Uptime target" },
       ],
     },
@@ -432,8 +432,8 @@ const dicts = {
       ],
       stats: [
         { number: "60+", label: "Shipped projects" },
-        { number: "12", label: "Full-time engineers" },
-        { number: "7", label: "Years of experience" },
+        { number: "6", label: "Full-time developers" },
+        { number: "10+", label: "Years of experience" },
         { number: "99.9%", label: "Uptime target" },
       ],
     },
