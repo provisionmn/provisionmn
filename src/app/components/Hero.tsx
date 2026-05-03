@@ -1,9 +1,41 @@
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
-import { lazy, Suspense } from "react";
+import { Component, lazy, Suspense, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { useT } from "../i18n";
 
 const HeroScene = lazy(() => import("./HeroScene"));
+
+class SceneBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: unknown) {
+    if (typeof console !== "undefined") {
+      console.warn("HeroScene failed, falling back:", error);
+    }
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
+function hasWebGL(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const c = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (c.getContext("webgl2") || c.getContext("webgl"))
+    );
+  } catch {
+    return false;
+  }
+}
 
 interface HeroProps {
   onGetQuote?: () => void;
@@ -11,6 +43,11 @@ interface HeroProps {
 
 export function Hero({ onGetQuote }: HeroProps) {
   const { t } = useT();
+  const [sceneEnabled, setSceneEnabled] = useState(false);
+
+  useEffect(() => {
+    setSceneEnabled(hasWebGL());
+  }, []);
 
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -30,20 +67,24 @@ export function Hero({ onGetQuote }: HeroProps) {
         }}
       />
 
-      <div
-        className="absolute left-1/2 top-16 md:top-20 -translate-x-1/2 h-[520px] w-[520px] md:h-[640px] md:w-[640px] pointer-events-none opacity-70 mix-blend-screen"
-        aria-hidden
-        style={{
-          maskImage:
-            "radial-gradient(circle at center, black 35%, transparent 75%)",
-          WebkitMaskImage:
-            "radial-gradient(circle at center, black 35%, transparent 75%)",
-        }}
-      >
-        <Suspense fallback={null}>
-          <HeroScene />
-        </Suspense>
-      </div>
+      {sceneEnabled && (
+        <div
+          className="absolute left-1/2 top-16 md:top-20 -translate-x-1/2 h-[520px] w-[520px] md:h-[640px] md:w-[640px] pointer-events-none opacity-70 mix-blend-screen"
+          aria-hidden
+          style={{
+            maskImage:
+              "radial-gradient(circle at center, black 35%, transparent 75%)",
+            WebkitMaskImage:
+              "radial-gradient(circle at center, black 35%, transparent 75%)",
+          }}
+        >
+          <SceneBoundary>
+            <Suspense fallback={null}>
+              <HeroScene />
+            </Suspense>
+          </SceneBoundary>
+        </div>
+      )}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="max-w-3xl mx-auto text-center">
