@@ -1,4 +1,7 @@
+"use client";
+
 import { Github, Linkedin, Mail, Twitter } from "lucide-react";
+import { Logo } from "./Logo";
 import { useT } from "../i18n";
 
 export function Footer() {
@@ -11,12 +14,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <span className="font-mono font-semibold text-primary">P</span>
-              </div>
-              <span className="font-semibold tracking-tight">provision.mn</span>
-            </div>
+            <Logo className="mb-4" />
             <p className="text-sm text-muted-foreground max-w-md mb-6">
               {t.footer.tagline}
             </p>

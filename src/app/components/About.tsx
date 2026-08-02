@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowRight,
   Award,
@@ -21,7 +23,7 @@ export function About() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           <div>
-            <div className="font-mono text-xs uppercase tracking-[0.2em] text-accent mb-4">
+            <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand mb-4">
               {t.about.tag}
             </div>
             <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mb-6">
@@ -34,7 +36,7 @@ export function About() {
             <ul className="space-y-3 font-mono text-sm">
               {t.about.highlights.map((h) => (
                 <li key={h} className="flex items-start gap-3">
-                  <ArrowRight className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-brand mt-0.5 shrink-0" />
                   <span className="text-muted-foreground">{h}</span>
                 </li>
               ))}
@@ -49,7 +51,7 @@ export function About() {
                   key={stat.label}
                   className="rounded-2xl border border-border bg-card/50 backdrop-blur p-6"
                 >
-                  <Icon className="h-5 w-5 text-accent mb-6" />
+                  <Icon className="h-5 w-5 text-brand mb-6" />
                   <div className="text-4xl md:text-5xl font-semibold tracking-tight mb-1">
                     {stat.number}
                   </div>

@@ -17,12 +17,12 @@ function Blob() {
     <mesh ref={ref} scale={1.9}>
       <icosahedronGeometry args={[1, 48]} />
       <MeshDistortMaterial
-        color="#7c6eff"
+        color="#7B1FA2"
         distort={0.55}
         speed={2.2}
         roughness={0.15}
         metalness={0.6}
-        emissive="#5a4cff"
+        emissive="#4C3BAD"
         emissiveIntensity={0.35}
       />
     </mesh>
@@ -39,7 +39,7 @@ function Wireframe() {
   return (
     <mesh ref={ref} scale={2.7}>
       <icosahedronGeometry args={[1, 1]} />
-      <meshBasicMaterial color="#a78bfa" wireframe transparent opacity={0.45} />
+      <meshBasicMaterial color="#BBDEFB" wireframe transparent opacity={0.45} />
     </mesh>
   );
 }
@@ -52,8 +52,8 @@ export default function HeroScene() {
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
     >
       <ambientLight intensity={0.6} />
-      <pointLight position={[5, 5, 5]} intensity={4} color="#7c6eff" />
-      <pointLight position={[-5, -3, -2]} intensity={2.5} color="#22d3ee" />
+      <pointLight position={[5, 5, 5]} intensity={4} color="#7B1FA2" />
+      <pointLight position={[-5, -3, -2]} intensity={2.5} color="#1976D2" />
       <pointLight position={[0, 4, 4]} intensity={1.5} color="#ffffff" />
       <Suspense fallback={null}>
         <Blob />

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowRight,
   ArrowUpRight,
@@ -54,13 +56,13 @@ function StatusBadge({ status }: { status: ProductStatus }) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-mono uppercase tracking-wider ${
         isLive
-          ? "border-[#27C93F]/30 bg-[#27C93F]/10 text-[#27C93F]"
-          : "border-accent/30 bg-accent/10 text-accent"
+          ? "border-brand-green/30 bg-brand-green/10 text-brand-green"
+          : "border-brand/30 bg-brand/10 text-brand"
       }`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
-          isLive ? "bg-[#27C93F]" : "bg-accent"
+          isLive ? "bg-brand-green" : "bg-brand"
         } animate-pulse`}
       />
       {status}
@@ -79,7 +81,7 @@ export function Products() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-accent mb-4">
+          <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand mb-4">
             {t.products.tag}
           </div>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
@@ -94,7 +96,7 @@ export function Products() {
             aria-hidden
             style={{
               background:
-                "radial-gradient(circle at 85% 0%, rgba(124,110,255,0.18), transparent 55%), radial-gradient(circle at 15% 100%, rgba(34,211,238,0.1), transparent 55%)",
+                "radial-gradient(circle at 85% 0%, rgba(123,31,162,0.28), transparent 55%), radial-gradient(circle at 15% 100%, rgba(25,118,210,0.16), transparent 55%)",
             }}
           />
 
@@ -105,7 +107,7 @@ export function Products() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="font-mono text-xs uppercase tracking-[0.2em] text-accent inline-flex items-center gap-1.5">
+                  <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand inline-flex items-center gap-1.5">
                     <Sparkles className="h-3 w-3" />
                     {t.products.flagship}
                   </div>
@@ -127,7 +129,7 @@ export function Products() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mb-8">
               {t.products.featured.features.map((f) => (
                 <div key={f} className="flex items-start gap-3">
-                  <ArrowRight className="h-4 w-4 text-accent mt-1 shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-brand mt-1 shrink-0" />
                   <span className="text-sm text-foreground/90">{f}</span>
                 </div>
               ))}
@@ -155,7 +157,7 @@ export function Products() {
                 key={brand.name}
                 className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur p-6 md:p-8 overflow-hidden hover:border-primary/40 transition-colors"
               >
-                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_0%,rgba(124,110,255,0.1),transparent_60%)]" />
+                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_0%,rgba(123,31,162,0.16),transparent_60%)]" />
 
                 <div className="relative">
                   <div className="flex items-start justify-between mb-6">
@@ -182,7 +184,7 @@ export function Products() {
                         key={f}
                         className="flex items-start gap-2 text-sm text-muted-foreground"
                       >
-                        <ArrowRight className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                        <ArrowRight className="h-4 w-4 text-brand mt-0.5 shrink-0" />
                         <span>{f}</span>
                       </li>
                     ))}

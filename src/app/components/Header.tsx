@@ -1,10 +1,18 @@
+"use client";
+
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
+import { Logo } from "./Logo";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import { useT } from "../i18n";
 
 export function Header() {
   const { t, lang, toggleLang } = useT();
+  const pathname = usePathname();
+  const router = useRouter();
+  const onHome = pathname === "/";
 
   const navLinks = [
     { href: "#services", label: t.nav.services },
@@ -29,8 +37,15 @@ export function Header() {
 
   const toggleTheme = () => setIsDark((v) => !v);
 
+  // On the landing page the section is already mounted, so scroll to it
+  // directly. Anywhere else, route home with the hash and let the browser
+  // handle the jump once the section renders.
   const scrollTo = (href: string) => {
     setMobileOpen(false);
+    if (!onHome) {
+      router.push(`/${href}`);
+      return;
+    }
     const el = document.getElementById(href.replace("#", ""));
     el?.scrollIntoView({ behavior: "smooth" });
   };
@@ -41,12 +56,9 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <a href="#home" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <span className="font-mono font-semibold text-primary">P</span>
-            </div>
-            <span className="font-semibold tracking-tight">provision.mn</span>
-          </a>
+          <Link href="/" aria-label="Provision Solutions — нүүр хуудас">
+            <Logo />
+          </Link>
 
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (

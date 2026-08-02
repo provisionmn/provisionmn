@@ -1,4 +1,8 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useQuote } from "../quote-context";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -13,11 +17,15 @@ interface Message {
   options?: string[];
 }
 
-interface ChatbotProps {
-  onQuoteRequest: (data: any) => void;
+interface ProjectData {
+  projectType?: string;
+  details?: string;
+  teamSize?: string;
 }
 
-export function Chatbot({ onQuoteRequest }: ChatbotProps) {
+export function Chatbot() {
+  const router = useRouter();
+  const { setQuote } = useQuote();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -31,7 +39,7 @@ export function Chatbot({ onQuoteRequest }: ChatbotProps) {
   ]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [chatState, setChatState] = useState<'greeting' | 'projectType' | 'details' | 'quote'>('greeting');
-  const [projectData, setProjectData] = useState<any>({});
+  const [projectData, setProjectData] = useState<ProjectData>({});
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -159,7 +167,7 @@ export function Chatbot({ onQuoteRequest }: ChatbotProps) {
   const handleQuoteRequest = (option: string) => {
     if (option === 'Дэлгэрэнгүй үнийн санал авах') {
       const estimateData = calculateEstimate(projectData);
-      onQuoteRequest({
+      setQuote({
         projectType: projectData.projectType,
         description: projectData.details,
         teamSize: projectData.teamSize,
@@ -167,6 +175,7 @@ export function Chatbot({ onQuoteRequest }: ChatbotProps) {
         estimatedWeeks: estimateData.weeks
       });
       setIsOpen(false);
+      router.push("/quote");
     } else if (option === 'Өөр төсөл тооцуулах') {
       setMessages([messages[0]]);
       setChatState('greeting');

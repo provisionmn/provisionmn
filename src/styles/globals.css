@@ -1,81 +1,133 @@
 @custom-variant dark (&:is(.dark *));
 
+/**
+ * Brand palette — Provision Solutions INC LLC brand book, section 05.
+ * These seven are the literal book values; everything below is derived from
+ * them. Do not introduce colours outside this set without a book update.
+ */
+:root {
+  --brand-navy: #0A0A1F;   /* Deep Navy       */
+  --brand-purple: #7B1FA2; /* Vibrant Purple  */
+  --brand-blue: #1976D2;   /* True Royal Blue */
+  --brand-gray: #E0E0E0;   /* Aura Gray       */
+  --brand-white: #FAFAFA;  /* Linen White     */
+  --brand-sky: #BBDEFB;    /* Sky Blue        */
+  --brand-green: #A5D6A7;  /* Emerald Green   */
+}
+
 :root {
   --font-size: 14px;
-  --background: #FAFAFB;
-  --foreground: #0B0B10;
+  --background: #FAFAFA;
+  --foreground: #0A0A1F;
   --card: #FFFFFF;
-  --card-foreground: #0B0B10;
+  --card-foreground: #0A0A1F;
   --popover: #FFFFFF;
-  --popover-foreground: #0B0B10;
-  --primary: #5B52E8;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F1F1F4;
-  --secondary-foreground: #0B0B10;
-  --muted: #F3F3F6;
-  --muted-foreground: #5B5B66;
-  --accent: #0E9FBE;
-  --accent-foreground: #FFFFFF;
+  --popover-foreground: #0A0A1F;
+  --primary: #7B1FA2;
+  --primary-foreground: #FAFAFA;
+  --secondary: #F0F0F3;
+  --secondary-foreground: #0A0A1F;
+  --muted: #F0F0F3;
+  --muted-foreground: #55556B;
+  /* `accent` is shadcn's subtle hover surface, NOT the brand accent — see
+     `--brand` below. Keeping these separate stops ghost buttons and select
+     rows from flashing a saturated brand colour on hover. */
+  --accent: #EDEDF1;
+  --accent-foreground: #0A0A1F;
+  /* Bright brand accent: eyebrow labels, status dots, active marks.
+     True Royal Blue on Linen White measures 4.41:1 — just under AA for the
+     small uppercase labels this drives. Section 07 of the book sets its own
+     accent word in Vibrant Purple on white, which clears 8:1, so light
+     surfaces use that instead. Both values are straight from the palette. */
+  --brand: #7B1FA2;
+  /* Headline gradient. On light surfaces the book's own colours work as text
+     (section 07 sets "provision." in Vibrant Purple on white). */
+  --gradient-from: #7B1FA2;
+  --gradient-to: #1976D2;
+  /* Logo mark, book section 03 "Full Color" — for light surfaces. */
+  --logo-from: #7B1FA2;
+  --logo-to: #0A0A1F;
+  --logo-block: #1976D2;
+  /* Hero backdrop glow. Vibrant Purple needs real weight to read on Deep
+     Navy, but the same value swamps the light theme — hence per-theme. */
+  --hero-glow: rgba(123, 31, 162, 0.09);
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(11, 11, 16, 0.1);
+  --success: #A5D6A7;
+  --border: rgba(10, 10, 31, 0.12);
   --input: transparent;
   --input-background: #FFFFFF;
-  --switch-background: #E4E4E9;
+  --switch-background: #E0E0E0;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #5B52E8;
-  --chart-1: #5B52E8;
-  --chart-2: #0E9FBE;
-  --chart-3: #10B981;
-  --chart-4: #F59E0B;
-  --chart-5: #EC4899;
+  --ring: #7B1FA2;
+  --chart-1: #7B1FA2;
+  --chart-2: #1976D2;
+  --chart-3: #A5D6A7;
+  --chart-4: #BBDEFB;
+  --chart-5: #E0E0E0;
   --radius: 0.75rem;
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #0B0B10;
-  --sidebar-primary: #5B52E8;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F1F1F4;
-  --sidebar-accent-foreground: #0B0B10;
-  --sidebar-border: rgba(11, 11, 16, 0.1);
-  --sidebar-ring: #5B52E8;
+  --sidebar-foreground: #0A0A1F;
+  --sidebar-primary: #7B1FA2;
+  --sidebar-primary-foreground: #FAFAFA;
+  --sidebar-accent: #F0F0F3;
+  --sidebar-accent-foreground: #0A0A1F;
+  --sidebar-border: rgba(10, 10, 31, 0.12);
+  --sidebar-ring: #7B1FA2;
 }
 
 .dark {
-  --background: #09090B;
+  --background: #0A0A1F;
   --foreground: #FAFAFA;
-  --card: #0F0F12;
+  --card: #12122B;
   --card-foreground: #FAFAFA;
-  --popover: #0F0F12;
+  --popover: #12122B;
   --popover-foreground: #FAFAFA;
-  --primary: #7C6EFF;
+  --primary: #7B1FA2;
   --primary-foreground: #FAFAFA;
-  --secondary: #18181B;
+  --secondary: #1A1A38;
   --secondary-foreground: #FAFAFA;
-  --muted: #18181B;
-  --muted-foreground: #A1A1AA;
-  --accent: #22D3EE;
-  --accent-foreground: #09090B;
+  --muted: #1A1A38;
+  --muted-foreground: #A8A8C0;
+  --accent: #1A1A38;
+  --accent-foreground: #FAFAFA;
+  /* Sky Blue rather than Royal Blue: on Deep Navy the book's #1976D2 only
+     reaches 4.1:1, and these labels are small. Sky Blue clears 13:1. */
+  --brand: #BBDEFB;
+  /* Vibrant Purple itself only reaches 2.3:1 on Deep Navy, so the dark
+     headline uses a 55% tint of it into white, paired with Sky Blue —
+     mirroring how the book's Inverse / App Icon marks lighten on navy. */
+  --gradient-from: #B684CC;
+  --gradient-to: #BBDEFB;
+  /* Book section 03 "Inverse". The Full Color mark ends on Deep Navy, which
+     IS the dark background — it would dissolve into it, so dark surfaces get
+     the light mark instead. */
+  --logo-from: #FAFAFA;
+  --logo-to: #E4D3F0;
+  --logo-block: #BBDEFB;
+  --hero-glow: rgba(123, 31, 162, 0.28);
   --destructive: #F87171;
-  --destructive-foreground: #09090B;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: #18181B;
-  --input-background: #18181B;
-  --switch-background: #27272A;
-  --ring: #7C6EFF;
-  --chart-1: #7C6EFF;
-  --chart-2: #22D3EE;
-  --chart-3: #10B981;
-  --chart-4: #F59E0B;
-  --chart-5: #EC4899;
-  --sidebar: #0F0F12;
+  --destructive-foreground: #0A0A1F;
+  --success: #A5D6A7;
+  --border: rgba(224, 224, 224, 0.12);
+  --input: #1A1A38;
+  --input-background: #1A1A38;
+  --switch-background: #26264A;
+  --ring: #7B1FA2;
+  --chart-1: #7B1FA2;
+  --chart-2: #1976D2;
+  --chart-3: #A5D6A7;
+  --chart-4: #BBDEFB;
+  --chart-5: #E0E0E0;
+  --sidebar: #12122B;
   --sidebar-foreground: #FAFAFA;
-  --sidebar-primary: #7C6EFF;
+  --sidebar-primary: #7B1FA2;
   --sidebar-primary-foreground: #FAFAFA;
-  --sidebar-accent: #18181B;
+  --sidebar-accent: #1A1A38;
   --sidebar-accent-foreground: #FAFAFA;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #7C6EFF;
+  --sidebar-border: rgba(224, 224, 224, 0.12);
+  --sidebar-ring: #7B1FA2;
 }
 
 @theme inline {
@@ -93,6 +145,13 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-brand: var(--brand);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-purple: var(--brand-purple);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-sky: var(--brand-sky);
+  --color-brand-green: var(--brand-green);
+  --color-success: var(--success);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -126,8 +185,9 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Inter", ui-sans-serif, system-ui, -apple-system,
-      "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* --font-inter is provided by next/font in app/layout.tsx */
+    font-family: var(--font-inter), "Inter", ui-sans-serif, system-ui,
+      -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1, "cv11" 1;
   }
 
@@ -209,7 +269,11 @@ html {
   }
 
   .text-gradient-brand {
-    background-image: linear-gradient(120deg, var(--primary) 0%, var(--accent) 100%);
+    background-image: linear-gradient(
+      120deg,
+      var(--gradient-from) 0%,
+      var(--gradient-to) 100%
+    );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;

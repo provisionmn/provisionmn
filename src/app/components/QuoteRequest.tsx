@@ -1,4 +1,8 @@
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuote } from "../quote-context";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -8,14 +12,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { FileText, Shield, CheckCircle, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 
-interface QuoteRequestProps {
-  initialData?: any;
-  onSubmit: (data: any) => void;
-  onBack: () => void;
+interface QuoteFormData {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  projectType: string;
+  description: string;
+  budget: string;
+  timeline: string;
+  estimatedPrice: number;
+  // The calculator/chatbot prefill can carry extra fields (complexity,
+  // features, estimatedHours…) that are spread in verbatim.
+  [key: string]: any;
 }
 
-export function QuoteRequest({ initialData, onSubmit, onBack }: QuoteRequestProps) {
-  const [formData, setFormData] = useState({
+export function QuoteRequest() {
+  const router = useRouter();
+  const { quote: initialData, clearQuote } = useQuote();
+
+  // Arriving from the calculator means there is something to go back to;
+  // a direct visit to /quote returns to the landing page instead.
+  const goBack = () => router.push(initialData ? "/calculator" : "/");
+
+  const [formData, setFormData] = useState<QuoteFormData>({
     name: "",
     email: "",
     phone: "",
@@ -37,6 +57,17 @@ export function QuoteRequest({ initialData, onSubmit, onBack }: QuoteRequestProp
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Mirrors the old single-page behaviour: show the success card, then return
+  // to the landing page after 3s.
+  useEffect(() => {
+    if (!isSubmitted) return;
+    const id = setTimeout(() => {
+      clearQuote();
+      router.push("/");
+    }, 3000);
+    return () => clearTimeout(id);
+  }, [isSubmitted, clearQuote, router]);
 
   // Generate simple math captcha
   const generateCaptcha = () => {
@@ -74,9 +105,12 @@ export function QuoteRequest({ initialData, onSubmit, onBack }: QuoteRequestProp
     });
   };
 
-  useState(() => {
+  // Must be client-only: the question is randomised, so generating it during
+  // render makes the server and client markup disagree (hydration mismatch).
+  useEffect(() => {
     generateCaptcha();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -110,7 +144,8 @@ export function QuoteRequest({ initialData, onSubmit, onBack }: QuoteRequestProp
       status: 'pending'
     };
     
-    onSubmit(requestData);
+    // No backend: the request is only surfaced in the success state below.
+    void requestData;
     setIsSubmitted(true);
     setIsSubmitting(false);
   };
@@ -132,7 +167,7 @@ export function QuoteRequest({ initialData, onSubmit, onBack }: QuoteRequestProp
             </p>
           </div>
           <div className="flex gap-4 justify-center">
-            <Button onClick={onBack}>
+            <Button onClick={() => { clearQuote(); router.push("/"); }}>
               Үндсэн хуудас руу буцах
             </Button>
             <Button variant="outline" onClick={() => window.location.reload()}>
@@ -314,7 +349,7 @@ export function QuoteRequest({ initialData, onSubmit, onBack }: QuoteRequestProp
 
             {/* Submit Buttons */}
             <div className="flex gap-4">
-              <Button type="button" variant="outline" onClick={onBack} className="flex-1">
+              <Button type="button" variant="outline" onClick={goBack} className="flex-1">
                 Буцах
               </Button>
               <Button 

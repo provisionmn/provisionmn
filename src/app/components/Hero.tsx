@@ -1,3 +1,6 @@
+"use client";
+
+import Link from "next/link";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import { Component, lazy, Suspense, useEffect, useState } from "react";
@@ -37,11 +40,7 @@ function hasWebGL(): boolean {
   }
 }
 
-interface HeroProps {
-  onGetQuote?: () => void;
-}
-
-export function Hero({ onGetQuote }: HeroProps) {
+export function Hero() {
   const { t } = useT();
   const [sceneEnabled, setSceneEnabled] = useState(false);
 
@@ -63,13 +62,15 @@ export function Hero({ onGetQuote }: HeroProps) {
         aria-hidden
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(124,110,255,0.18) 0%, transparent 60%)",
+            "radial-gradient(ellipse at center, var(--hero-glow) 0%, transparent 60%)",
         }}
       />
 
       {sceneEnabled && (
         <div
-          className="absolute left-1/2 -top-8 md:-top-16 -translate-x-1/2 h-[640px] w-[640px] md:h-[860px] md:w-[860px] pointer-events-none"
+          // The scene is lit for Deep Navy; at full strength it swamps the
+          // light theme and drops the sub-headline below readable contrast.
+          className="absolute left-1/2 -top-8 md:-top-16 -translate-x-1/2 h-[640px] w-[640px] md:h-[860px] md:w-[860px] pointer-events-none opacity-30 dark:opacity-100 transition-opacity"
           aria-hidden
           style={{
             maskImage:
@@ -90,8 +91,8 @@ export function Hero({ onGetQuote }: HeroProps) {
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/50 backdrop-blur px-4 py-1.5 text-xs font-mono text-muted-foreground">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inset-0 animate-ping rounded-full bg-accent opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-brand opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-brand" />
             </span>
             <span>{t.hero.badge}</span>
           </div>
@@ -107,13 +108,11 @@ export function Hero({ onGetQuote }: HeroProps) {
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              size="lg"
-              className="h-12 px-6 text-base"
-              onClick={onGetQuote}
-            >
-              {t.hero.startBtn}
-              <ArrowRight className="ml-1 h-4 w-4" />
+            <Button asChild size="lg" className="h-12 px-6 text-base">
+              <Link href="/calculator">
+                {t.hero.startBtn}
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
             </Button>
             <Button
               variant="outline"
@@ -131,6 +130,7 @@ export function Hero({ onGetQuote }: HeroProps) {
             <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-secondary/40">
               <span className="w-3 h-3 rounded-full bg-[#FF5F56]" />
               <span className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
+              {/* macOS window controls — literal chrome, deliberately not brand colours */}
               <span className="w-3 h-3 rounded-full bg-[#27C93F]" />
               <span className="ml-3 font-mono text-xs text-muted-foreground">
                 ~/provision — zsh
@@ -142,41 +142,41 @@ export function Hero({ onGetQuote }: HeroProps) {
                 <span>provision ship</span>
                 <span className="text-muted-foreground"> --stack=all</span>
                 {"\n\n"}
-                <span className="text-accent">➜</span>{" "}
+                <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   Fullstack     Next.js · Django · Postgres
                 </span>{" "}
-                <span className="text-[#27C93F]">✓</span>
+                <span className="text-brand-green">✓</span>
                 {"\n"}
-                <span className="text-accent">➜</span>{" "}
+                <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   Mobile        React Native · Swift · Kotlin
                 </span>{" "}
-                <span className="text-[#27C93F]">✓</span>
+                <span className="text-brand-green">✓</span>
                 {"\n"}
-                <span className="text-accent">➜</span>{" "}
+                <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   AI / LLM      RAG · Agent · Fine-tune
                 </span>{" "}
-                <span className="text-[#27C93F]">✓</span>
+                <span className="text-brand-green">✓</span>
                 {"\n"}
-                <span className="text-accent">➜</span>{" "}
+                <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   DevOps        Kubernetes · Terraform · CI/CD
                 </span>{" "}
-                <span className="text-[#27C93F]">✓</span>
+                <span className="text-brand-green">✓</span>
                 {"\n"}
-                <span className="text-accent">➜</span>{" "}
+                <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   RPA           Power Automate · Workflow
                 </span>{" "}
-                <span className="text-[#27C93F]">✓</span>
+                <span className="text-brand-green">✓</span>
                 {"\n"}
-                <span className="text-accent">➜</span>{" "}
+                <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   Odoo · UX/UI  Custom module · Design system
                 </span>{" "}
-                <span className="text-[#27C93F]">✓</span>
+                <span className="text-brand-green">✓</span>
                 {"\n\n"}
                 <span className="text-primary">{t.hero.termReady}</span>
                 <span className="text-muted-foreground">

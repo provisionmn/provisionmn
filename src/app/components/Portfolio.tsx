@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowUpRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useT } from "../i18n";
@@ -34,7 +36,7 @@ export function Portfolio() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-accent mb-4">
+          <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand mb-4">
             {t.portfolio.tag}
           </div>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">

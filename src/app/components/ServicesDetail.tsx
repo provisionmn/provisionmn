@@ -1,21 +1,20 @@
+import Link from "next/link";
 import { ArrowLeft, CheckCircle, Code, Smartphone, Settings, Users, Clock, Star } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 
-interface ServicesDetailProps {
-  onBack: () => void;
-}
-
-export function ServicesDetail({ onBack }: ServicesDetailProps) {
+export function ServicesDetail() {
   return (
     <div className="min-h-screen bg-white dark:bg-background">
       {/* Header */}
       <div className="bg-white dark:bg-background border-b border-border sticky top-0 z-50 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Button variant="ghost" onClick={onBack} className="mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Буцах
+          <Button asChild variant="ghost" className="mb-4">
+            <Link href="/">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Буцах
+            </Link>
           </Button>
           <div className="text-center">
             <h1 className="text-3xl font-bold text-foreground mb-4">Манай үйлчилгээнүүд</h1>

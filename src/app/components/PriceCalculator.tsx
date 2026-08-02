@@ -1,4 +1,8 @@
+"use client";
+
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuote } from "../quote-context";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -8,11 +12,10 @@ import { Checkbox } from "./ui/checkbox";
 import { Textarea } from "./ui/textarea";
 import { Calculator, Clock, Users, DollarSign } from "lucide-react";
 
-interface PriceCalculatorProps {
-  onSubmit: (data: any) => void;
-}
+export function PriceCalculator() {
+  const router = useRouter();
+  const { setQuote } = useQuote();
 
-export function PriceCalculator({ onSubmit }: PriceCalculatorProps) {
   const [projectType, setProjectType] = useState("");
   const [complexity, setComplexity] = useState("");
   const [features, setFeatures] = useState<string[]>([]);
@@ -87,8 +90,9 @@ export function PriceCalculator({ onSubmit }: PriceCalculatorProps) {
       estimatedHours: Math.round(price / hourlyRate),
       createdAt: new Date().toISOString()
     };
-    
-    onSubmit(data);
+
+    setQuote(data);
+    router.push("/quote");
   };
 
   const totalPrice = calculatePrice();

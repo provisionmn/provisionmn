@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createContext,
   useContext,
@@ -558,20 +560,31 @@ interface Ctx {
 const Context = createContext<Ctx | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Language>(() => {
-    if (typeof window === "undefined") return "mn";
-    const saved = localStorage.getItem("lang");
-    return saved === "en" ? "en" : "mn";
-  });
+  // Must start at the server-rendered default ("mn") so the first client render
+  // matches the HTML. The stored preference is applied in an effect below,
+  // after hydration — reading localStorage during render would desync them.
+  const [lang, setLang] = useState<Language>("mn");
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem("lang");
+      if (saved === "en") setLang("en");
+    } catch {
+      // ignore
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     try {
       localStorage.setItem("lang", lang);
     } catch {
       // ignore
     }
     document.documentElement.lang = lang;
-  }, [lang]);
+  }, [lang, hydrated]);
 
   const toggleLang = () => setLang((v) => (v === "mn" ? "en" : "mn"));
 
