@@ -46,7 +46,22 @@ npm run typecheck  # зөвхөн tsc --noEmit
 
 ## Deployment
 
-GitHub `main` branch-ийн push нь Vercel дээр автомат production deploy үүсгэнэ. Branch / PR push → preview deploy.
+Хоёр бие даасан суваг байна — Docker image нь Vercel-ийг **орлохгүй**:
+
+**Vercel.** `main`-д push хийхэд автомат production deploy. Branch / PR push → preview deploy.
+
+**GitHub Packages (ghcr.io).** `.github/workflows/docker.yml` нь `main` болон `v*` тэг дээр image build хийж түлхэнэ. Pull request дээр зөвхөн build хийж, push хийхгүй (шалгалт). Нэмэлт secret хэрэггүй — `GITHUB_TOKEN`-оор нэвтэрнэ.
+
+```bash
+docker pull ghcr.io/provisionmn/provisionmn:latest
+docker run -p 3000:3000 ghcr.io/provisionmn/provisionmn:latest
+```
+
+Тэгүүд: `latest` (default branch), branch нэр, `v*` тэг, богино sha.
+
+Image нь `node:22-alpine` дээрх Next standalone output, ~200MB, non-root `nextjs` хэрэглэгчээр ажиллана, `/` дээр healthcheck-тэй.
+
+> `output: "standalone"` нь `DOCKER_BUILD` env-ээр хаалттай бөгөөд зөвхөн Dockerfile түүнийг тавьдаг. Тиймээс локал болон Vercel дээрх `npm run build` урьдын хэвээр ажиллана.
 
 ## Notable details
 

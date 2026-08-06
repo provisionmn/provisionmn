@@ -14,7 +14,26 @@ There are no tests and no lint config. `npm run build` and `npm run typecheck` a
 
 **Known build trap:** when `tsc` reports an error, Next 16's Rust code-frame renderer panics (`end byte index … is not a char boundary`) instead of printing it — the source files are Mongolian, and it slices UTF-8 by byte offset. The build then dies with `SIGABRT` and no usable message. Run `npx tsc --noEmit` directly to see the real errors.
 
-Deployment: pushing to `main` triggers a production deploy on Vercel; branch/PR pushes get preview deploys.
+## Deployment
+
+Two independent targets — the Docker image did **not** replace Vercel:
+
+- **Vercel** — pushing to `main` triggers a production deploy; branch/PR pushes get preview deploys.
+- **GHCR** — `.github/workflows/docker.yml` builds a container and pushes it to `ghcr.io/provisionmn/provisionmn` on `main` and on `v*` tags. Pull requests build the image but do not push it. No secrets needed; it authenticates with the built-in `GITHUB_TOKEN`.
+
+```bash
+docker pull ghcr.io/provisionmn/provisionmn:latest
+docker run -p 3000:3000 ghcr.io/provisionmn/provisionmn:latest
+```
+
+The image is Next's standalone output on `node:22-alpine`, ~200MB, running as non-root `nextjs` with a healthcheck on `/`.
+
+**`output: "standalone"` is gated behind the `DOCKER_BUILD` env var** in `next.config.mjs`, and only the Dockerfile sets it. That keeps `npm run build` — locally and on Vercel — producing exactly what it did before. If you ever need standalone output outside Docker, set `DOCKER_BUILD=1`; don't un-gate it.
+
+Two things about the image that are easy to break:
+
+- **`next/font` fetches Google Fonts at build time**, so the builder stage needs network. The payoff is that the running image makes no external font requests — the woff2 files are served from `/_next/static/media/`. Verified: no `fonts.gstatic.com` reference survives into the HTML.
+- **There is no `public/` directory.** The builder stage runs `mkdir -p public` so the runner's `COPY` stays valid either way; adding one later needs no Dockerfile change.
 
 ## Architecture
 

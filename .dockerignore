@@ -1,0 +1,19 @@
+.git
+.github
+node_modules
+.next
+npm-debug.log*
+*.tsbuildinfo
+
+# Docs and reference art — not build inputs. logo.png in particular is ~1.2MB
+# of brand reference that never reaches the image.
+*.md
+logo.png
+LICENSE
+
+.env*
+.vercel
+.DS_Store
+*.Zone.Identifier
+Dockerfile
+.dockerignore

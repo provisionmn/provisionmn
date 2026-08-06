@@ -1,0 +1,93 @@
+name: Build & Push Docker Image
+
+# Docker image build хийж GitHub Packages (ghcr.io) руу түлхэнэ.
+#
+#   main руу push       → build + push (latest, sha, branch тэг)
+#   v* тэг              → build + push (мөн семантик хувилбарын тэг)
+#   pull request        → зөвхөн build (push ХИЙХГҮЙ) — шалгалтын зорилгоор
+#   workflow_dispatch   → гараар аль ч branch-аас
+#
+# Нэмэлт secret шаардлагагүй: ghcr.io-д GITHUB_TOKEN-оор нэвтэрнэ.
+#
+# Анхаар: энэ нь Vercel deploy-г ОРЛОХГҮЙ. Vercel хэвээрээ main-аас production
+# deploy хийсээр байна; энэ image бол өөрөө host хийх хувилбар.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # PR дээр push хийхгүй тул нэвтрэх ч шаардлагагүй.
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha,format=short
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=Provision.mn
+
+      # Dockerfile дотор `npm run build` ажилладаг тул энэ алхам нь tsc
+      # шалгалтыг мөн дамжуулна — PR дээр тусад нь typecheck хийх хэрэггүй.
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Summary
+        if: github.event_name != 'pull_request'
+        run: |
+          {
+            echo "### Image pushed"
+            echo
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo '```'
+            echo
+            echo "docker pull ${{ env.REGISTRY }}/${{ github.repository }}:latest"
+          } >> "$GITHUB_STEP_SUMMARY"
