@@ -3,7 +3,7 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { LanguageProvider } from "./i18n";
 import { QuoteProvider } from "./quote-context";
-import { inter, sora } from "./fonts";
+import { jetbrainsMono, manrope, sora } from "./fonts";
 import "../styles/index.css";
 
 export const metadata: Metadata = {
@@ -39,7 +39,7 @@ export default function RootLayout({
     // suppressHydrationWarning. `lang` is likewise rewritten by LanguageProvider.
     <html
       lang="mn"
-      className={`dark ${inter.variable} ${sora.variable}`}
+      className={`dark ${manrope.variable} ${jetbrainsMono.variable} ${sora.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen">

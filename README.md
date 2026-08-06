@@ -56,7 +56,8 @@ GitHub `main` branch-ийн push нь Vercel дээр автомат production 
 - `--success` нь брэндийн бус, функциональ өнгө (номд ногоон байхгүй ч "live" төлөв, ✓ тэмдэгт шаарддаг) — `text-success` / `bg-success`
 - Лого нь `components/Logo.tsx` доторх inline SVG (растер файл байхгүй; `logo.png` бол зөвхөн лавлагаа). Тэмдэг нь **зузаан chevron-ы контур** — round cap/join бүхий stroke-ыг mask-аар хоосолсон: төв шугам `M 16 16 L 58 50 L 16 84`, гадна 32, дотор 21.4. Хоёр өргөнийг хамт өөрчлөх ёстой
 - Лого болон түүний градиент theme-ээс хамаардаггүй — violet → blue нь light, dark аль алин дээр уншигдана
-- Фонт: UI-д Inter (кирилл дэмжинэ), зөвхөн "Provision" wordmark-д Sora — **Sora кирилл subset-гүй** тул монгол текстэд хэрэглэхгүй (ном Sora-г нэрлэсэн ч гарчигт шилжүүлж болохгүй)
+- Фонт: UI/body-д **Manrope**, `font-mono`-д **JetBrains Mono** (терминал блок "14 өдөрт" гэх монгол текст агуулдаг, системийн анхдагч mono-д **ө** байхгүй), зөвхөн "Provision" wordmark-д **Sora** — Sora кирилл subset-гүй тул монгол текстэд хэрэглэхгүй (ном Sora-г нэрлэсэн ч гарчигт шилжүүлж болохгүй)
+- Фонт солихдоо: **Ө (U+04E8), Ү (U+04AE) нь `cyrillic` биш `cyrillic-ext` дотор**. Мөн `cyrillic-ext` зарласан нь glyph байгаа гэсэн үг биш — Onest, Wix Madefor Text хоёр зарласан мөртлөө Ө/Ү-гүй. Subset жагсаалтад биш, жинхэнэ woff2-ын cmap-д итгэ (CLAUDE.md дээр шалгах script бий)
 - Tailwind v4-ийн `@theme inline` -аар theme tokens-ыг CSS custom property-аас map хийдэг
 - Base font size 14px (`--font-size`) — px hardcode хийхгүй
 - Dark mode-ыг `layout.tsx` дээр `class="dark"`-аар анхдагчаар асаасан; Header-ийн товч сэлгэнэ (хадгалагдахгүй)

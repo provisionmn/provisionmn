@@ -130,7 +130,29 @@ Theming is CSS custom properties mapped to Tailwind tokens via `@theme inline`. 
 
 Fonts are declared in `src/app/fonts.ts` and shared by `layout.tsx` and `Logo.tsx`:
 
-- **Inter** — all UI and body copy, subsets `latin` + `cyrillic` + `cyrillic-ext`. The Cyrillic subsets are what render Ө and Ү, so don't drop them or swap in a font without that coverage. Exposed as `--font-inter`, consumed by the `body` rule in `globals.css`. The brand book names Sora as the typeface, but Sora has no Cyrillic — so Inter carries every heading and paragraph on the site and Sora is confined to the wordmark. Do not "fix" this by moving headings to Sora.
+- **Manrope** — all UI and body copy, subsets `latin` + `cyrillic` + `cyrillic-ext`. Exposed as `--font-manrope`, consumed by the `body` rule in `globals.css` and by `--font-sans`. Chosen to sit with the Sora wordmark while drawing its Cyrillic as part of the family. The brand book names Sora as *the* typeface, but Sora has no Cyrillic — so Manrope carries every heading and paragraph and Sora is confined to the wordmark. Do not "fix" this by moving headings to Sora.
+- **JetBrains Mono** — `--font-mono`, i.e. every `font-mono` utility: the Hero terminal, eyebrow labels, code. Not a cosmetic choice — the terminal block sets Mongolian ("14 өдөрт") and the default system mono stack (Consolas, Liberation Mono, …) has no ө, so that one letter used to fall out to another family mid-line.
+
+**Choosing a font for this repo — two traps, both already hit here:**
+
+1. **Ө (U+04E8) and Ү (U+04AE) are in `cyrillic-ext`, not `cyrillic`.** Requesting only the `cyrillic` subset silently drops them.
+2. **Advertising `cyrillic-ext` does not mean the family draws them.** Onest and Wix Madefor Text both declare the subset and ship neither letter — their cyrillic-ext slice is ~10 codepoints of punctuation. Jost has no `cyrillic-ext` at all.
+
+So never swap a family on the strength of its subset list. Verify against the real font binary:
+
+```bash
+# after a build, check what the shipped woff2 files actually contain
+python3 - <<'EOF'
+import glob
+from fontTools.ttLib import TTFont
+NEED = {0x04E8:'Ө', 0x04E9:'ө', 0x04AE:'Ү', 0x04AF:'ү'}
+for p in glob.glob('.next/static/media/*.woff2'):
+    f = TTFont(p, lazy=True); cps = set()
+    for t in f['cmap'].tables: cps |= set(t.cmap.keys())
+    got = set(NEED) & cps
+    if got: print(f['name'].getDebugName(1), ''.join(NEED[c] for c in sorted(got)))
+EOF
+```
 - **Sora 600** — the "Provision" wordmark only. Sora is the family the brand book names, and **it ships `latin` + `latin-ext` with no Cyrillic subset**, so it can never carry Mongolian copy: a Cyrillic string set in Sora falls back to Inter glyph-by-glyph, which reads as a rendering bug rather than a font choice. Keep it scoped to the Latin wordmark in `Logo.tsx`. This is the same constraint the previous wordmark font (Poppins) had, and it is why the book naming Sora does *not* mean Sora becomes the heading font.
 
 Dark mode is a `.dark` class set on `<html>` in `layout.tsx`. `Header.tsx` toggles it by writing that class directly — the choice is **not** persisted, unlike language, so reloads return to dark. `next-themes` is installed but only referenced inside `ui/sonner.tsx`; it does not drive the app's theme.

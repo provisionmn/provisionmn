@@ -63,7 +63,7 @@ export function Services() {
                 key={s.title}
                 className={`${span} group relative rounded-2xl border border-border bg-card/50 backdrop-blur p-6 md:p-8 hover:border-primary/40 transition-colors overflow-hidden`}
               >
-                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_0%,rgba(123,31,162,0.18),transparent_60%)]" />
+                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_0%,rgba(109,70,255,0.18),transparent_60%)]" />
 
                 <div className="relative flex items-start justify-between mb-6">
                   <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-primary/10 border border-primary/20">

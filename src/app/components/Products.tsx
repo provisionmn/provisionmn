@@ -96,7 +96,7 @@ export function Products() {
             aria-hidden
             style={{
               background:
-                "radial-gradient(circle at 85% 0%, rgba(123,31,162,0.28), transparent 55%), radial-gradient(circle at 15% 100%, rgba(25,118,210,0.16), transparent 55%)",
+                "radial-gradient(circle at 85% 0%, rgba(109,70,255,0.28), transparent 55%), radial-gradient(circle at 15% 100%, rgba(37,99,235,0.16), transparent 55%)",
             }}
           />
 
@@ -157,7 +157,7 @@ export function Products() {
                 key={brand.name}
                 className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur p-6 md:p-8 overflow-hidden hover:border-primary/40 transition-colors"
               >
-                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_0%,rgba(123,31,162,0.16),transparent_60%)]" />
+                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_0%,rgba(109,70,255,0.16),transparent_60%)]" />
 
                 <div className="relative">
                   <div className="flex items-start justify-between mb-6">
