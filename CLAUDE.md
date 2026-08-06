@@ -85,29 +85,36 @@ Verified after the migration: three.js stays in its own chunk and is absent from
 
 ### Brand system
 
-`logo_brand_book.png` at the repo root is the source of truth (Provision Solutions INC LLC). The seven palette colours from its section 05 are declared once at the top of `globals.css` as `--brand-*` and everything else derives from them:
+`logo.png` at the repo root is the source of truth (Provision Solutions). It supersedes an earlier `logo_brand_book.png` with a completely different mark, palette and typeface — if you find anything referencing Deep Navy, Vibrant Purple, Sky Blue or a "block" logo element, it is left over from that book and is wrong.
 
-| Book name | Hex | Role in the UI |
+The palette is **four colours**, declared once at the top of `globals.css` as `--brand-*`; everything else derives from them:
+
+| Name | Hex | Role in the UI |
 | --- | --- | --- |
-| Deep Navy | `#0A0A1F` | dark `--background`, `themeColor` |
-| Vibrant Purple | `#7B1FA2` | `--primary`, light-theme `--brand`, 3D blob |
-| True Royal Blue | `#1976D2` | light `--logo-block`, gradient stop, charts |
-| Aura Gray | `#E0E0E0` | borders (at 12% alpha), switch track |
-| Linen White | `#FAFAFA` | `--foreground` on dark, light `--background` |
-| Sky Blue | `#BBDEFB` | dark-theme `--brand`, wireframe, dark logo block |
-| Emerald Green | `#A5D6A7` | `--success`, status dots, terminal ✓ |
+| Violet | `#6D46FF` | `--primary`, light `--brand`, logo gradient start, 3D blob |
+| Blue | `#2563EB` | logo gradient end, headline gradient stop, charts |
+| Ink | `#0B0F1A` | dark `--background`, light `--foreground`, `themeColor` |
+| Mist | `#E6E8EF` | dark `--foreground`, light `--secondary`/`--muted`, borders at 12% |
 
-Three things about this mapping are deliberate and easy to undo by accident:
+Four things about this mapping are deliberate and easy to undo by accident:
 
 - **`--accent` is not the brand accent.** It is shadcn's subtle hover surface (ghost buttons, select rows). The bright brand colour is `--brand`, exposed as `text-brand` / `bg-brand`. Painting a saturated colour into `--accent` makes every hover state flash.
-- **`--brand` changes hue by theme, on purpose.** Sky Blue on dark (13.9:1); Vibrant Purple on light (7.9:1). The book's own True Royal Blue on Linen White only reaches 4.41:1, under AA for the small uppercase labels this drives — section 07 of the book sets its accent word in purple on white, so light follows that.
-- **The logo gradient is theme-aware** via `--logo-from` / `--logo-to` / `--logo-block`. The book's Full Color mark ends on Deep Navy, which *is* the dark background, so dark surfaces get the Inverse (light) mark instead. `LogoMark` also takes explicit `mono` / `invert` variants.
+- **`--brand` keeps its hue across themes but not its value.** Raw `#6D46FF` is 5.07:1 on light (fine) but only 3.62:1 on `#0B0F1A` — under AA for the small uppercase labels it drives — so dark uses `#A78BFF`, a tint of the same violet, at 7.09:1. Same for `text-gradient-brand` (`--gradient-from/to`): both palette values are too dark to set text in on ink, so dark tints each toward white (`#A78BFF` → `#7BA7F5`).
+- **`--success` is not a brand colour.** The book has no green, but "live" pills and the terminal ✓ marks need one to read as status rather than decoration. It is functional, lives outside the `--brand-*` block, and is exposed as `text-success` / `bg-success` — deliberately *not* under the `brand-` namespace.
+- **The logo gradient is theme-independent.** Violet → blue reads on light and dark alike, and the book itself puts that exact mark on white, on an ink tile, on a violet circle and on light grey. This is a simplification over the old book, whose mark ended on the dark background colour and had to be flipped per theme. `LogoMark` still takes `mono` / `invert` variants for one-colour and photographic contexts.
 
-`text-gradient-brand` and the hero backdrop glow are likewise per-theme (`--gradient-from/to`, `--hero-glow`) — raw Vibrant Purple is only 2.3:1 on Deep Navy and unreadable as headline text, so dark uses a 55% tint of it into white.
+The hero backdrop glow stays per-theme (`--hero-glow`) — violet needs real weight on ink but swamps light. The 3D hero scene is lit for the dark background; its wrapper carries `opacity-30 dark:opacity-100` for the same reason.
 
-The 3D hero scene is lit for Deep Navy; its wrapper carries `opacity-30 dark:opacity-100` so it doesn't swamp the light theme.
+`components/Logo.tsx` holds the mark as inline SVG and `app/icon.svg` is the favicon built from the same numbers. There are no raster logo assets — `logo.png` is reference art, not a build input.
 
-`components/Logo.tsx` holds the mark as inline SVG (geometry traced from the book's flat Mono variant) plus the wordmark; `app/icon.svg` is the favicon built from the same paths. There are no raster logo assets.
+**The mark is the contour of a thick chevron, not an outlined polygon.** That distinction is the whole geometry: the two edges of each arm are parallel, so it is a round-capped, round-joined chevron stroke with its middle knocked out, done as a mask (fat white stroke minus thin black stroke). Everything derives from five numbers, fitted to the artwork to within a pixel:
+
+```
+centreline   M 16 16 L 58 50 L 16 84   in viewBox 0 0 74 100   (arms at 39°)
+outer edge   stroke-width 32           inner edge  stroke-width 21.4
+```
+
+Those widths are what produce the ~5.3-unit contour. Changing one without the other changes the arm thickness rather than the line weight. The mark exactly fills its viewBox on all four sides, so the viewBox doubles as the bounding box.
 
 ### Styling
 
@@ -123,8 +130,8 @@ Theming is CSS custom properties mapped to Tailwind tokens via `@theme inline`. 
 
 Fonts are declared in `src/app/fonts.ts` and shared by `layout.tsx` and `Logo.tsx`:
 
-- **Inter** — all UI and body copy, subsets `latin` + `cyrillic` + `cyrillic-ext`. The Cyrillic subsets are what render Ө and Ү, so don't drop them or swap in a font without that coverage. Exposed as `--font-inter`, consumed by the `body` rule in `globals.css`. The brand book's typography panel (section 06) gives a Bold/SemiBold/Medium/Regular ladder but never names a family; Inter matches the specimen and maps onto that ladder at 700/600/500/400, so it stayed.
-- **Poppins 600** — the "Provision" wordmark only, matching the geometric logotype. **Poppins has no Cyrillic subset**, so it must never touch Mongolian copy; keep it scoped to the Latin wordmark in `Logo.tsx`.
+- **Inter** — all UI and body copy, subsets `latin` + `cyrillic` + `cyrillic-ext`. The Cyrillic subsets are what render Ө and Ү, so don't drop them or swap in a font without that coverage. Exposed as `--font-inter`, consumed by the `body` rule in `globals.css`. The brand book names Sora as the typeface, but Sora has no Cyrillic — so Inter carries every heading and paragraph on the site and Sora is confined to the wordmark. Do not "fix" this by moving headings to Sora.
+- **Sora 600** — the "Provision" wordmark only. Sora is the family the brand book names, and **it ships `latin` + `latin-ext` with no Cyrillic subset**, so it can never carry Mongolian copy: a Cyrillic string set in Sora falls back to Inter glyph-by-glyph, which reads as a rendering bug rather than a font choice. Keep it scoped to the Latin wordmark in `Logo.tsx`. This is the same constraint the previous wordmark font (Poppins) had, and it is why the book naming Sora does *not* mean Sora becomes the heading font.
 
 Dark mode is a `.dark` class set on `<html>` in `layout.tsx`. `Header.tsx` toggles it by writing that class directly — the choice is **not** persisted, unlike language, so reloads return to dark. `next-themes` is installed but only referenced inside `ui/sonner.tsx`; it does not drive the app's theme.
 

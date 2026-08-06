@@ -146,37 +146,37 @@ export function Hero() {
                 <span className="text-muted-foreground">
                   Fullstack     Next.js · Django · Postgres
                 </span>{" "}
-                <span className="text-brand-green">✓</span>
+                <span className="text-success">✓</span>
                 {"\n"}
                 <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   Mobile        React Native · Swift · Kotlin
                 </span>{" "}
-                <span className="text-brand-green">✓</span>
+                <span className="text-success">✓</span>
                 {"\n"}
                 <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   AI / LLM      RAG · Agent · Fine-tune
                 </span>{" "}
-                <span className="text-brand-green">✓</span>
+                <span className="text-success">✓</span>
                 {"\n"}
                 <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   DevOps        Kubernetes · Terraform · CI/CD
                 </span>{" "}
-                <span className="text-brand-green">✓</span>
+                <span className="text-success">✓</span>
                 {"\n"}
                 <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   RPA           Power Automate · Workflow
                 </span>{" "}
-                <span className="text-brand-green">✓</span>
+                <span className="text-success">✓</span>
                 {"\n"}
                 <span className="text-brand">➜</span>{" "}
                 <span className="text-muted-foreground">
                   Odoo · UX/UI  Custom module · Design system
                 </span>{" "}
-                <span className="text-brand-green">✓</span>
+                <span className="text-success">✓</span>
                 {"\n\n"}
                 <span className="text-primary">{t.hero.termReady}</span>
                 <span className="text-muted-foreground">

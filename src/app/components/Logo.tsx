@@ -1,17 +1,29 @@
-import { poppins } from "../fonts";
+import { sora } from "../fonts";
 
 /**
- * Provision Solutions logo mark — brand book section 01 / 03.
+ * Provision Solutions logo mark.
  *
- * The mark is a broken "P": a top arm that sweeps into the bowl, a detached
- * lower stem, and the small block that section 02 calls out as the
- * "building block that creates value". Geometry traced from the flat Mono
- * variant so the three pieces keep their published proportions.
+ * The mark is the *contour* of a thick chevron — the book's "icon concept"
+ * panel reads it as ">" (forward / progress) plus "<" (solution / structure).
+ * It is not an outlined polygon: the two edges of each arm are parallel, so
+ * the shape is a round-capped, round-joined chevron stroke with its middle
+ * knocked out. Geometry below was traced off the book artwork and fits it to
+ * within a pixel.
  *
- * `variant` maps to the book's logo-mark variations:
- *   full   — Vibrant Purple to Deep Navy gradient (default, section 03)
- *   mono   — single currentColor, for tight or one-colour contexts
- *   invert — light mark for dark surfaces (the book's Inverse lockup)
+ *   arm centreline   M 16 16 L 58 50 L 16 84   (arms at 39° from horizontal)
+ *   arm width        26.7   →  outer edge 32, inner edge 21.4
+ *   contour weight   5.3    →  (32 - 21.4) / 2
+ *
+ * Those two stroke widths are what the mask below trades on: paint the fat
+ * chevron white, punch the thin one back out in black, and the difference is
+ * the ring. Doing it as a mask rather than two stacked strokes keeps the mark
+ * transparent in the middle, so it sits on any surface — the book uses it on
+ * white, on a dark tile, on a violet circle and on light grey.
+ *
+ * `variant` maps to the book's logo variations:
+ *   full   — violet → blue gradient (default; used on every background there)
+ *   mono   — single currentColor
+ *   invert — solid light mark, for busy or photographic backgrounds
  */
 export function LogoMark({
   className,
@@ -22,84 +34,99 @@ export function LogoMark({
   variant?: "full" | "mono" | "invert";
   title?: string;
 }) {
-  // Unique per variant so two marks on one page can't collide on gradient ids.
-  const gid = `pv-mark-${variant}`;
+  // Unique per variant so two marks on one page can't collide on ids.
+  const uid = `pv-${variant}`;
+  const chevron = "M 16 16 L 58 50 L 16 84";
 
-  const fill =
+  const paint =
     variant === "full"
-      ? `url(#${gid})`
+      ? `url(#${uid}-grad)`
       : variant === "invert"
-        ? "var(--brand-white)"
-        : "currentColor";
-
-  const blockFill =
-    variant === "full"
-      ? "var(--logo-block)"
-      : variant === "invert"
-        ? "var(--brand-sky)"
+        ? "var(--brand-mist)"
         : "currentColor";
 
   return (
     <svg
-      viewBox="0 0 84 100"
+      viewBox="0 0 74 100"
       className={className}
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       aria-label={title}
     >
-      {variant === "full" && (
-        <defs>
-          {/* Stops come from CSS vars so the mark follows the theme: Full
-              Color on light surfaces, Inverse on dark. */}
-          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--logo-from)" />
-            <stop offset="100%" stopColor="var(--logo-to)" />
+      <defs>
+        {variant === "full" && (
+          // Violet at the top of the mark falling to blue at the bottom,
+          // matching the book artwork. Unlike the previous mark this does
+          // not flip per theme — it is legible on light and dark alike.
+          <linearGradient id={`${uid}-grad`} x1="0.15" y1="0" x2="0.5" y2="1">
+            <stop offset="0%" stopColor="var(--brand-violet)" />
+            <stop offset="100%" stopColor="var(--brand-blue)" />
           </linearGradient>
-        </defs>
-      )}
+        )}
+        <mask id={`${uid}-mask`}>
+          <path
+            d={chevron}
+            fill="none"
+            stroke="#fff"
+            strokeWidth="32"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d={chevron}
+            fill="none"
+            stroke="#000"
+            strokeWidth="21.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </mask>
+      </defs>
 
-      {/* Top arm sweeping into the bowl, drawn as one round-capped stroke */}
-      <path
-        d="M 10 10 H 52 A 21 21 0 1 1 52 52 H 45"
-        fill="none"
-        stroke={fill}
-        strokeWidth="20"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      <rect
+        width="74"
+        height="100"
+        fill={paint}
+        mask={`url(#${uid}-mask)`}
       />
-      {/* Detached lower stem */}
-      <path
-        d="M 11 53 V 88"
-        fill="none"
-        stroke={fill}
-        strokeWidth="20"
-        strokeLinecap="round"
-      />
-      {/* The block */}
-      <rect x="37" y="72" width="26" height="26" rx="7" fill={blockFill} />
     </svg>
   );
 }
 
 /**
- * Full lockup: mark + wordmark. Mirrors the book's "Compact" horizontal
- * lockup (section 04) — the one sized for UI chrome rather than print.
+ * Full lockup: mark + wordmark. Mirrors the book's primary horizontal lockup,
+ * sized for UI chrome.
+ *
+ * `showTagline` adds the letterspaced SOLUTIONS line beneath the wordmark —
+ * the book's stacked lockup. It is off by default because at header size the
+ * tagline sets below ~7px and turns to mud.
  */
 export function Logo({
   className,
   showWordmark = true,
+  showTagline = false,
 }: {
   className?: string;
   showWordmark?: boolean;
+  showTagline?: boolean;
 }) {
   return (
     <span className={`inline-flex items-center gap-2.5 ${className ?? ""}`}>
       <LogoMark className="h-8 w-auto" title="Provision Solutions" />
       {showWordmark && (
-        <span
-          className={`${poppins.className} text-[1.05rem] font-semibold tracking-tight leading-none`}
-        >
-          Provision
+        <span className="inline-flex flex-col justify-center">
+          <span
+            className={`${sora.className} text-[1.15rem] font-semibold tracking-tight leading-none`}
+          >
+            Provision
+          </span>
+          {showTagline && (
+            <span
+              className={`${sora.className} mt-1 text-[0.5rem] font-semibold uppercase leading-none tracking-[0.42em] text-brand`}
+            >
+              Solutions
+            </span>
+          )}
         </span>
       )}
     </span>

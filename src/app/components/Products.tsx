@@ -56,13 +56,13 @@ function StatusBadge({ status }: { status: ProductStatus }) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-mono uppercase tracking-wider ${
         isLive
-          ? "border-brand-green/30 bg-brand-green/10 text-brand-green"
+          ? "border-success/30 bg-success/10 text-success"
           : "border-brand/30 bg-brand/10 text-brand"
       }`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
-          isLive ? "bg-brand-green" : "bg-brand"
+          isLive ? "bg-success" : "bg-brand"
         } animate-pulse`}
       />
       {status}

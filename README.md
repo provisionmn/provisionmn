@@ -50,11 +50,13 @@ GitHub `main` branch-ийн push нь Vercel дээр автомат production 
 
 ## Notable details
 
-- Брэнд өнгө, лого, фонт нь `logo_brand_book.png`-оос гаралтай. Палитрын 7 өнгө `globals.css`-ийн эхэнд `--brand-*` болж нэг удаа тодорхойлогдоно; бусад бүх token эднээс үүсдэг
+- Брэнд өнгө, лого, фонт нь `logo.png`-оос гаралтай. Палитрын 4 өнгө (`#6D46FF` violet, `#2563EB` blue, `#0B0F1A` ink, `#E6E8EF` mist) `globals.css`-ийн эхэнд `--brand-*` болж нэг удаа тодорхойлогдоно; бусад бүх token эднээс үүсдэг
 - `--accent` бол shadcn-ий hover гадаргуу, брэндийн өнгө БИШ — брэндийн тод өнгө нь `--brand` (`text-brand`)
-- `--brand` нь theme-ээс хамаарч өөрчлөгддөг: dark дээр Sky Blue (13.9:1), light дээр Vibrant Purple (7.9:1) — номын Royal Blue нь цагаан дээр 4.41:1 болж AA-д хүрэхгүй
-- Лого нь `components/Logo.tsx` доторх inline SVG (растер файл байхгүй); dark дээр номын Inverse хувилбар руу автоматаар шилжинэ
-- Фонт: UI-д Inter (кирилл дэмжинэ), зөвхөн "Provision" wordmark-д Poppins — **Poppins кирилл subset-гүй** тул монгол текстэд хэрэглэхгүй
+- `--brand` нь өнгөний аяс хадгална, харин утга нь theme-ээс хамаарна: light дээр `#6D46FF` (5.07:1), dark дээр түүний цайвар хувилбар `#A78BFF` (7.09:1) — түүхий violet нь ink дээр 3.62:1 болж AA-д хүрэхгүй
+- `--success` нь брэндийн бус, функциональ өнгө (номд ногоон байхгүй ч "live" төлөв, ✓ тэмдэгт шаарддаг) — `text-success` / `bg-success`
+- Лого нь `components/Logo.tsx` доторх inline SVG (растер файл байхгүй; `logo.png` бол зөвхөн лавлагаа). Тэмдэг нь **зузаан chevron-ы контур** — round cap/join бүхий stroke-ыг mask-аар хоосолсон: төв шугам `M 16 16 L 58 50 L 16 84`, гадна 32, дотор 21.4. Хоёр өргөнийг хамт өөрчлөх ёстой
+- Лого болон түүний градиент theme-ээс хамаардаггүй — violet → blue нь light, dark аль алин дээр уншигдана
+- Фонт: UI-д Inter (кирилл дэмжинэ), зөвхөн "Provision" wordmark-д Sora — **Sora кирилл subset-гүй** тул монгол текстэд хэрэглэхгүй (ном Sora-г нэрлэсэн ч гарчигт шилжүүлж болохгүй)
 - Tailwind v4-ийн `@theme inline` -аар theme tokens-ыг CSS custom property-аас map хийдэг
 - Base font size 14px (`--font-size`) — px hardcode хийхгүй
 - Dark mode-ыг `layout.tsx` дээр `class="dark"`-аар анхдагчаар асаасан; Header-ийн товч сэлгэнэ (хадгалагдахгүй)

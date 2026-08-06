@@ -3,7 +3,7 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { LanguageProvider } from "./i18n";
 import { QuoteProvider } from "./quote-context";
-import { inter, poppins } from "./fonts";
+import { inter, sora } from "./fonts";
 import "../styles/index.css";
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "dark",
-  themeColor: "#0A0A1F", // Deep Navy
+  themeColor: "#0B0F1A",
 };
 
 export default function RootLayout({
@@ -39,7 +39,7 @@ export default function RootLayout({
     // suppressHydrationWarning. `lang` is likewise rewritten by LanguageProvider.
     <html
       lang="mn"
-      className={`dark ${inter.variable} ${poppins.variable}`}
+      className={`dark ${inter.variable} ${sora.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen">
