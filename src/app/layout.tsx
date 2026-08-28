@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
+import { SkipLink } from "./components/SkipLink";
 import { LanguageProvider } from "./i18n";
 import { QuoteProvider } from "./quote-context";
 import { jetbrainsMono, manrope, sora } from "./fonts";
@@ -21,6 +22,9 @@ export const metadata: Metadata = {
     title: "Provision.mn — Инженерийн студи",
     description:
       "Fullstack, mobile, AI, DevOps, security, Odoo, UX/UI — нэг багаар technology stack-ийн бүх давхаргыг.",
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 
@@ -45,6 +49,7 @@ export default function RootLayout({
       <body className="min-h-screen">
         <LanguageProvider>
           <QuoteProvider>
+            <SkipLink />
             <Header />
             {children}
             <Footer />

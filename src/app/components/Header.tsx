@@ -29,11 +29,41 @@ export function Header() {
     return true;
   });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeId, setActiveId] = useState("");
 
   useEffect(() => {
     if (isDark) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");
   }, [isDark]);
+
+  // Scrollspy for the one-page nav. The margins collapse the viewport to a
+  // band just under the sticky header, so normally one section qualifies;
+  // when two do, the earlier one in `ids` wins, which is document order.
+  useEffect(() => {
+    if (!onHome) {
+      setActiveId("");
+      return;
+    }
+    const ids = ["services", "products", "portfolio", "about", "contact"];
+    const els = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (els.length === 0) return;
+
+    const visible = new Set<string>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
+        }
+        setActiveId(ids.find((id) => visible.has(id)) ?? "");
+      },
+      { rootMargin: "-72px 0px -70% 0px" },
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [onHome]);
 
   const toggleTheme = () => setIsDark((v) => !v);
 
@@ -61,15 +91,29 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => scrollTo(link.href)}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {link.label}
-              </button>
-            ))}
+            {navLinks.map((link) => {
+              const active = activeId === link.href.slice(1);
+              return (
+                <button
+                  key={link.href}
+                  onClick={() => scrollTo(link.href)}
+                  aria-current={active ? "true" : undefined}
+                  className={`relative py-1 text-sm transition-colors ${
+                    active
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {link.label}
+                  <span
+                    aria-hidden
+                    className={`absolute -bottom-0.5 left-0 h-px w-full origin-left bg-brand transition-transform duration-200 ${
+                      active ? "scale-x-100" : "scale-x-0"
+                    }`}
+                  />
+                </button>
+              );
+            })}
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
@@ -143,15 +187,23 @@ export function Header() {
       {mobileOpen && (
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur">
           <div className="max-w-7xl mx-auto px-4 py-4 space-y-3">
-            {navLinks.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => scrollTo(link.href)}
-                className="block w-full text-left text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-              >
-                {link.label}
-              </button>
-            ))}
+            {navLinks.map((link) => {
+              const active = activeId === link.href.slice(1);
+              return (
+                <button
+                  key={link.href}
+                  onClick={() => scrollTo(link.href)}
+                  aria-current={active ? "true" : undefined}
+                  className={`block w-full text-left text-sm transition-colors py-2 ${
+                    active
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {link.label}
+                </button>
+              );
+            })}
             <Button
               size="sm"
               onClick={() => scrollTo("#contact")}

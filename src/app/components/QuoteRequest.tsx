@@ -57,6 +57,8 @@ export function QuoteRequest() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [requestId, setRequestId] = useState("");
+  const [captchaError, setCaptchaError] = useState("");
 
   // Mirrors the old single-page behaviour: show the success card, then return
   // to the landing page after 3s.
@@ -117,6 +119,7 @@ export function QuoteRequest() {
   };
 
   const handleCaptchaChange = (value: string) => {
+    setCaptchaError("");
     setCaptcha(prev => ({
       ...prev,
       userAnswer: value,
@@ -128,24 +131,27 @@ export function QuoteRequest() {
     e.preventDefault();
     
     if (!captcha.isValid) {
-      alert("CAPTCHA хариултыг зөв оруулна уу!");
+      setCaptchaError("Шалгалтын хариуг зөв оруулна уу.");
       return;
     }
+    setCaptchaError("");
 
     setIsSubmitting(true);
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     
+    const id = `REQ-${Date.now()}`;
     const requestData = {
       ...formData,
-      requestId: `REQ-${Date.now()}`,
+      requestId: id,
       createdAt: new Date().toISOString(),
       status: 'pending'
     };
     
     // No backend: the request is only surfaced in the success state below.
     void requestData;
+    setRequestId(id);
     setIsSubmitted(true);
     setIsSubmitting(false);
   };
@@ -154,16 +160,16 @@ export function QuoteRequest() {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardContent className="pt-6 text-center">
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-foreground mb-2">
-            Хүсэлт амжилттай илгээгдлээ!
+            Хүсэлт амжилттай илгээгдлээ
           </h3>
           <p className="text-muted-foreground mb-6">
             Таны хүсэлтийг хүлээн авлаа. Бид 24 цагийн дотор таны имэйл хаягруу дэлгэрэнгүй үнийн санал илгээх болно.
           </p>
           <div className="bg-muted p-4 rounded-lg mb-6">
             <p className="text-sm font-medium text-foreground">
-              Хүсэлтийн дугаар: REQ-{Date.now()}
+              Хүсэлтийн дугаар: {requestId}
             </p>
           </div>
           <div className="flex gap-4 justify-center">
@@ -322,7 +328,7 @@ export function QuoteRequest() {
                 Аюулгүй байдлын шалгалт (CAPTCHA)
               </Label>
               <div className="flex items-center gap-4">
-                <div className="bg-white dark:bg-background border rounded px-3 py-2 font-mono text-lg min-w-[120px] text-center">
+                <div className="bg-card border rounded px-3 py-2 font-mono text-lg min-w-[120px] text-center tabular-nums">
                   {captcha.question}
                 </div>
                 <Input
@@ -342,9 +348,14 @@ export function QuoteRequest() {
                   <RefreshCw className="h-4 w-4" />
                 </Button>
                 {captcha.isValid && (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <CheckCircle className="h-5 w-5 text-success" />
                 )}
               </div>
+              {captchaError && (
+                <p role="alert" className="mt-3 text-xs text-destructive">
+                  {captchaError}
+                </p>
+              )}
             </div>
 
             {/* Submit Buttons */}

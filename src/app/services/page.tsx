@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ServicesPage() {
   return (
-    <main>
+    <main id="main">
       <ServicesDetail />
     </main>
   );

@@ -249,6 +249,17 @@ const dicts = {
         "Процесс автоматжуулалт · RPA",
         "Техникийн зөвлөгөө",
       ],
+      sending: "Илгээж байна…",
+      successTitle: "Хүсэлт хүлээн авлаа",
+      successBody:
+        "Ажлын нэг өдрийн дотор {email} хаягаар тодруулга илгээнэ.",
+      successAgain: "Дахин илгээх",
+      optional: "заавал биш",
+      errors: {
+        name: "Нэрээ бичнэ үү",
+        email: "И-мэйл хаяг буруу байна",
+        brief: "Дор хаяж 20 тэмдэгт бичнэ үү",
+      },
       info: {
         email: "Email",
         phone: "Утас",
@@ -276,6 +287,16 @@ const dicts = {
       rights: "© {year} Provision.mn · Built in Улаанбаатар",
       terms: "Үйлчилгээний нөхцөл",
       privacy: "Нууцлалын бодлого",
+    },
+    a11y: {
+      skip: "Үндсэн агуулга руу шилжих",
+    },
+    notFound: {
+      tag: "// 404",
+      title: "Ийм хуудас олдсонгүй",
+      body: "Хаяг буруу бичигдсэн эсвэл хуудас зөөгдсөн байж болзошгүй. Доорхоос үргэлжлүүлээрэй.",
+      home: "Нүүр хуудас",
+      services: "Үйлчилгээ үзэх",
     },
   },
 
@@ -517,6 +538,16 @@ const dicts = {
         "Process automation · RPA",
         "Technical consulting",
       ],
+      sending: "Sending…",
+      successTitle: "Brief received",
+      successBody: "We'll follow up at {email} within one business day.",
+      successAgain: "Send another",
+      optional: "optional",
+      errors: {
+        name: "Enter your name",
+        email: "That email address isn't valid",
+        brief: "Write at least 20 characters",
+      },
       info: {
         email: "Email",
         phone: "Phone",
@@ -544,6 +575,16 @@ const dicts = {
       rights: "© {year} Provision.mn · Built in Ulaanbaatar",
       terms: "Terms of service",
       privacy: "Privacy policy",
+    },
+    a11y: {
+      skip: "Skip to main content",
+    },
+    notFound: {
+      tag: "// 404",
+      title: "We couldn't find that page",
+      body: "The address may be mistyped, or the page has moved. Pick up from here.",
+      home: "Home",
+      services: "See services",
     },
   },
 };
