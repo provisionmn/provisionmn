@@ -87,7 +87,16 @@ export function Header() {
     // the pill is the child, so page content slides underneath the gap rather
     // than butting against a full-bleed bar.
     <header className="sticky top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl rounded-full border border-border bg-background/60 shadow-[0_10px_40px_-16px_rgba(11,15,26,0.5)] backdrop-blur-xl">
+      {/* Scroll edge, not a divider: the pill floats clear of the top, so
+          without this, page content is visible sliding through the gap above
+          it. A short fade to the page colour reads as the content passing
+          under the chrome. Sits behind the pill inside the header's own
+          stacking context. */}
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-24 bg-gradient-to-b from-background via-background/80 to-transparent"
+        aria-hidden
+      />
+      <div className="mx-auto max-w-6xl rounded-full border border-border bg-background/60 elev-2 backdrop-blur-xl">
         <div className="flex h-14 items-center justify-between pl-5 pr-2.5">
           <Link href="/" aria-label="Provision Solutions — нүүр хуудас">
             <Logo />
@@ -186,7 +195,7 @@ export function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="mx-auto mt-2 max-w-6xl rounded-3xl border border-border bg-background/90 p-3 shadow-2xl backdrop-blur-xl md:hidden">
+        <div className="mx-auto mt-2 max-w-6xl rounded-3xl border border-border bg-background/90 p-3 elev-3 backdrop-blur-xl md:hidden">
           <div className="space-y-1">
             {navLinks.map((link) => {
               const active = activeId === link.href.slice(1);

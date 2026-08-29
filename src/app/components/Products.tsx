@@ -77,14 +77,14 @@ export function Products() {
   return (
     <section
       id="products"
-      className="relative scroll-mt-24 border-t border-border py-32 md:py-48"
+      className="relative scroll-mt-24 py-32 md:py-48"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-20 max-w-3xl">
           <div className="mb-5 font-mono text-xs uppercase tracking-[0.2em] text-brand">
             {t.products.tag}
           </div>
-          <h2 className="font-display text-[clamp(1.85rem,3.4vw,2.9rem)] font-semibold leading-[1.1] tracking-tight">
+          <h2 className="font-display text-[clamp(1.85rem,3.4vw,2.9rem)] font-semibold leading-[1.1] tracking-display">
             {t.products.title}
           </h2>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
@@ -114,18 +114,21 @@ export function Products() {
               return (
                 <article
                   key={brand.name}
-                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-xl transition-colors hover:border-primary/40 md:p-8 lg:min-h-[30rem]"
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-6 elev-2-bezel transition-[border-color,box-shadow] duration-300 ease-out-strong hover:border-primary/40 md:p-8 lg:min-h-[30rem]"
                 >
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(109,70,255,0.16),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
                   <div className="relative flex flex-1 flex-col">
                     <div className="mb-6 flex items-start justify-between">
                       <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
-                        <Icon className="h-5 w-5 text-primary" />
+                        <Icon strokeWidth={1.5} className="h-5 w-5 text-primary" />
                       </div>
                       <div className="flex items-center gap-3">
                         <StatusBadge status={brand.status} />
-                        <ArrowUpRight className="h-5 w-5 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+                        <ArrowUpRight
+                          strokeWidth={1.5}
+                          className="h-5 w-5 text-muted-foreground transition-[transform,color] duration-300 ease-out-strong group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+                        />
                       </div>
                     </div>
 
@@ -167,7 +170,7 @@ export function Products() {
             })}
           </div>
 
-          <article className="sticky top-32 z-20 overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-2xl md:p-10 lg:min-h-[32rem]">
+          <article className="sticky top-32 z-20 overflow-hidden rounded-3xl border border-border bg-card p-8 elev-3-bezel md:p-10 lg:min-h-[32rem]">
             <div
               className="pointer-events-none absolute inset-0 opacity-70"
               aria-hidden
@@ -180,14 +183,14 @@ export function Products() {
             <div className="relative">
               <div className="mb-6 flex flex-wrap items-start gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/30 bg-gradient-to-br from-primary/20 to-accent/10">
-                  <FeaturedIcon className="h-7 w-7 text-primary" />
+                  <FeaturedIcon strokeWidth={1.5} className="h-7 w-7 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.2em] text-brand">
                     <Sparkles className="h-3 w-3" />
                     {t.products.flagship}
                   </div>
-                  <h3 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
+                  <h3 className="font-display text-3xl font-semibold tracking-display md:text-4xl">
                     {featuredBrand.name}
                   </h3>
                 </div>

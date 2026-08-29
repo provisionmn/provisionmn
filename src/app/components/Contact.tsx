@@ -123,7 +123,7 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="relative scroll-mt-24 border-t border-border py-32 md:py-48"
+      className="relative scroll-mt-24 py-32 md:py-48"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/*
@@ -134,7 +134,7 @@ export function Contact() {
           label — scoping the class swaps it for the #A78BFF tint at 7.09:1
           without hardcoding either value here.
         */}
-        <div className="dark relative mb-20 overflow-hidden rounded-3xl border border-border bg-background px-6 py-16 text-center md:px-16 md:py-24">
+        <div className="dark relative mb-20 overflow-hidden rounded-3xl border border-border bg-background px-6 py-16 text-center elev-3 md:px-16 md:py-24">
           <div
             className="pointer-events-none absolute inset-0 bg-mesh"
             aria-hidden
@@ -144,7 +144,7 @@ export function Contact() {
             <div className="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-brand">
               {t.contact.tag}
             </div>
-            <h2 className="mx-auto max-w-4xl font-display text-[clamp(2.1rem,5.2vw,3.9rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
+            <h2 className="mx-auto max-w-4xl font-display text-[clamp(2.1rem,5.2vw,3.9rem)] font-semibold leading-[1.05] tracking-display text-foreground">
               {t.contact.title}
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
@@ -154,7 +154,7 @@ export function Contact() {
               href="mailto:hello@provision.mn"
               className="mt-10 inline-flex items-center gap-3 rounded-full border border-border bg-card px-7 py-3.5 font-mono text-sm text-foreground transition-colors hover:border-primary/50"
             >
-              <Mail className="h-4 w-4 text-brand" />
+              <Mail strokeWidth={1.5} className="h-4 w-4 text-brand" />
               hello@provision.mn
             </a>
           </div>
@@ -162,7 +162,7 @@ export function Contact() {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {status === "sent" ? (
-            <div className="lg:col-span-3 rounded-2xl border border-border bg-card/50 backdrop-blur p-6 md:p-8">
+            <div className="lg:col-span-3 rounded-2xl border border-border bg-card/70 p-6 md:p-8 elev-1">
               <div className="flex h-11 w-11 items-center justify-center rounded-full border border-success/30 bg-success/10">
                 <Check className="h-5 w-5 text-success" />
               </div>
@@ -187,7 +187,7 @@ export function Contact() {
             <form
               noValidate
               onSubmit={handleSubmit}
-              className="lg:col-span-3 rounded-2xl border border-border bg-card/50 backdrop-blur p-6 md:p-8 space-y-5"
+              className="lg:col-span-3 rounded-2xl border border-border bg-card/70 p-6 md:p-8 space-y-5 elev-1"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -288,9 +288,9 @@ export function Contact() {
             {contactInfo.map((info) => {
               const Icon = info.icon;
               const content = (
-                <div className="flex items-start gap-4 p-5 rounded-2xl border border-border bg-card/50 backdrop-blur hover:border-primary/40 transition-colors">
+                <div className="flex items-start gap-4 rounded-2xl border border-border bg-card/70 p-5 transition-[transform,border-color,box-shadow] duration-300 ease-out-strong hover:-translate-y-0.5 hover:border-primary/40 hover:elev-2">
                   <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 border border-primary/20">
-                    <Icon className="h-4 w-4 text-primary" />
+                    <Icon strokeWidth={1.5} className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0">
                     <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-1">

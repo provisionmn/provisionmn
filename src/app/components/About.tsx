@@ -29,7 +29,7 @@ export function About() {
   return (
     <section
       id="about"
-      className="relative scroll-mt-24 border-t border-border py-32 md:py-48"
+      className="relative scroll-mt-24 py-32 md:py-48"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-start gap-16 lg:grid-cols-12 lg:gap-20">
@@ -40,7 +40,7 @@ export function About() {
 
             {/* Pills are inline-block spans sized in em, so they scale with
                 the clamp instead of breaking the line box at small widths. */}
-            <h2 className="mb-8 font-display text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-[1.15] tracking-tight">
+            <h2 className="mb-8 font-display text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-[1.15] tracking-display">
               {t.about.title1}
               <span
                 aria-hidden
@@ -73,7 +73,7 @@ export function About() {
             <ul className="space-y-3 font-mono text-sm">
               {t.about.highlights.map((h) => (
                 <li key={h} className="flex items-start gap-3">
-                  <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                  <ArrowRight strokeWidth={1.5} className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
                   <span className="text-muted-foreground">{h}</span>
                 </li>
               ))}
@@ -86,10 +86,11 @@ export function About() {
               return (
                 <div
                   key={stat.label}
-                  className="reveal rounded-2xl border border-border bg-card/50 p-6 backdrop-blur"
+                  style={{ "--i": i } as CSSProperties}
+                  className="reveal reveal-stagger rounded-2xl border border-border bg-card/70 p-6 elev-1"
                 >
-                  <Icon className="mb-6 h-5 w-5 text-brand" />
-                  <div className="mb-1 font-display text-4xl font-semibold tracking-tight md:text-5xl">
+                  <Icon strokeWidth={1.5} className="mb-6 h-5 w-5 text-brand" />
+                  <div className="mb-1 font-display text-4xl font-semibold tracking-display md:text-5xl">
                     {stat.number}
                   </div>
                   <div className="text-sm text-muted-foreground">

@@ -48,6 +48,20 @@
   /* Hero backdrop glow. Violet needs real weight to read on the dark
      background but the same value swamps light — hence per-theme. */
   --hero-glow: rgba(109, 70, 255, 0.08);
+  /* Elevation ramp. Tailwind's own shadow scale is flat black at 25% alpha,
+     which reads as a hard drop shadow rather than ambient occlusion. These
+     are two-layer (contact + ambient) and tinted with the ink from the
+     palette, so a raised card looks lit rather than stamped. */
+  --elev-1: 0 1px 2px -1px rgba(11, 15, 26, 0.1),
+    0 6px 16px -8px rgba(11, 15, 26, 0.14);
+  --elev-2: 0 2px 6px -2px rgba(11, 15, 26, 0.1),
+    0 16px 40px -12px rgba(11, 15, 26, 0.16);
+  --elev-3: 0 4px 12px -4px rgba(11, 15, 26, 0.12),
+    0 32px 64px -24px rgba(11, 15, 26, 0.22);
+  /* Inner half of a double bezel. A white top edge is invisible on a white
+     card, so light reads the seam the way a physical one does instead — a
+     faint shade along the top inner edge. */
+  --bezel-hi: inset 0 1px 0 0 rgba(11, 15, 26, 0.05);
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
   --success: #047857; /* functional, not brand — 5.25:1 */
@@ -101,6 +115,15 @@
   --gradient-from: #A78BFF;
   --gradient-to: #7BA7F5; /* 7.92:1 */
   --hero-glow: rgba(109, 70, 255, 0.26);
+  /* On ink, an ink-tinted shadow is invisible; depth has to come from real
+     black plus a brighter top edge on the surface itself. */
+  --elev-1: 0 1px 2px -1px rgba(0, 0, 0, 0.5),
+    0 6px 16px -8px rgba(0, 0, 0, 0.55);
+  --elev-2: 0 2px 6px -2px rgba(0, 0, 0, 0.55),
+    0 16px 40px -12px rgba(0, 0, 0, 0.6);
+  --elev-3: 0 4px 12px -4px rgba(0, 0, 0, 0.6),
+    0 32px 64px -24px rgba(0, 0, 0, 0.7);
+  --bezel-hi: inset 0 1px 0 0 rgba(230, 232, 239, 0.07);
   --destructive: #F87171;
   --destructive-foreground: #0B0F1A;
   --success: #34D399; /* functional, not brand — 9.95:1 */
@@ -169,6 +192,19 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  /* The built-in CSS easings are too soft to read as intentional. These are
+     the three this site uses: `out-strong` for anything entering or reacting
+     to a pointer, `drawer` for large surfaces that travel, `in-out-strong`
+     for something moving between two on-screen positions. There is
+     deliberately no ease-in — it delays the first frame, which is the one
+     the user is watching hardest. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Tracking is size-specific: display type needs negative tracking because
+     letters drift apart as they grow, body copy sits at 0, and the small
+     uppercase eyebrows open up (set inline as tracking-[0.2em]). */
+  --tracking-display: -0.035em;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -380,6 +416,41 @@ html {
   }
 }
 
+/*
+ * Elevation, as `@utility` rather than a plain class in `@layer utilities`.
+ * That distinction is load-bearing in Tailwind v4: only `@utility` gets
+ * variants generated, so `hover:elev-2` exists and `.elev-2` inside a layer
+ * block would silently produce nothing on hover.
+ *
+ * Written as raw box-shadow rather than through Tailwind's shadow scale so
+ * both layers — contact and ambient — survive composition untouched.
+ */
+@utility elev-1 {
+  box-shadow: var(--elev-1);
+}
+
+@utility elev-2 {
+  box-shadow: var(--elev-2);
+}
+
+@utility elev-3 {
+  box-shadow: var(--elev-3);
+}
+
+/* Inner core of a double bezel: its own top highlight, so the surface reads
+   as a plate seated in a tray rather than a div stacked on a div. */
+@utility bezel {
+  box-shadow: var(--bezel-hi);
+}
+
+@utility elev-2-bezel {
+  box-shadow: var(--bezel-hi), var(--elev-2);
+}
+
+@utility elev-3-bezel {
+  box-shadow: var(--bezel-hi), var(--elev-3);
+}
+
 @layer utilities {
   .animate-marquee {
     animation: marquee-x var(--marquee-duration, 46s) linear infinite;
@@ -436,10 +507,24 @@ html {
         animation-range: entry 4% cover 20%;
       }
 
+      /*
+       * The range is handed over through a custom property, and that is not
+       * stylistic. Lightning CSS rewrites both `animation-range: entry 0%
+       * exit 100%` and the equivalent longhand pair to `entry exit 0%`,
+       * which reparses as end = `exit 0%` — the animation would finish the
+       * instant the element began to leave and the darken-on-exit would
+       * never play. Only ranges whose offsets differ from the defaults
+       * survive the minifier intact; a custom property is passed through
+       * verbatim, so the value reaches the browser as written.
+       *
+       * Re-check this if Tailwind's bundled Lightning CSS is upgraded:
+       *   grep -o '\.media-scroll{[^}]*}' .next/static/chunks/*.css
+       */
       .media-scroll {
+        --media-range: entry 0% exit 100%;
         animation: media-scroll linear both;
         animation-timeline: view();
-        animation-range: entry 0% exit 100%;
+        animation-range: var(--media-range);
       }
 
       /* The whole paragraph owns one timeline; each word reads it and shifts
@@ -456,6 +541,32 @@ html {
         animation-range: cover calc(12% + var(--i) * 1.6%) cover
           calc(34% + var(--i) * 1.6%);
       }
+
+      /* Stagger for grids that reveal together. Same trick as the scrub:
+         the offset lives in animation-range, because a scroll timeline
+         ignores animation-delay. Kept small — 4 cards should feel like one
+         gesture, not a queue. */
+      .reveal-stagger {
+        animation-range: entry calc(4% + var(--i) * 3%) cover
+          calc(20% + var(--i) * 3%);
+      }
     }
+  }
+}
+
+/**
+ * Translucency is a preference, not a given. Frost the glass surfaces into
+ * solid ones rather than dropping them, so the hierarchy they carry survives.
+ *
+ * Deliberately outside `@layer utilities`: unlayered rules outrank every
+ * layered one regardless of source order, which is the only way this reliably
+ * beats Tailwind's own `backdrop-blur-*` utilities.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  .backdrop-blur-xl,
+  .backdrop-blur-md,
+  .backdrop-blur {
+    backdrop-filter: none;
+    background-color: var(--background);
   }
 }

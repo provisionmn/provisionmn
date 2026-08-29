@@ -32,14 +32,14 @@ export function Portfolio() {
   return (
     <section
       id="portfolio"
-      className="relative scroll-mt-24 border-t border-border py-32 md:py-48"
+      className="relative scroll-mt-24 py-32 md:py-48"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-20 max-w-3xl">
           <div className="mb-5 font-mono text-xs uppercase tracking-[0.2em] text-brand">
             {t.portfolio.tag}
           </div>
-          <h2 className="font-display text-[clamp(1.85rem,3.4vw,2.9rem)] font-semibold leading-[1.1] tracking-tight">
+          <h2 className="font-display text-[clamp(1.85rem,3.4vw,2.9rem)] font-semibold leading-[1.1] tracking-display">
             {t.portfolio.title}
           </h2>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
@@ -62,12 +62,12 @@ export function Portfolio() {
             <article
               key={p.title}
               tabIndex={0}
-              className="group/slice relative isolate h-full min-w-0 flex-1 basis-0 grow overflow-hidden rounded-2xl border border-border transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:grow-[3.6] focus-visible:grow-[3.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group/slice relative isolate h-full min-w-0 flex-1 basis-0 grow overflow-hidden rounded-2xl border border-border transition-[flex-grow] duration-[400ms] ease-drawer hover:grow-[3.6] focus-visible:grow-[3.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <ImageWithFallback
                 src={projectImages[i]}
                 alt={p.title}
-                className="absolute inset-0 h-full w-full scale-105 object-cover brightness-[0.32] contrast-125 grayscale transition-all duration-700 ease-out group-hover/slice:scale-100 group-hover/slice:brightness-[0.62] group-hover/slice:grayscale-0 group-focus-within/slice:scale-100 group-focus-within/slice:brightness-[0.62] group-focus-within/slice:grayscale-0"
+                className="absolute inset-0 h-full w-full scale-105 object-cover brightness-[0.32] contrast-125 grayscale transition-[transform,filter] duration-[600ms] ease-out-strong group-hover/slice:scale-100 group-hover/slice:brightness-[0.62] group-hover/slice:grayscale-0 group-focus-within/slice:scale-100 group-focus-within/slice:brightness-[0.62] group-focus-within/slice:grayscale-0"
               />
               <div
                 className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-transparent"
@@ -113,13 +113,13 @@ export function Portfolio() {
           {t.portfolio.projects.map((p, i) => (
             <article
               key={p.title}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-card/50 backdrop-blur transition-colors hover:border-primary/40"
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card/70 transition-[transform,border-color,box-shadow] duration-300 ease-out-strong hover:-translate-y-1 hover:border-primary/40 hover:elev-2"
             >
               <div className="media-scroll relative aspect-[16/10] overflow-hidden">
                 <ImageWithFallback
                   src={projectImages[i]}
                   alt={p.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-500 ease-out-strong group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                 <div className="absolute left-4 top-4">
@@ -134,7 +134,10 @@ export function Portfolio() {
                   <h3 className="font-display text-lg font-semibold tracking-tight">
                     {p.title}
                   </h3>
-                  <ArrowUpRight className="h-5 w-5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+                  <ArrowUpRight
+                    strokeWidth={1.5}
+                    className="h-5 w-5 shrink-0 text-muted-foreground transition-[transform,color] duration-300 ease-out-strong group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+                  />
                 </div>
                 <p className="mb-4 text-sm text-muted-foreground">
                   {p.description}

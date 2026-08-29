@@ -61,7 +61,10 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 bg-mesh opacity-50 dark:opacity-100"
         aria-hidden
       />
-      <div className="pointer-events-none absolute inset-0 bg-grain" aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-0 bg-grain"
+        aria-hidden
+      />
       {/* Glow follows the media column rather than the page centre, so the
           asymmetry of the split reads as intentional. */}
       <div
@@ -98,7 +101,7 @@ export function Hero() {
       <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 md:pb-32 md:pt-24 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 font-mono text-xs text-muted-foreground backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 font-mono text-xs text-muted-foreground backdrop-blur elev-1">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inset-0 animate-ping rounded-full bg-brand opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
@@ -110,7 +113,7 @@ export function Hero() {
                 ("бодитой барьж байгуулна", 23 characters) inside the 7-of-12
                 column instead of wrapping into a third line. 23 × 0.52em ×
                 47.6px ≈ 569px against ~616px of column. */}
-            <h1 className="mt-7 font-display text-[clamp(2rem,4.2vw,3.4rem)] font-semibold leading-[1.08] tracking-tight">
+            <h1 className="mt-7 font-display text-[clamp(2rem,4.2vw,3.4rem)] font-semibold leading-[1.08] tracking-display">
               {t.hero.headline1}
               <br />
               <span className="text-gradient-brand">{t.hero.headline2}</span>
@@ -121,10 +124,19 @@ export function Hero() {
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="h-12 rounded-full px-7 text-base">
+              <Button
+                asChild
+                size="lg"
+                className="group h-12 rounded-full py-0 pl-7 pr-1.5 text-base"
+              >
                 <Link href="/calculator">
                   {t.hero.startBtn}
-                  <ArrowRight className="ml-1 h-4 w-4" />
+                  {/* The arrow sits in its own well rather than naked beside
+                      the label, and carries the hover on its own transform so
+                      the button itself stays still. */}
+                  <span className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary-foreground/15 transition-transform duration-300 ease-out-strong group-hover:translate-x-0.5">
+                    <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+                  </span>
                 </Link>
               </Button>
               <Button
@@ -139,67 +151,73 @@ export function Hero() {
           </div>
 
           <div className="lg:col-span-5 lg:-mr-6 xl:-mr-10">
-            <div className="overflow-hidden rounded-2xl border border-border bg-card/85 shadow-2xl shadow-primary/10 backdrop-blur">
-              <div className="flex items-center gap-2 border-b border-border bg-secondary/40 px-4 py-3">
-                <span className="h-3 w-3 rounded-full bg-[#FF5F56]" />
-                <span className="h-3 w-3 rounded-full bg-[#FFBD2E]" />
-                {/* macOS window controls — literal chrome, deliberately not brand colours */}
-                <span className="h-3 w-3 rounded-full bg-[#27C93F]" />
-                <span className="ml-3 font-mono text-xs text-muted-foreground">
-                  ~/provision — zsh
-                </span>
-              </div>
-              <pre className="overflow-x-auto p-5 font-mono text-[0.8125rem] leading-7 text-foreground">
-                <code>
-                  <span className="text-muted-foreground">$ </span>
-                  <span>provision ship</span>
-                  <span className="text-muted-foreground"> --stack=all</span>
-                  {"\n\n"}
-                  <span className="text-brand">➜</span>{" "}
-                  <span className="text-muted-foreground">
-                    Fullstack     Next.js · Django · Postgres
-                  </span>{" "}
-                  <span className="text-success">✓</span>
-                  {"\n"}
-                  <span className="text-brand">➜</span>{" "}
-                  <span className="text-muted-foreground">
-                    Mobile        React Native · Swift · Kotlin
-                  </span>{" "}
-                  <span className="text-success">✓</span>
-                  {"\n"}
-                  <span className="text-brand">➜</span>{" "}
-                  <span className="text-muted-foreground">
-                    AI / LLM      RAG · Agent · Fine-tune
-                  </span>{" "}
-                  <span className="text-success">✓</span>
-                  {"\n"}
-                  <span className="text-brand">➜</span>{" "}
-                  <span className="text-muted-foreground">
-                    DevOps        Kubernetes · Terraform · CI/CD
-                  </span>{" "}
-                  <span className="text-success">✓</span>
-                  {"\n"}
-                  <span className="text-brand">➜</span>{" "}
-                  <span className="text-muted-foreground">
-                    RPA           Power Automate · Workflow
-                  </span>{" "}
-                  <span className="text-success">✓</span>
-                  {"\n"}
-                  <span className="text-brand">➜</span>{" "}
-                  <span className="text-muted-foreground">
-                    Odoo · UX/UI  Custom module · Design system
-                  </span>{" "}
-                  <span className="text-success">✓</span>
-                  {"\n\n"}
-                  <span className="text-primary">{t.hero.termReady}</span>
-                  <span className="text-muted-foreground">
-                    {" "}
-                    {t.hero.termAfter}{" "}
+            {/* Double bezel. The outer tray carries the shadow, the inner
+                plate carries its own top highlight, and the inner radius is
+                the outer one minus the 0.375rem of padding so the two curves
+                stay concentric. */}
+            <div className="rounded-[1.75rem] border border-border bg-secondary/30 p-1.5 backdrop-blur elev-3">
+              <div className="overflow-hidden rounded-[calc(1.75rem-0.375rem)] border border-border bg-card/85 bezel">
+                <div className="flex items-center gap-2 border-b border-border bg-secondary/40 px-4 py-3">
+                  <span className="h-3 w-3 rounded-full bg-[#FF5F56]" />
+                  <span className="h-3 w-3 rounded-full bg-[#FFBD2E]" />
+                  {/* macOS window controls — literal chrome, deliberately not brand colours */}
+                  <span className="h-3 w-3 rounded-full bg-[#27C93F]" />
+                  <span className="ml-3 font-mono text-xs text-muted-foreground">
+                    ~/provision — zsh
                   </span>
-                  <span>{t.hero.termDays}</span>
-                  <span className="ml-1 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-foreground" />
-                </code>
-              </pre>
+                </div>
+                <pre className="overflow-x-auto p-5 font-mono text-[0.8125rem] leading-7 text-foreground">
+                  <code>
+                    <span className="text-muted-foreground">$ </span>
+                    <span>provision ship</span>
+                    <span className="text-muted-foreground"> --stack=all</span>
+                    {"\n\n"}
+                    <span className="text-brand">➜</span>{" "}
+                    <span className="text-muted-foreground">
+                      Fullstack Next.js · Django · Postgres
+                    </span>{" "}
+                    <span className="text-success">✓</span>
+                    {"\n"}
+                    <span className="text-brand">➜</span>{" "}
+                    <span className="text-muted-foreground">
+                      Mobile React Native · Swift · Kotlin
+                    </span>{" "}
+                    <span className="text-success">✓</span>
+                    {"\n"}
+                    <span className="text-brand">➜</span>{" "}
+                    <span className="text-muted-foreground">
+                      AI / LLM RAG · Agent · Fine-tune
+                    </span>{" "}
+                    <span className="text-success">✓</span>
+                    {"\n"}
+                    <span className="text-brand">➜</span>{" "}
+                    <span className="text-muted-foreground">
+                      DevOps Kubernetes · Terraform · CI/CD
+                    </span>{" "}
+                    <span className="text-success">✓</span>
+                    {"\n"}
+                    <span className="text-brand">➜</span>{" "}
+                    <span className="text-muted-foreground">
+                      RPA Power Automate · Workflow
+                    </span>{" "}
+                    <span className="text-success">✓</span>
+                    {"\n"}
+                    <span className="text-brand">➜</span>{" "}
+                    <span className="text-muted-foreground">
+                      Odoo · UX/UI Custom module · Design system
+                    </span>{" "}
+                    <span className="text-success">✓</span>
+                    {"\n\n"}
+                    <span className="text-primary">{t.hero.termReady}</span>
+                    <span className="text-muted-foreground">
+                      {" "}
+                      {t.hero.termAfter}{" "}
+                    </span>
+                    <span>{t.hero.termDays}</span>
+                    <span className="ml-1 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-foreground" />
+                  </code>
+                </pre>
+              </div>
             </div>
           </div>
         </div>
