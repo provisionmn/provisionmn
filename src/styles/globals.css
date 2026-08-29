@@ -131,6 +131,12 @@
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo,
     Consolas, "Liberation Mono", monospace;
+  /* Drives `font-display`, which is h1/h2 only. Geist is the sole family in
+     the redesign's shortlist that actually draws Ө/Ү — see app/fonts.ts. It
+     falls back to Manrope rather than a system stack so a failed fetch keeps
+     Cyrillic in one family instead of splitting it mid-word. */
+  --font-display: var(--font-geist), var(--font-manrope), ui-sans-serif,
+    system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -303,5 +309,153 @@ html {
   .mask-fade-bottom {
     -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+  }
+}
+
+/**
+ * Scroll-driven motion.
+ *
+ * This is the GSAP/ScrollTrigger layer, written against the platform instead
+ * of the library: `animation-timeline: view()` covers the scrub, the scale
+ * and the fade, and `position: sticky` covers the pinning and the card stack.
+ * Nothing here costs a dependency or a byte of JavaScript.
+ *
+ * Two guards, both load-bearing:
+ *
+ *  - `@supports (animation-timeline: view())`. Outside it every element keeps
+ *    its natural, fully-visible state, so a browser without scroll timelines
+ *    renders the page complete rather than blank. The `from` state only ever
+ *    exists where something can animate it back.
+ *  - `prefers-reduced-motion: no-preference`. The global reduce-motion block
+ *    further up collapses durations, but a scroll timeline has no duration to
+ *    collapse — it has to be opted out of by not applying it at all.
+ */
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Small start scale, full scale while in frame, darken and drop away on exit. */
+@keyframes media-scroll {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.86);
+    filter: brightness(0.45);
+  }
+  32%,
+  72% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+    filter: brightness(0.45);
+  }
+}
+
+/* Word-by-word scrub: each word carries its own --i and lags behind the last. */
+@keyframes scrub-word {
+  from {
+    opacity: 0.12;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee-x var(--marquee-duration, 46s) linear infinite;
+  }
+
+  /* Pause on hover so the strip is readable rather than merely decorative. */
+  .marquee-track:hover .animate-marquee {
+    animation-play-state: paused;
+  }
+
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+  }
+
+  /* Ambient backdrop: two offset brand washes plus a fractal-noise grain, so
+     large dark areas have some tooth instead of reading as flat fill. */
+  .bg-mesh {
+    background-image:
+      radial-gradient(
+        60% 50% at 15% 0%,
+        color-mix(in oklab, var(--brand-violet) 22%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        50% 50% at 90% 30%,
+        color-mix(in oklab, var(--brand-blue) 16%, transparent),
+        transparent 70%
+      );
+  }
+
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .reveal {
+        animation: reveal-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 4% cover 20%;
+      }
+
+      .media-scroll {
+        animation: media-scroll linear both;
+        animation-timeline: view();
+        animation-range: entry 0% exit 100%;
+      }
+
+      /* The whole paragraph owns one timeline; each word reads it and shifts
+         its own slice of it by --i. `animation-delay` is deliberately not
+         used here — it has no effect on a scroll-driven animation, so the
+         stagger has to live in animation-range. */
+      .scrub {
+        view-timeline: --scrub block;
+      }
+
+      .scrub > * {
+        animation: scrub-word linear both;
+        animation-timeline: --scrub;
+        animation-range: cover calc(12% + var(--i) * 1.6%) cover
+          calc(34% + var(--i) * 1.6%);
+      }
+    }
   }
 }

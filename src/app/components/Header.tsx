@@ -83,14 +83,17 @@ export function Header() {
   const langLabel = lang === "mn" ? "EN" : "MN";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    // Floating glass pill. The header itself stays transparent and only pads;
+    // the pill is the child, so page content slides underneath the gap rather
+    // than butting against a full-bleed bar.
+    <header className="sticky top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl rounded-full border border-border bg-background/60 shadow-[0_10px_40px_-16px_rgba(11,15,26,0.5)] backdrop-blur-xl">
+        <div className="flex h-14 items-center justify-between pl-5 pr-2.5">
           <Link href="/" aria-label="Provision Solutions — нүүр хуудас">
             <Logo />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden items-center gap-1 md:flex">
             {navLinks.map((link) => {
               const active = activeId === link.href.slice(1);
               return (
@@ -98,30 +101,24 @@ export function Header() {
                   key={link.href}
                   onClick={() => scrollTo(link.href)}
                   aria-current={active ? "true" : undefined}
-                  className={`relative py-1 text-sm transition-colors ${
+                  className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${
                     active
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
                   }`}
                 >
                   {link.label}
-                  <span
-                    aria-hidden
-                    className={`absolute -bottom-0.5 left-0 h-px w-full origin-left bg-brand transition-transform duration-200 ${
-                      active ? "scale-x-100" : "scale-x-0"
-                    }`}
-                  />
                 </button>
               );
             })}
           </nav>
 
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden items-center gap-1 md:flex">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleLang}
-              className="h-9 px-2.5 font-mono text-xs"
+              className="h-9 rounded-full px-2.5 font-mono text-xs"
               aria-label="Toggle language"
             >
               {langLabel}
@@ -130,7 +127,7 @@ export function Header() {
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="h-9 w-9 p-0"
+              className="h-9 w-9 rounded-full p-0"
               aria-label="Toggle theme"
             >
               {isDark ? (
@@ -139,17 +136,21 @@ export function Header() {
                 <Moon className="h-4 w-4" />
               )}
             </Button>
-            <Button size="sm" onClick={() => scrollTo("#contact")} className="h-9">
+            <Button
+              size="sm"
+              onClick={() => scrollTo("#contact")}
+              className="h-9 rounded-full px-4"
+            >
               {t.nav.cta}
             </Button>
           </div>
 
-          <div className="md:hidden flex items-center gap-1">
+          <div className="flex items-center gap-1 md:hidden">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleLang}
-              className="h-9 px-2.5 font-mono text-xs"
+              className="h-9 rounded-full px-2.5 font-mono text-xs"
               aria-label="Toggle language"
             >
               {langLabel}
@@ -158,7 +159,7 @@ export function Header() {
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="h-9 w-9 p-0"
+              className="h-9 w-9 rounded-full p-0"
               aria-label="Toggle theme"
             >
               {isDark ? (
@@ -171,7 +172,7 @@ export function Header() {
               variant="ghost"
               size="sm"
               onClick={() => setMobileOpen((v) => !v)}
-              className="h-9 w-9 p-0"
+              className="h-9 w-9 rounded-full p-0"
               aria-label="Toggle menu"
             >
               {mobileOpen ? (
@@ -185,8 +186,8 @@ export function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur">
-          <div className="max-w-7xl mx-auto px-4 py-4 space-y-3">
+        <div className="mx-auto mt-2 max-w-6xl rounded-3xl border border-border bg-background/90 p-3 shadow-2xl backdrop-blur-xl md:hidden">
+          <div className="space-y-1">
             {navLinks.map((link) => {
               const active = activeId === link.href.slice(1);
               return (
@@ -194,9 +195,9 @@ export function Header() {
                   key={link.href}
                   onClick={() => scrollTo(link.href)}
                   aria-current={active ? "true" : undefined}
-                  className={`block w-full text-left text-sm transition-colors py-2 ${
+                  className={`block w-full rounded-2xl px-4 py-2.5 text-left text-sm transition-colors ${
                     active
-                      ? "text-foreground"
+                      ? "bg-secondary text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -204,14 +205,14 @@ export function Header() {
                 </button>
               );
             })}
-            <Button
-              size="sm"
-              onClick={() => scrollTo("#contact")}
-              className="w-full"
-            >
-              {t.nav.cta}
-            </Button>
           </div>
+          <Button
+            size="sm"
+            onClick={() => scrollTo("#contact")}
+            className="mt-2 h-10 w-full rounded-2xl"
+          >
+            {t.nav.cta}
+          </Button>
         </div>
       )}
     </header>

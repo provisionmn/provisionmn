@@ -77,133 +77,151 @@ export function Products() {
   return (
     <section
       id="products"
-      className="relative py-24 md:py-32 border-t border-border"
+      className="relative scroll-mt-24 border-t border-border py-32 md:py-48"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand mb-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-20 max-w-3xl">
+          <div className="mb-5 font-mono text-xs uppercase tracking-[0.2em] text-brand">
             {t.products.tag}
           </div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
+          <h2 className="font-display text-[clamp(1.85rem,3.4vw,2.9rem)] font-semibold leading-[1.1] tracking-tight">
             {t.products.title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">{t.products.sub}</p>
+          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+            {t.products.sub}
+          </p>
         </div>
 
-        <article className="relative rounded-2xl border border-border bg-card/50 backdrop-blur p-8 md:p-10 overflow-hidden group hover:border-primary/40 transition-colors">
-          <div
-            className="absolute inset-0 pointer-events-none opacity-70"
-            aria-hidden
-            style={{
-              background:
-                "radial-gradient(circle at 85% 0%, rgba(109,70,255,0.28), transparent 55%), radial-gradient(circle at 15% 100%, rgba(37,99,235,0.16), transparent 55%)",
-            }}
-          />
+        {/*
+          Card stack. Two sticky layers rather than three: the flagship card
+          is the tall one, so it has to arrive last — a taller card stuck
+          underneath a shorter one hangs its bottom edge out below the stack.
+          The two smaller products therefore share one layer side by side and
+          Credix lands on top of them.
 
-          <div className="relative">
-            <div className="flex flex-wrap items-start gap-4 mb-6">
-              <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/30">
-                <FeaturedIcon className="h-7 w-7 text-primary" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand inline-flex items-center gap-1.5">
+          Both layers are opaque (`bg-card`, not `bg-card/50`); a translucent
+          card in a stack shows the card beneath it through the fill and the
+          whole thing reads as a z-index bug.
+
+          Nothing in this subtree may take `overflow: hidden` — that makes a
+          scroll container and silently kills the sticky positioning.
+        */}
+        <div className="space-y-6 pb-8 lg:space-y-10">
+          <div className="sticky top-24 z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {productBrands.map((brand, i) => {
+              const Icon = brand.icon;
+              const copy = t.products.items[i];
+              return (
+                <article
+                  key={brand.name}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-xl transition-colors hover:border-primary/40 md:p-8 lg:min-h-[30rem]"
+                >
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(109,70,255,0.16),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+                  <div className="relative flex flex-1 flex-col">
+                    <div className="mb-6 flex items-start justify-between">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
+                        <Icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <StatusBadge status={brand.status} />
+                        <ArrowUpRight className="h-5 w-5 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+                      </div>
+                    </div>
+
+                    <h3 className="mb-2 font-display text-2xl font-semibold tracking-tight">
+                      {brand.name}
+                    </h3>
+                    <p className="mb-2 text-base text-foreground">
+                      {copy.tagline}
+                    </p>
+                    <p className="mb-5 text-sm text-muted-foreground">
+                      {copy.description}
+                    </p>
+
+                    <ul className="mb-5 space-y-2">
+                      {copy.features.map((f) => (
+                        <li
+                          key={f}
+                          className="flex items-start gap-2 text-sm text-muted-foreground"
+                        >
+                          <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="mt-auto flex flex-wrap gap-1.5">
+                      {brand.stack.map((s) => (
+                        <span
+                          key={s}
+                          className="rounded-md border border-border px-2 py-1 font-mono text-xs text-muted-foreground"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <article className="sticky top-32 z-20 overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-2xl md:p-10 lg:min-h-[32rem]">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-70"
+              aria-hidden
+              style={{
+                background:
+                  "radial-gradient(circle at 85% 0%, rgba(109,70,255,0.28), transparent 55%), radial-gradient(circle at 15% 100%, rgba(37,99,235,0.16), transparent 55%)",
+              }}
+            />
+
+            <div className="relative">
+              <div className="mb-6 flex flex-wrap items-start gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/30 bg-gradient-to-br from-primary/20 to-accent/10">
+                  <FeaturedIcon className="h-7 w-7 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.2em] text-brand">
                     <Sparkles className="h-3 w-3" />
                     {t.products.flagship}
                   </div>
-                </div>
-                <h3 className="text-3xl md:text-4xl font-semibold tracking-tight">
-                  {featuredBrand.name}
-                </h3>
-              </div>
-              <StatusBadge status={featuredBrand.status} />
-            </div>
-
-            <p className="text-xl text-foreground mb-4">
-              {t.products.featured.tagline}
-            </p>
-            <p className="text-muted-foreground max-w-3xl mb-8">
-              {t.products.featured.description}
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mb-8">
-              {t.products.featured.features.map((f) => (
-                <div key={f} className="flex items-start gap-3">
-                  <ArrowRight className="h-4 w-4 text-brand mt-1 shrink-0" />
-                  <span className="text-sm text-foreground/90">{f}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {featuredBrand.stack.map((s) => (
-                <span
-                  key={s}
-                  className="text-xs font-mono px-2.5 py-1 rounded-md border border-border bg-secondary/40 text-muted-foreground"
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
-        </article>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          {productBrands.map((brand, i) => {
-            const Icon = brand.icon;
-            const copy = t.products.items[i];
-            return (
-              <article
-                key={brand.name}
-                className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur p-6 md:p-8 overflow-hidden hover:border-primary/40 transition-colors"
-              >
-                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_0%,rgba(109,70,255,0.16),transparent_60%)]" />
-
-                <div className="relative">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-primary/10 border border-primary/20">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <StatusBadge status={brand.status} />
-                      <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
-                    </div>
-                  </div>
-
-                  <h3 className="text-2xl font-semibold tracking-tight mb-2">
-                    {brand.name}
+                  <h3 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
+                    {featuredBrand.name}
                   </h3>
-                  <p className="text-base text-foreground mb-2">{copy.tagline}</p>
-                  <p className="text-sm text-muted-foreground mb-5">
-                    {copy.description}
-                  </p>
-
-                  <ul className="space-y-2 mb-5">
-                    {copy.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-start gap-2 text-sm text-muted-foreground"
-                      >
-                        <ArrowRight className="h-4 w-4 text-brand mt-0.5 shrink-0" />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {brand.stack.map((s) => (
-                      <span
-                        key={s}
-                        className="text-xs font-mono px-2 py-1 rounded-md border border-border text-muted-foreground"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
                 </div>
-              </article>
-            );
-          })}
+                <StatusBadge status={featuredBrand.status} />
+              </div>
+
+              <p className="mb-4 text-xl text-foreground">
+                {t.products.featured.tagline}
+              </p>
+              <p className="mb-8 max-w-3xl text-muted-foreground">
+                {t.products.featured.description}
+              </p>
+
+              <div className="mb-8 grid grid-cols-1 gap-x-8 gap-y-3 md:grid-cols-2">
+                {t.products.featured.features.map((f) => (
+                  <div key={f} className="flex items-start gap-3">
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-brand" />
+                    <span className="text-sm text-foreground/90">{f}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {featuredBrand.stack.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-md border border-border bg-secondary/40 px-2.5 py-1 font-mono text-xs text-muted-foreground"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>

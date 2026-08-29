@@ -123,17 +123,41 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="relative py-24 md:py-32 border-t border-border"
+      className="relative scroll-mt-24 border-t border-border py-32 md:py-48"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand mb-4">
-            {t.contact.tag}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/*
+          The closing CTA is an ink slab in both themes, so it carries the
+          `dark` class and every token inside it resolves to the dark palette.
+          That matters for more than the background: `--brand` is #6D46FF on
+          light, which is 3.62:1 on ink and fails AA for the small uppercase
+          label — scoping the class swaps it for the #A78BFF tint at 7.09:1
+          without hardcoding either value here.
+        */}
+        <div className="dark relative mb-20 overflow-hidden rounded-3xl border border-border bg-background px-6 py-16 text-center md:px-16 md:py-24">
+          <div
+            className="pointer-events-none absolute inset-0 bg-mesh"
+            aria-hidden
+          />
+          <div className="pointer-events-none absolute inset-0 bg-grain" aria-hidden />
+          <div className="relative">
+            <div className="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-brand">
+              {t.contact.tag}
+            </div>
+            <h2 className="mx-auto max-w-4xl font-display text-[clamp(2.1rem,5.2vw,3.9rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
+              {t.contact.title}
+            </h2>
+            <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
+              {t.contact.sub}
+            </p>
+            <a
+              href="mailto:hello@provision.mn"
+              className="mt-10 inline-flex items-center gap-3 rounded-full border border-border bg-card px-7 py-3.5 font-mono text-sm text-foreground transition-colors hover:border-primary/50"
+            >
+              <Mail className="h-4 w-4 text-brand" />
+              hello@provision.mn
+            </a>
           </div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
-            {t.contact.title}
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">{t.contact.sub}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">

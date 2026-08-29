@@ -1,4 +1,4 @@
-import { JetBrains_Mono, Manrope, Sora } from "next/font/google";
+import { Geist, JetBrains_Mono, Manrope, Sora } from "next/font/google";
 
 /**
  * Every font here is picked cyrillic-first, because everything the user reads
@@ -35,6 +35,43 @@ export const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin", "cyrillic", "cyrillic-ext"],
   weight: ["400", "500"],
   variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
+/**
+ * Display face: h1/h2 only, via the `font-display` utility. Manrope still
+ * carries every paragraph, label and button.
+ *
+ * Geist is the only family out of the four this redesign could pick from that
+ * can set Mongolian at all. Checked the usual way — pull the woff2 Google
+ * actually serves and read its cmap, never trust the advertised subset list:
+ *
+ *   Satoshi          472 glyphs, 0 in U+04xx   (Fontshare, not on Google)
+ *   Cabinet Grotesk  442 glyphs, 0 in U+04xx   (Fontshare, not on Google)
+ *   Outfit           latin + latin-ext only
+ *   Geist            cyrillic 107 + cyrillic-ext 40, and the ext slice really
+ *                    does contain Ө ө Ү ү
+ *
+ * The first two are not on Google Fonts at all, so `next/font/google` could
+ * not fetch them even if they had the glyphs.
+ *
+ * `cyrillic-ext` is missing below on purpose, and it is NOT the bug it looks
+ * like. Next's bundled font metadata lists Geist as latin/latin-ext/cyrillic,
+ * so naming the ext subset fails typecheck and then the build. It does not
+ * need naming: `getGoogleFontsUrl` never sends `&subset=`, so the CSS comes
+ * back with every subset Google has, and `findFontFilesInCss` downloads and
+ * emits all of them — `subsets` only decides which files get a preload tag.
+ * The cyrillic-ext woff2 therefore ships and the browser selects it by
+ * unicode-range; Ө and Ү just are not preloaded, so with `display: "swap"`
+ * they can flash in Manrope on a cold load. That is the whole cost.
+ *
+ * Verify after any Next upgrade by rebuilding and re-reading the cmaps of
+ * .next/static/media/*.woff2 — see the snippet in CLAUDE.md.
+ */
+export const geist = Geist({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "600", "700"],
+  variable: "--font-geist",
   display: "swap",
 });
 
