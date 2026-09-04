@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function CalculatorPage() {
   return (
-    <main id="main" className="pt-20 pb-12 px-4">
+    <main id="main" className="px-4 pb-20 pt-28 sm:px-6 lg:px-8 lg:pb-24">
       <PriceCalculator />
     </main>
   );

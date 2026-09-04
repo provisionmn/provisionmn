@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
@@ -30,6 +30,35 @@ export function Header() {
   });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeId, setActiveId] = useState("");
+  const menuId = "site-menu";
+  const pillRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // A menu that only closes via its own button is a trap on a phone: the
+  // first instinct is to tap the page, and the second is Escape.
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (menuRef.current?.contains(target)) return;
+      if (pillRef.current?.contains(target)) return;
+      setMobileOpen(false);
+    };
+
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [mobileOpen]);
+
+  // Navigating away leaves the panel open over the new page otherwise.
+  useEffect(() => setMobileOpen(false), [pathname]);
 
   useEffect(() => {
     if (isDark) document.documentElement.classList.add("dark");
@@ -96,7 +125,10 @@ export function Header() {
         className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-24 bg-gradient-to-b from-background via-background/80 to-transparent"
         aria-hidden
       />
-      <div className="mx-auto max-w-6xl rounded-full border border-border bg-background/60 elev-2 backdrop-blur-xl">
+      <div
+        ref={pillRef}
+        className="mx-auto max-w-6xl rounded-full border border-border bg-background/60 elev-2 backdrop-blur-xl"
+      >
         <div className="flex h-14 items-center justify-between pl-5 pr-2.5">
           <Link href="/" aria-label="Provision Solutions — нүүр хуудас">
             <Logo />
@@ -109,7 +141,7 @@ export function Header() {
                 <button
                   key={link.href}
                   onClick={() => scrollTo(link.href)}
-                  aria-current={active ? "true" : undefined}
+                  aria-current={active ? "location" : undefined}
                   className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${
                     active
                       ? "bg-secondary text-foreground"
@@ -128,7 +160,7 @@ export function Header() {
               size="sm"
               onClick={toggleLang}
               className="h-9 rounded-full px-2.5 font-mono text-xs"
-              aria-label="Toggle language"
+              aria-label="Хэл солих"
             >
               {langLabel}
             </Button>
@@ -137,7 +169,7 @@ export function Header() {
               size="sm"
               onClick={toggleTheme}
               className="h-9 w-9 rounded-full p-0"
-              aria-label="Toggle theme"
+              aria-label="Гэрэл/бараан горим солих"
             >
               {isDark ? (
                 <Sun className="h-4 w-4" />
@@ -160,7 +192,7 @@ export function Header() {
               size="sm"
               onClick={toggleLang}
               className="h-9 rounded-full px-2.5 font-mono text-xs"
-              aria-label="Toggle language"
+              aria-label="Хэл солих"
             >
               {langLabel}
             </Button>
@@ -169,7 +201,7 @@ export function Header() {
               size="sm"
               onClick={toggleTheme}
               className="h-9 w-9 rounded-full p-0"
-              aria-label="Toggle theme"
+              aria-label="Гэрэл/бараан горим солих"
             >
               {isDark ? (
                 <Sun className="h-4 w-4" />
@@ -182,7 +214,9 @@ export function Header() {
               size="sm"
               onClick={() => setMobileOpen((v) => !v)}
               className="h-9 w-9 rounded-full p-0"
-              aria-label="Toggle menu"
+              aria-label={mobileOpen ? "Цэс хаах" : "Цэс нээх"}
+              aria-expanded={mobileOpen}
+              aria-controls={menuId}
             >
               {mobileOpen ? (
                 <X className="h-5 w-5" />
@@ -195,7 +229,11 @@ export function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="mx-auto mt-2 max-w-6xl rounded-3xl border border-border bg-background/90 p-3 elev-3 backdrop-blur-xl md:hidden">
+        <div
+          id={menuId}
+          ref={menuRef}
+          className="mx-auto mt-2 max-w-6xl rounded-3xl border border-border bg-background/90 p-3 elev-3 backdrop-blur-xl md:hidden"
+        >
           <div className="space-y-1">
             {navLinks.map((link) => {
               const active = activeId === link.href.slice(1);
@@ -203,8 +241,8 @@ export function Header() {
                 <button
                   key={link.href}
                   onClick={() => scrollTo(link.href)}
-                  aria-current={active ? "true" : undefined}
-                  className={`block w-full rounded-2xl px-4 py-2.5 text-left text-sm transition-colors ${
+                  aria-current={active ? "location" : undefined}
+                  className={`block w-full rounded-2xl px-4 py-3 text-left text-sm transition-colors ${
                     active
                       ? "bg-secondary text-foreground"
                       : "text-muted-foreground hover:text-foreground"

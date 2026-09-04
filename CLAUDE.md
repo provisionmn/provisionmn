@@ -39,7 +39,7 @@ Two things about the image that are easy to break:
 
 Marketing site for Provision.mn, originally generated from Figma Make, ported to Vite, then migrated to **Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4**.
 
-There is **no backend and no persistence**. Nothing in `src/` calls `fetch`, and there are no env vars. `QuoteRequest` fakes a 2s submit, shows a success card, and returns to `/` after 3s — the data goes nowhere.
+There is **no backend and no persistence**. Nothing in `src/` calls `fetch`, and there are no env vars. `QuoteRequest` and `Contact` both fake a submit and then render a success card — the data goes nowhere. The success card is a dead end on purpose: it carries a reference number, so it waits for the user to choose *home* or *new request* rather than redirecting itself.
 
 ### Routes
 
@@ -93,7 +93,7 @@ UI copy is Mongolian (Cyrillic). Preserve existing Mongolian strings when editin
 ### Component layers (`src/app/components/`)
 
 - **Page sections** (top level): `Header`, `Hero`, `HeroScene`, `Services`, `ServicesDetail`, `Products`, `About`, `Portfolio`, `Contact`, `Footer`, `PriceCalculator`, `QuoteRequest`, `Chatbot`.
-- **`ui/`**: shadcn/ui primitives (Radix UI + CVA + Tailwind). Use `cn()` from `ui/utils.ts` for class merging. Pruned to the 11 the site actually renders — `alert`, `badge`, `button`, `card`, `checkbox`, `input`, `label`, `scroll-area`, `select`, `textarea`, `utils.ts`. The other 37 shadcn primitives were deleted along with the dependencies that only they used. To bring one back: `npx shadcn@latest add <name>`, then install its Radix package.
+- **`ui/`**: shadcn/ui primitives (Radix UI + CVA + Tailwind). Use `cn()` from `ui/utils.ts` for class merging. Pruned to the 7 the site actually renders — `badge`, `button`, `checkbox`, `input`, `select`, `textarea`, `utils.ts`. (`alert`, `card`, `label` and `scroll-area` went when the calculator, quote form and chatbot were rebuilt on plain markup; `@radix-ui/react-label` and `@radix-ui/react-scroll-area` went with them.) The other 37 shadcn primitives were deleted along with the dependencies that only they used. To bring one back: `npx shadcn@latest add <name>`, then install its Radix package.
 - **`figma/ImageWithFallback.tsx`**: drop-in `<img>` replacement that swaps in a placeholder SVG on error — used for the Unsplash shots in `Portfolio`. The site does not use `next/image` anywhere.
 
 ### 3D Hero scene
@@ -186,6 +186,6 @@ Typography: the second `@layer base` block in `globals.css` styles `h1`-`h4`, `p
 
 - This repo was exported from Figma Make. The original `package.json` had duplicate `"pkg@x.y.z": "npm:pkg@x.y.z"` entries and source files imported with `@version` suffixes (`from "@radix-ui/react-slot@1.1.2"`). Both were cleaned up. If reintroducing code from Figma Make, strip `@<version>` from any new import specifiers.
 - The Vite migration left a `figmaAssetResolver` plugin mapping `figma:asset/<filename>` → `src/assets/<filename>`. It died with `vite.config.ts`; nothing imported through it and `src/assets/` never existed. Re-importing Figma Make code that uses `figma:asset/` specifiers means adding a Turbopack `resolveAlias` in `next.config.mjs`.
-- `package.json` was pruned from 60 dependencies to 15 + 7 dev. Everything declared is now reachable from the four routes, so treat an unused-looking dependency as a bug rather than Figma-export residue. The `@mui/*`, `react-dnd`, `react-slick`, `recharts`, `react-router`, `next-themes`, `motion`, `sonner` and `react-hook-form` leftovers are all gone; `react-router` in particular was never a routing option here — routing is the App Router.
+- `package.json` was pruned from 60 dependencies to 13 + 7 dev. Everything declared is now reachable from the four routes, so treat an unused-looking dependency as a bug rather than Figma-export residue. The `@mui/*`, `react-dnd`, `react-slick`, `recharts`, `react-router`, `next-themes`, `motion`, `sonner` and `react-hook-form` leftovers are all gone; `react-router` in particular was never a routing option here — routing is the App Router.
 - Two dependencies look unused to a naive import scan but are load-bearing: `react-dom` (Next requires it at runtime; nothing imports it directly since `main.tsx` was deleted) and `tw-animate-css` (imported from `styles/index.css`, not from TypeScript).
 - `npm audit` reports 3 high-severity advisories in `postcss` and `sharp`. Both are transitive dependencies of `next` itself; `npm audit fix --force` "resolves" them by downgrading to `next@9.3.3`. Leave them alone.
