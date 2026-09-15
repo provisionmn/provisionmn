@@ -5,6 +5,8 @@ import { Products } from "./components/Products";
 import { About } from "./components/About";
 import { Portfolio } from "./components/Portfolio";
 import { Contact } from "./components/Contact";
+import { Process } from "./components/Process";
+import { Faq } from "./components/Faq";
 import { Chatbot } from "./components/Chatbot";
 
 export default function HomePage() {
@@ -23,8 +25,10 @@ export default function HomePage() {
         <Marquee />
         <Services />
         <Products />
+        <Process />
         <Portfolio />
         <About />
+        <Faq />
         <Contact />
       </main>
       <Chatbot />

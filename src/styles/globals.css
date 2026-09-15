@@ -555,6 +555,235 @@ html {
 }
 
 /**
+ * Scroll-scrubbed hero (components/Hero.tsx + scrub/useScrubHero.ts).
+ *
+ * The hero is footage, so it stays dark in both themes: its text is set in
+ * brand mist on ink regardless of `.dark`, and it fades into the page
+ * background at the bottom edge instead.
+ *
+ * All choreography is transform + opacity scrubbed off each band's `--k`
+ * (0..1), written by JS only when it changes.
+ */
+:root {
+  --tshadow: 0 1px 2px rgba(5, 5, 10, 0.95), 0 3px 12px rgba(5, 5, 10, 0.78),
+    0 10px 44px rgba(5, 5, 10, 0.8);
+}
+
+.scrub-hero {
+  position: relative;
+  height: 400vh;
+  /* Slide under the sticky header pill (pt-4 + h-14 = 72px) so the footage
+     starts at the very top of the viewport. */
+  margin-top: -72px;
+  background-color: var(--brand-ink);
+}
+
+.scrub-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background-color: var(--brand-ink);
+}
+
+.scrub-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateZ(0);
+}
+
+.scrub-video[data-failed] {
+  /* Keep the poster, never a dead frame. The poster attribute still paints. */
+  pointer-events: none;
+}
+
+.scrub-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 120% 90% at 50% 45%,
+      rgba(10, 10, 18, 0) 35%,
+      rgba(10, 10, 18, 0.62) 100%
+    ),
+    /* The shot comes to rest on a single row of lights hugging the bottom
+       ~8% of the frame, so the fade into the page is kept to the last 3%
+       and never covers it. */
+    linear-gradient(to bottom, transparent 97%, var(--background) 100%);
+}
+
+.scrub-band {
+  position: absolute;
+  isolation: isolate;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--brand-mist);
+  text-shadow: var(--tshadow);
+}
+
+/* Per-band scrim: dims the footage only while this band's words are on, and
+   dies out by 76% so the corners stay live. */
+.scrub-band::before {
+  content: "";
+  position: absolute;
+  inset: -34% -22%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: calc(0.25 + 0.75 * var(--k, 0));
+  background: radial-gradient(
+    ellipse 62% 60% at 50% 50%,
+    rgba(5, 5, 10, var(--scrim-a, 0.66)) 0%,
+    rgba(5, 5, 10, calc(var(--scrim-a, 0.66) * 0.66)) 46%,
+    rgba(5, 5, 10, 0) 76%
+  );
+}
+
+.scrub-band .w,
+.scrub-band .c {
+  display: inline-block;
+}
+
+/* Gradient text is transparent, so a text-shadow would smear through it. */
+.scrub-band .text-gradient-brand,
+.scrub-band a,
+.scrub-band button {
+  text-shadow: none;
+}
+
+.scrub-band:not([inert]) .settle-cta {
+  pointer-events: auto;
+}
+
+/* (f) drift-down: each word falls into place, echoing the falling sparks. */
+.band-drift .w {
+  --kc: clamp(0, (var(--k, 0) - var(--th, 0)) * 2.8, 1);
+  opacity: var(--kc);
+  transform: translateY(calc((1 - var(--kc)) * -26px));
+}
+
+/* (a) scatter: characters gather from seeded offsets as the sparks align. */
+.band-scatter .c {
+  --kc: clamp(0, (var(--k, 0) - var(--th, 0)) * 2.6, 1);
+  opacity: var(--kc);
+  transform: translate(
+      calc((1 - var(--kc)) * var(--jx, 0px)),
+      calc((1 - var(--kc)) * var(--jy, 0px))
+    )
+    rotate(calc((1 - var(--kc)) * var(--jr, 0deg)));
+}
+
+/* (e) staged settle: words rise, then the badge and sub, then the CTAs. */
+.band-rise .w {
+  --kc: clamp(0, (var(--k, 0) - var(--th, 0)) * 3, 1);
+  opacity: var(--kc);
+  transform: translateY(calc((1 - var(--kc)) * 0.45em));
+}
+
+.band-rise .settle-sub {
+  opacity: clamp(0, (var(--k, 0) - 0.5) * 4, 1);
+}
+
+.band-rise .settle-cta {
+  --kb: clamp(0, (var(--k, 0) - 0.72) * 4, 1);
+  opacity: var(--kb);
+  transform: translateY(calc((1 - var(--kb)) * 12px));
+}
+
+.scrub-chip {
+  background: rgba(8, 8, 15, 0.55);
+  border: 1px solid rgba(150, 150, 190, 0.28);
+  backdrop-filter: blur(10px);
+  text-shadow: 0 1px 3px rgba(5, 5, 10, 0.85);
+}
+
+.scrub-ring,
+.scrub-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 2.5rem;
+  translate: -50% 0;
+  color: var(--brand-mist);
+  pointer-events: none;
+}
+
+.scrub-ring {
+  width: 44px;
+  height: 44px;
+  opacity: 0.85;
+}
+
+.scrub-cue {
+  opacity: 0.7;
+}
+
+.static-hero {
+  display: none;
+}
+
+/* The five static-hero gates. Character-for-character identical to
+   STATIC_HERO_GATES in components/scrub/useScrubHero.ts. */
+@media (max-width: 720px),
+  (orientation: portrait) and (max-width: 1024px),
+  (orientation: portrait) and (pointer: coarse),
+  (orientation: landscape) and (pointer: coarse) and (max-height: 560px),
+  (prefers-reduced-motion: reduce) {
+  .scrub-hero {
+    height: auto;
+  }
+
+  .scrub-stage {
+    display: none;
+  }
+
+  .static-hero {
+    display: flex;
+    align-items: flex-end;
+    min-height: 100svh;
+    background-image:
+      linear-gradient(
+        to bottom,
+        rgba(11, 15, 26, 0.3) 0%,
+        rgba(11, 15, 26, 0.74) 55%,
+        var(--background) 100%
+      ),
+      url("/hero/hero-ending.jpg");
+    background-size: cover;
+    /* The ending frame's row of lights sits on its bottom edge. */
+    background-position: center bottom;
+  }
+}
+
+/* Short desktop windows keep the scrub but lose the small overlays. */
+@media (max-height: 560px) {
+  .scrub-ring,
+  .scrub-cue {
+    display: none;
+  }
+}
+
+/* FAQ answer arrival: opacity + a short rise only, so no layout property
+   animates. The global reduced-motion block collapses the duration. */
+@keyframes faq-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+details[open] > .faq-answer {
+  animation: faq-open 420ms var(--ease-out-strong) both;
+}
+
+/**
  * Translucency is a preference, not a given. Frost the glass surfaces into
  * solid ones rather than dropping them, so the hierarchy they carry survives.
  *
