@@ -290,7 +290,7 @@ const dicts = {
     },
     journey: {
       band1: "Олон гүйцэтгэгч. Хэн ч хариуцдаггүй.",
-      band2: "Нэг баг. Дизайнаас ашиглалт хүртэл.",
+      band2: "Бүгдийг нэг баг хийж, бүрэн хариуцна.",
       loading: "Видео ачаалж байна",
     },
     process: {
@@ -634,7 +634,7 @@ const dicts = {
     },
     journey: {
       band1: "Many vendors. Nobody takes responsibility.",
-      band2: "One team. From design to launch.",
+      band2: "One team builds it all, and owns it all.",
       loading: "Loading video",
     },
     process: {

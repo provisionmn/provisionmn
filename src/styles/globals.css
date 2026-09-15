@@ -154,11 +154,11 @@
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo,
     Consolas, "Liberation Mono", monospace;
-  /* Drives `font-display`, which is h1/h2 only. Geist is the sole family in
-     the redesign's shortlist that actually draws Ө/Ү — see app/fonts.ts. It
+  /* Drives `font-display`, which is h1/h2 only. Geologica, verified to draw
+     Ө/Ү and to declare cyrillic-ext in next/font; see app/fonts.ts. It
      falls back to Manrope rather than a system stack so a failed fetch keeps
      Cyrillic in one family instead of splitting it mid-word. */
-  --font-display: var(--font-geist), var(--font-manrope), ui-sans-serif,
+  --font-display: var(--font-geologica), var(--font-manrope), ui-sans-serif,
     system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);

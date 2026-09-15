@@ -4,7 +4,7 @@ import { Footer } from "./components/Footer";
 import { SkipLink } from "./components/SkipLink";
 import { LanguageProvider } from "./i18n";
 import { QuoteProvider } from "./quote-context";
-import { geist, jetbrainsMono, manrope, sora } from "./fonts";
+import { geologica, jetbrainsMono, manrope, sora } from "./fonts";
 import "../styles/index.css";
 
 export const metadata: Metadata = {
@@ -43,7 +43,7 @@ export default function RootLayout({
     // suppressHydrationWarning. `lang` is likewise rewritten by LanguageProvider.
     <html
       lang="mn"
-      className={`dark ${manrope.variable} ${geist.variable} ${jetbrainsMono.variable} ${sora.variable}`}
+      className={`dark ${manrope.variable} ${geologica.variable} ${jetbrainsMono.variable} ${sora.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen w-full max-w-full overflow-x-hidden">

@@ -1,4 +1,4 @@
-import { Geist, JetBrains_Mono, Manrope, Sora } from "next/font/google";
+import { Geologica, JetBrains_Mono, Manrope, Sora } from "next/font/google";
 
 /**
  * Every font here is picked cyrillic-first, because everything the user reads
@@ -42,6 +42,23 @@ export const jetbrainsMono = JetBrains_Mono({
  * Display face: h1/h2 only, via the `font-display` utility. Manrope still
  * carries every paragraph, label and button.
  *
+ * Geologica replaced Geist. It has more character, and its geometric round
+ * shapes sit with the chevron mark. Checked the usual way before the switch
+ * (Google's font file, U+04E8/04E9/04AE/04AF in its cmap): all four present,
+ * 178 Cyrillic glyphs. Unlike Geist, Next's font metadata lists `cyrillic-ext`
+ * for Geologica, so the subset can be named and Ө/Ү get a preload tag instead
+ * of flashing in Manrope on a cold load.
+ */
+export const geologica = Geologica({
+  subsets: ["latin", "cyrillic", "cyrillic-ext"],
+  weight: ["500", "600", "700"],
+  variable: "--font-geologica",
+  display: "swap",
+});
+
+/*
+ * Previous display face, kept as a note for whoever revisits this choice:
+ *
  * Geist is the only family out of the four this redesign could pick from that
  * can set Mongolian at all. Checked the usual way — pull the woff2 Google
  * actually serves and read its cmap, never trust the advertised subset list:
@@ -68,12 +85,6 @@ export const jetbrainsMono = JetBrains_Mono({
  * Verify after any Next upgrade by rebuilding and re-reading the cmaps of
  * .next/static/media/*.woff2 — see the snippet in CLAUDE.md.
  */
-export const geist = Geist({
-  subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700"],
-  variable: "--font-geist",
-  display: "swap",
-});
 
 /**
  * Wordmark only. Sora is the family the brand book names, and the "Provision"
