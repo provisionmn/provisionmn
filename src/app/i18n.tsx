@@ -289,7 +289,7 @@ const dicts = {
       privacy: "Нууцлалын бодлого",
     },
     journey: {
-      band1: "Таван гүйцэтгэгч. Дуусаагүй нэг төсөл.",
+      band1: "Олон гүйцэтгэгч. Хэн ч хариуцдаггүй.",
       band2: "Нэг баг. Дизайнаас ашиглалт хүртэл.",
       loading: "Видео ачаалж байна",
     },
@@ -633,7 +633,7 @@ const dicts = {
       privacy: "Privacy policy",
     },
     journey: {
-      band1: "Five vendors. One unfinished project.",
+      band1: "Many vendors. Nobody takes responsibility.",
       band2: "One team. From design to launch.",
       loading: "Loading video",
     },
