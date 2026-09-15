@@ -16,10 +16,11 @@ There are no tests and no lint config. `npm run build` and `npm run typecheck` a
 
 ## Deployment
 
-Two independent targets — the Docker image did **not** replace Vercel:
+Three targets — the Docker image did **not** replace Vercel, and the VPS runs that image:
 
 - **Vercel** — pushing to `main` triggers a production deploy; branch/PR pushes get preview deploys.
 - **GHCR** — `.github/workflows/docker.yml` builds a container and pushes it to `ghcr.io/provisionmn/provisionmn` on `main` and on `v*` tags. Pull requests build the image but do not push it. No secrets needed; it authenticates with the built-in `GITHUB_TOKEN`.
+- **VPS `provision.mn`** — since 2026-09-15 the apex domain's A record points at `202.131.1.126` (the shared amf.mn host), which serves `ghcr.io/provisionmn/provisionmn:latest` from `deploy/docker-compose.yml`. Vercel still builds every push; it just no longer answers for `provision.mn`.
 
 ```bash
 docker pull ghcr.io/provisionmn/provisionmn:latest
@@ -34,6 +35,19 @@ Two things about the image that are easy to break:
 
 - **`next/font` fetches Google Fonts at build time**, so the builder stage needs network. The payoff is that the running image makes no external font requests — the woff2 files are served from `/_next/static/media/`. Verified: no `fonts.gstatic.com` reference survives into the HTML.
 - **There is no `public/` directory.** The builder stage runs `mkdir -p public` so the runner's `COPY` stays valid either way; adding one later needs no Dockerfile change.
+
+### The VPS deploy
+
+`deploy/docker-compose.yml` is the deployed definition; the host keeps a copy of it at `/opt/provision/provisionmn/` (it is not a git checkout — copy the file over when you change it). It publishes **no host port**: the box runs one shared edge Traefik (`/opt/provision/traefik`, owned by the `provision_odoo` repo) that holds :80/:443, the `provision` Docker network and the `letsencrypt` ACME resolver, and this stack attaches to that network and declares ``Host(`provision.mn`)`` on container labels. Everything runs as the unprivileged `provision` user, whose `~/.docker/config.json` carries the GHCR credentials — **the package is private, so `docker pull` only works as that user**.
+
+Releasing is one command; the site is prerendered and stateless, so there is nothing to migrate or back up:
+
+```bash
+ssh provision@202.131.1.126
+cd /opt/provision/provisionmn && docker compose pull && docker compose up -d
+```
+
+`www.provision.mn` has **no DNS record**, so the compose file deliberately routes the apex only — adding a `www` router before the record exists just makes Traefik retry a doomed ACME order. Note also that Traefik does not re-attempt a failed ACME order on its own: if a certificate is missing after a DNS change, `docker compose up -d --force-recreate traefik` in the Odoo stack is what re-triggers it.
 
 ## Architecture
 

@@ -1,0 +1,43 @@
+# Provision.mn marketing site on the shared amf.mn host (202.131.1.126).
+#
+# The host runs ONE edge Traefik (/opt/provision/traefik config, started by
+# the provision_odoo stack under its `edge` profile) that owns :80/:443, the
+# `provision` network and the `letsencrypt` ACME resolver. This stack joins
+# that network and declares its Host router via labels — it publishes no host
+# port of its own.
+#
+# The image is Next 16 standalone output (see the repo Dockerfile); the site
+# is fully prerendered, has no backend, no env vars and no persistence, so
+# there is nothing to back up here and a redeploy is just a new image tag.
+#
+#   IMAGE_TAG=ghcr.io/provisionmn/provisionmn:<sha> docker compose up -d
+
+name: provisionmn
+
+services:
+  web:
+    image: ${IMAGE_TAG:-ghcr.io/provisionmn/provisionmn:latest}
+    container_name: provisionmn-web
+    restart: unless-stopped
+    # Static site; 512 MB is far above what it uses and keeps a runaway
+    # process from starving the Odoo containers on the same box.
+    mem_limit: 512m
+    networks:
+      - provision
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=provision"
+      - "traefik.http.routers.provisionmn.rule=Host(`provision.mn`)"
+      - "traefik.http.routers.provisionmn.entrypoints=websecure"
+      - "traefik.http.routers.provisionmn.tls=true"
+      - "traefik.http.routers.provisionmn.tls.certresolver=letsencrypt"
+      - "traefik.http.services.provisionmn.loadbalancer.server.port=3000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  provision:
+    external: true
