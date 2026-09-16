@@ -1,20 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
   <!-- App-icon lockup from the brand book: the mark on a dark rounded tile.
-       Geometry matches components/Logo.tsx — keep the two in step. -->
+       Browsers draw this at 16 and 32px, which is below where the contour
+       mark survives — the 5.3-unit ribbon lands on 0.85px at 16px and the
+       counter closes. So the tile carries the *solid* form of the same
+       chevron: same centreline, same round caps and joins, one stroke at the
+       arm width the contour is built from (26.7 = mean of 32 and 21.4).
+       Keep in step with the `form="solid"` branch of components/Logo.tsx.
+
+       Placement is measured, not eyeballed. The solid mark's ink spans
+       x 2.70..71.20, y 2.70..97.20 of its 74x100 box; at scale 0.82 that is
+       56.2 x 77.5 inside the 120 tile. Its centre of mass sits 3.58 units
+       left of its bounding-box centre (the arms carry the weight, the point
+       carries none), so the glyph is set half that distance right of centre
+       — box-centred looks left-heavy, mass-centred overshoots. -->
   <defs>
     <linearGradient id="g" x1="0.15" y1="0" x2="0.5" y2="1">
       <stop offset="0%" stop-color="#6D46FF"/>
       <stop offset="100%" stop-color="#2563EB"/>
     </linearGradient>
-    <mask id="m">
-      <path d="M 16 16 L 58 50 L 16 84" fill="none" stroke="#fff"
-            stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M 16 16 L 58 50 L 16 84" fill="none" stroke="#000"
-            stroke-width="21.4" stroke-linecap="round" stroke-linejoin="round"/>
-    </mask>
   </defs>
   <rect width="120" height="120" rx="28" fill="#0B0F1A"/>
-  <g transform="translate(23 10) scale(0.8)">
-    <rect width="74" height="100" fill="url(#g)" mask="url(#m)"/>
+  <g transform="translate(31.2 19.05) scale(0.82)">
+    <path d="M 16 16 L 58 50 L 16 84" fill="none" stroke="url(#g)"
+          stroke-width="26.7" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>

@@ -194,6 +194,17 @@ The hero backdrop glow stays per-theme (`--hero-glow`) — violet needs real wei
 
 `components/Logo.tsx` holds the mark as inline SVG and `app/icon.svg` is the favicon built from the same numbers. There are no raster logo assets — `logo.png` is reference art, not a build input.
 
+**The mark has two optical sizes, and the choice is not cosmetic.** `LogoMark` takes `form`:
+
+| `form` | Geometry | Use |
+| --- | --- | --- |
+| `outline` (default) | the contour: 32 outer minus 21.4 inner | ≥28px — the lockup, the header, the footer |
+| `solid` | one stroke at 26.7, same centreline and caps | <28px — `icon.svg`, any tiny chrome |
+
+The contour's ribbon is 5.3 units of a 74-wide box, i.e. **0.85px once the mark is 16px tall**. Below ~28px the counter closes, the two edges merge, and the mark renders as a grey smudge — which is exactly what browsers were drawing in the tab, because `icon.svg` is rasterised at 16 and 32. The solid form is the same chevron with nothing thin left to lose: 26.7 is the mean of the two contour edges, i.e. the arm width the outline is built from, so the two forms share a silhouette and can stand in for each other.
+
+`icon.svg`'s placement is arithmetic, not eyeballing. The solid mark's ink spans x 2.70..71.20, y 2.70..97.20 of its box; at scale 0.82 that is 56.2 × 77.5 in the 120 tile. Its centre of mass is **3.58 units left of its bounding-box centre** — the arms carry the weight and the point carries none — so the glyph sits half that distance right of box centre. Box-centred reads left-heavy; mass-centred overshoots. (The old tile was neither: `translate(23 10)` left margins of 23/37.8 and 10/30, visibly up and to the left.)
+
 **The mark is the contour of a thick chevron, not an outlined polygon.** That distinction is the whole geometry: the two edges of each arm are parallel, so it is a round-capped, round-joined chevron stroke with its middle knocked out, done as a mask (fat white stroke minus thin black stroke). Everything derives from five numbers, fitted to the artwork to within a pixel:
 
 ```

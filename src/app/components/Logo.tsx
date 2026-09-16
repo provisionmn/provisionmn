@@ -24,18 +24,35 @@ import { sora } from "../fonts";
  *   full   — violet → blue gradient (default; used on every background there)
  *   mono   — single currentColor
  *   invert — solid light mark, for busy or photographic backgrounds
+ *
+ * `form` is the optical size, and it is not a style choice:
+ *
+ *   outline — the contour above. The ribbon is 5.3 units of a 74-wide box,
+ *             i.e. 0.85px once the mark is 16px tall. Below ~28px it stops
+ *             being a mark and becomes a grey smudge — the counter closes
+ *             first, then the two edges merge.
+ *   solid   — the same centreline, same caps and joins, drawn once at the
+ *             arm width the contour is built from (26.7 = the mean of the
+ *             32 outer and 21.4 inner edges). No knockout, so nothing thin
+ *             is left to lose. Legible down to 16px.
+ *
+ * So: `solid` for favicons and anything under ~28px, `outline` everywhere
+ * else. Both are the same chevron on the same centreline, which is why they
+ * can stand in for each other at all.
  */
 export function LogoMark({
   className,
   variant = "full",
+  form = "outline",
   title,
 }: {
   className?: string;
   variant?: "full" | "mono" | "invert";
+  form?: "outline" | "solid";
   title?: string;
 }) {
-  // Unique per variant so two marks on one page can't collide on ids.
-  const uid = `pv-${variant}`;
+  // Unique per variant *and* form so two marks on one page can't collide.
+  const uid = `pv-${variant}-${form}`;
   const chevron = "M 16 16 L 58 50 L 16 84";
 
   const paint =
@@ -45,6 +62,16 @@ export function LogoMark({
         ? "var(--brand-mist)"
         : "currentColor";
 
+  // Violet at the top of the mark falling to blue at the bottom, matching the
+  // book artwork. Unlike the previous mark this does not flip per theme — it
+  // is legible on light and dark alike.
+  const gradient = variant === "full" && (
+    <linearGradient id={`${uid}-grad`} x1="0.15" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stopColor="var(--brand-violet)" />
+      <stop offset="100%" stopColor="var(--brand-blue)" />
+    </linearGradient>
+  );
+
   return (
     <svg
       viewBox="0 0 74 100"
@@ -53,42 +80,50 @@ export function LogoMark({
       aria-hidden={title ? undefined : true}
       aria-label={title}
     >
-      <defs>
-        {variant === "full" && (
-          // Violet at the top of the mark falling to blue at the bottom,
-          // matching the book artwork. Unlike the previous mark this does
-          // not flip per theme — it is legible on light and dark alike.
-          <linearGradient id={`${uid}-grad`} x1="0.15" y1="0" x2="0.5" y2="1">
-            <stop offset="0%" stopColor="var(--brand-violet)" />
-            <stop offset="100%" stopColor="var(--brand-blue)" />
-          </linearGradient>
-        )}
-        <mask id={`${uid}-mask`}>
+      {form === "solid" ? (
+        <>
+          <defs>{gradient}</defs>
           <path
             d={chevron}
             fill="none"
-            stroke="#fff"
-            strokeWidth="32"
+            stroke={paint}
+            strokeWidth="26.7"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <path
-            d={chevron}
-            fill="none"
-            stroke="#000"
-            strokeWidth="21.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </mask>
-      </defs>
+        </>
+      ) : (
+        <>
+          <defs>
+            {gradient}
+            <mask id={`${uid}-mask`}>
+              <path
+                d={chevron}
+                fill="none"
+                stroke="#fff"
+                strokeWidth="32"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d={chevron}
+                fill="none"
+                stroke="#000"
+                strokeWidth="21.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </mask>
+          </defs>
 
-      <rect
-        width="74"
-        height="100"
-        fill={paint}
-        mask={`url(#${uid}-mask)`}
-      />
+          <rect
+            width="74"
+            height="100"
+            fill={paint}
+            mask={`url(#${uid}-mask)`}
+          />
+        </>
+      )}
     </svg>
   );
 }
