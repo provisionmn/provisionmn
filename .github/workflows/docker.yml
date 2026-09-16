@@ -7,10 +7,14 @@ name: Build & Push Docker Image
 #   pull request        → зөвхөн build (push ХИЙХГҮЙ) — шалгалтын зорилгоор
 #   workflow_dispatch   → гараар аль ч branch-аас
 #
-# Нэмэлт secret шаардлагагүй: ghcr.io-д GITHUB_TOKEN-оор нэвтэрнэ.
+# main дээр build амжилттай болмогц `deploy` job нь VPS (202.131.1.126) руу
+# SSH-ээр орж шинэ image-ийг гаргана — доорх "deploy" job-ын тайлбарыг үз.
 #
-# Анхаар: энэ нь Vercel deploy-г ОРЛОХГҮЙ. Vercel хэвээрээ main-аас production
-# deploy хийсээр байна; энэ image бол өөрөө host хийх хувилбар.
+# Build-д нэмэлт secret шаардлагагүй: ghcr.io-д GITHUB_TOKEN-оор нэвтэрнэ.
+# Deploy-д ганц secret хэрэгтэй: VPS_SSH_KEY.
+#
+# Анхаар: энэ нь Vercel deploy-г ОРЛОХГҮЙ. Vercel хэвээрээ main-аас build
+# хийсээр байна; харин provision.mn домэйнд VPS дээрх энэ image хариулна.
 
 on:
   push:
@@ -19,6 +23,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      deploy_check:
+        description: "Зөвхөн VPS-тэй холбогдож stack-ийн төлвийг шалгах (deploy хийхгүй)"
+        type: boolean
+        default: false
 
 concurrency:
   group: docker-${{ github.ref }}
@@ -90,4 +99,90 @@ jobs:
             echo '```'
             echo
             echo "docker pull ${{ env.REGISTRY }}/${{ github.repository }}:latest"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Image бэлэн болмогц provision.mn-г шинэчилнэ.
+  #
+  # Хост дээр /opt/provision/provisionmn/deploy.sh (эх хувь нь repo-гийн
+  # deploy/deploy.sh) forced command болж суусан: VPS_SSH_KEY түлхүүр нь
+  # authorized_keys дотроо `restrict,command="…/deploy.sh"` гэж бичигдсэн тул
+  # энэ түлхүүрээр дурын команд ажиллуулах боломжгүй — зөвхөн `check` ба
+  # `deploy <tag>`. Тиймээс secret алдагдсан ч болох хамгийн муу зүйл нь
+  # тухайн registry-гээс image дахин татагдах явдал.
+  #
+  # Тодорхой sha тэгээр deploy хийнэ (`latest` биш): ингэснээр нэг зэрэг
+  # хоёр run явсан ч аль commit гарсан нь эргэлзээгүй байна.
+  deploy:
+    name: Deploy to provision.mn
+    needs: build
+    # main дээрх push / гараар ажиллуулсан тохиолдолд л. PR deploy хийхгүй.
+    if: >-
+      github.event_name != 'pull_request' &&
+      (github.ref == 'refs/heads/main' || inputs.deploy_check)
+    runs-on: ubuntu-latest
+    # build-ийн concurrency нь cancel-in-progress боловч deploy-г дунд нь
+    # таслах ёсгүй — оронд нь дараалалд оруулна.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://provision.mn
+
+    env:
+      VPS_HOST: 202.131.1.126
+      VPS_USER: provision
+      # Хостын нийтийн түлхүүр (нууц биш). Энд бэхэлсэн нь ssh-keyscan-ы
+      # "анх уулзсандаа итгэх" загварыг орлож, MITM-ийг үгүй хийнэ.
+      # Хэрэв хост дахин суулгагдаж түлхүүр солигдвол энэ мөрийг шинэчил.
+      VPS_HOST_KEY: "202.131.1.126 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICdNonqkgE2Ly5M9tQ/MNAJ6h0FR5g4WI7TMbq+CpAOG"
+
+    steps:
+      - name: Prepare the SSH key
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          if [ -z "$VPS_SSH_KEY" ]; then
+            echo "VPS_SSH_KEY secret алга — repo Settings → Secrets → Actions дээр нэм." >&2
+            exit 1
+          fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$VPS_HOST_KEY" > ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          if [ "${{ inputs.deploy_check }}" = "true" ]; then
+            remote="check"
+          else
+            remote="deploy sha-${GITHUB_SHA:0:7}"
+          fi
+          echo "→ $remote"
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes \
+              -o ConnectTimeout=15 "$VPS_USER@$VPS_HOST" "$remote"
+
+      # Контейнер healthy болсныг deploy.sh шалгасан; энэ нь Traefik-ийн ард
+      # домэйн үнэхээр хариулж байгааг гаднаас нь баталгаажуулна.
+      - name: Smoke test https://provision.mn
+        if: inputs.deploy_check != true
+        run: |
+          for attempt in 1 2 3 4 5; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 https://provision.mn/ || echo 000)
+            echo "оролдлого $attempt: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 5
+          done
+          echo "provision.mn 200 буцаасангүй" >&2
+          exit 1
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Deploy"
+            echo
+            echo "- host: \`$VPS_HOST\`"
+            echo "- tag: \`sha-${GITHUB_SHA:0:7}\`"
+            echo "- https://provision.mn"
           } >> "$GITHUB_STEP_SUMMARY"
