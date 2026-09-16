@@ -24,7 +24,7 @@ const dicts = {
       badge: "Шинэ төсөл хүлээн авч байна · Улаанбаатар",
       headline1: "Таны бүтээгдэхүүнийг",
       headline2: "бодитой барьж байгуулна",
-      sub: "Fullstack, mobile, AI, DevOps, Odoo, UX/UI, RPA — нэг багаар инженерийн бүх давхаргыг хамруулж, production-д хүргэнэ.",
+      sub: "Fullstack, mobile, AI, DevOps, Odoo, UX/UI, RPA. Нэг багаар инженерийн бүх давхаргыг хамруулж, production-д хүргэнэ.",
       startBtn: "Төсөл эхлүүлэх",
       workBtn: "Ажлуудыг үзэх",
       termReady: "Ready",
@@ -249,6 +249,17 @@ const dicts = {
         "Процесс автоматжуулалт · RPA",
         "Техникийн зөвлөгөө",
       ],
+      sending: "Илгээж байна…",
+      successTitle: "Хүсэлт хүлээн авлаа",
+      successBody:
+        "Ажлын нэг өдрийн дотор {email} хаягаар тодруулга илгээнэ.",
+      successAgain: "Дахин илгээх",
+      optional: "заавал биш",
+      errors: {
+        name: "Нэрээ бичнэ үү",
+        email: "И-мэйл хаяг буруу байна",
+        brief: "Дор хаяж 20 тэмдэгт бичнэ үү",
+      },
       info: {
         email: "Email",
         phone: "Утас",
@@ -277,6 +288,72 @@ const dicts = {
       terms: "Үйлчилгээний нөхцөл",
       privacy: "Нууцлалын бодлого",
     },
+    journey: {
+      band1: "Олон гүйцэтгэгч. Хэн ч хариуцдаггүй.",
+      band2: "Бүгдийг нэг баг хийж, бүрэн хариуцна.",
+      loading: "Видео ачаалж байна",
+    },
+    process: {
+      tag: "// Process",
+      title: "Эхнээс нь тодорхой. Дуустал нь хариуцна.",
+      steps: [
+        {
+          title: "Танилцах уулзалт",
+          body: "Нэг уулзалтаар зорилго, хугацаа, шаардлагатай холболтуудыг тодорхойлно.",
+        },
+        {
+          title: "Бичгээр тохирсон хүрээ",
+          body: "Юу хийх, юу өөрчлөлтөд тооцогдох нь эхнээсээ цаасан дээр.",
+        },
+        {
+          title: "Үе шаттай хүргэлт",
+          body: "Үе шат бүр ажиллаж буй хувилбараар дуусна. Төлбөр ч үе шатаараа.",
+        },
+        {
+          title: "Ашиглалт ба дэмжлэг",
+          body: "Ашиглалтад гаргаад хяналт, шинэчлэлийг нь хариуцна. Код таны репозиторид.",
+        },
+      ],
+      hold: "Барьж байгаад хүрээгээ түгжих",
+      locked: "Хүрээ түгжигдлээ",
+    },
+    faq: {
+      tag: "// FAQ",
+      title: "Асуух зүйл байна уу?",
+      cta: "Үнээ тооцоолох",
+      items: [
+        {
+          q: "Жижиг өөрчлөлт бүрт шинэ үнэ гарах уу?",
+          a: "Үгүй. Хамрах хүрээг эхэнд бичгээр тохирч, юу өөрчлөлтөд тооцогдохыг тэнд заана. Бидний алдааг үнэгүй засна.",
+        },
+        {
+          q: "Төсөл дундаа гацвал яах вэ?",
+          a: "Төлбөр үе шаттай. Үе шат бүр ажиллаж буй хувилбараар дуусдаг тул явц нүдэнд харагдана.",
+        },
+        {
+          q: "Код хэнийх вэ?",
+          a: "Та. Код эхний өдрөөс таны репозиторид хадгалагдана.",
+        },
+        {
+          q: "e-barimt, QPay, банктай холбож чадах уу?",
+          a: "Тийм. Эхний уулзалтаар аль холболт хэрэгтэйг тодорхойлж, хамрах хүрээнд бичнэ.",
+        },
+        {
+          q: "Жижиг компанид үнэтэй биш үү?",
+          a: "Үнийн тооцоолуураар хэдхэн алхамд ойролцоо үнээ харна. Дараа нь тогтмол үнийн санал өгнө.",
+        },
+      ],
+    },
+    a11y: {
+      skip: "Үндсэн агуулга руу шилжих",
+    },
+    notFound: {
+      tag: "// 404",
+      title: "Ийм хуудас олдсонгүй",
+      body: "Хаяг буруу бичигдсэн эсвэл хуудас зөөгдсөн байж болзошгүй. Доорхоос үргэлжлүүлээрэй.",
+      home: "Нүүр хуудас",
+      services: "Үйлчилгээ үзэх",
+    },
   },
 
   en: {
@@ -292,7 +369,7 @@ const dicts = {
       badge: "Taking on new projects · Ulaanbaatar",
       headline1: "We build",
       headline2: "your product for real",
-      sub: "Fullstack, mobile, AI, DevOps, Odoo, UX/UI, RPA — one team covering every engineering layer, shipped to production.",
+      sub: "Fullstack, mobile, AI, DevOps, Odoo, UX/UI, RPA. One team covering every engineering layer, shipped to production.",
       startBtn: "Start a project",
       workBtn: "View our work",
       termReady: "Ready",
@@ -517,6 +594,16 @@ const dicts = {
         "Process automation · RPA",
         "Technical consulting",
       ],
+      sending: "Sending…",
+      successTitle: "Brief received",
+      successBody: "We'll follow up at {email} within one business day.",
+      successAgain: "Send another",
+      optional: "optional",
+      errors: {
+        name: "Enter your name",
+        email: "That email address isn't valid",
+        brief: "Write at least 20 characters",
+      },
       info: {
         email: "Email",
         phone: "Phone",
@@ -544,6 +631,72 @@ const dicts = {
       rights: "© {year} Provision.mn · Built in Ulaanbaatar",
       terms: "Terms of service",
       privacy: "Privacy policy",
+    },
+    journey: {
+      band1: "Many vendors. Nobody takes responsibility.",
+      band2: "One team builds it all, and owns it all.",
+      loading: "Loading video",
+    },
+    process: {
+      tag: "// Process",
+      title: "Clear from day one. Owned until launch.",
+      steps: [
+        {
+          title: "Discovery call",
+          body: "One call to pin down the goal, the timeline and the integrations you need.",
+        },
+        {
+          title: "Scope in writing",
+          body: "What we build, and what counts as a change, on paper before work starts.",
+        },
+        {
+          title: "Milestone delivery",
+          body: "Every milestone ends in a working build. You pay milestone by milestone.",
+        },
+        {
+          title: "Launch and support",
+          body: "We launch it, then keep it monitored and updated. The code lives in your repository.",
+        },
+      ],
+      hold: "Hold to lock the scope",
+      locked: "Scope locked",
+    },
+    faq: {
+      tag: "// FAQ",
+      title: "Before you ask",
+      cta: "Estimate your price",
+      items: [
+        {
+          q: "Will every small change become a new quote?",
+          a: "No. We agree the scope in writing first, and it spells out what counts as a change. Our bugs we fix for free.",
+        },
+        {
+          q: "What if the project stalls halfway?",
+          a: "Payment is by milestone, and every milestone ends in a working build, so you always see real progress.",
+        },
+        {
+          q: "Who owns the code?",
+          a: "You do. It sits in your own repository from the first day.",
+        },
+        {
+          q: "Can you connect e-barimt, QPay and banks?",
+          a: "Yes. We list the integrations you need in the first call and write them into the scope.",
+        },
+        {
+          q: "Is this too expensive for a small business?",
+          a: "The price calculator shows a ballpark in a few steps. After that you get a fixed quote.",
+        },
+      ],
+    },
+    a11y: {
+      skip: "Skip to main content",
+    },
+    notFound: {
+      tag: "// 404",
+      title: "We couldn't find that page",
+      body: "The address may be mistyped, or the page has moved. Pick up from here.",
+      home: "Home",
+      services: "See services",
     },
   },
 };

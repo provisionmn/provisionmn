@@ -32,54 +32,121 @@ export function Portfolio() {
   return (
     <section
       id="portfolio"
-      className="relative py-24 md:py-32 border-t border-border"
+      className="relative scroll-mt-24 py-32 md:py-48"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand mb-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-20 max-w-3xl">
+          <div className="mb-5 font-mono text-xs uppercase tracking-[0.2em] text-brand">
             {t.portfolio.tag}
           </div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
+          <h2 className="font-display text-[clamp(1.85rem,3.4vw,2.9rem)] font-semibold leading-[1.1] tracking-display">
             {t.portfolio.title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
             {t.portfolio.sub}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/*
+          Horizontal accordion, desktop only. The expanded copy is always in
+          the DOM and only faded out, so a screen reader still reads every
+          project from the collapsed state; `tabIndex` plus focus-visible
+          expansion covers keyboard users, who would otherwise be the one
+          group that can reach this layout and not open it.
+
+          The inner content block is a fixed width rather than a fluid one so
+          the text does not reflow line by line while the slice grows.
+        */}
+        <div className="hidden h-[34rem] gap-2 lg:flex">
           {t.portfolio.projects.map((p, i) => (
             <article
               key={p.title}
-              className="group relative rounded-2xl border border-border bg-card/50 backdrop-blur overflow-hidden hover:border-primary/40 transition-colors"
+              tabIndex={0}
+              className="group/slice relative isolate h-full min-w-0 flex-1 basis-0 grow overflow-hidden rounded-2xl border border-border transition-[flex-grow] duration-[400ms] ease-drawer hover:grow-[3.6] focus-visible:grow-[3.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <div className="relative aspect-[16/10] overflow-hidden">
+              <ImageWithFallback
+                src={projectImages[i]}
+                alt={p.title}
+                className="absolute inset-0 h-full w-full scale-105 object-cover brightness-[0.32] contrast-125 grayscale transition-[transform,filter] duration-[600ms] ease-out-strong group-hover/slice:scale-100 group-hover/slice:brightness-[0.62] group-hover/slice:grayscale-0 group-focus-within/slice:scale-100 group-focus-within/slice:brightness-[0.62] group-focus-within/slice:grayscale-0"
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-transparent"
+                aria-hidden
+              />
+
+              <div className="absolute bottom-0 left-0 p-5 transition-opacity duration-300 group-hover/slice:opacity-0 group-focus-within/slice:opacity-0">
+                <span className="rotate-180 font-mono text-xs uppercase tracking-[0.22em] text-foreground/90 [writing-mode:vertical-rl]">
+                  {p.category}
+                </span>
+              </div>
+
+              <div className="absolute inset-x-0 bottom-0 w-[24rem] max-w-full p-6 opacity-0 transition-opacity delay-150 duration-500 group-hover/slice:opacity-100 group-focus-within/slice:opacity-100">
+                <span className="font-mono text-xs uppercase tracking-[0.22em] text-brand">
+                  {p.category}
+                </span>
+                <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight">
+                  {p.title}
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {p.description}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {projectTech[i].map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded-md border border-border bg-background/60 px-2 py-1 font-mono text-xs text-muted-foreground backdrop-blur"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* Below lg the accordion has no room to open, so the same projects
+            render as cards. The scroll-driven scale/fade lives on a wrapper,
+            not on the img — an animation on transform would otherwise beat
+            the hover transition on the same property. */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:hidden">
+          {t.portfolio.projects.map((p, i) => (
+            <article
+              key={p.title}
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card/70 transition-[transform,border-color,box-shadow] duration-300 ease-out-strong hover:-translate-y-1 hover:border-primary/40 hover:elev-2"
+            >
+              <div className="media-scroll relative aspect-[16/10] overflow-hidden">
                 <ImageWithFallback
                   src={projectImages[i]}
                   alt={p.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="h-full w-full object-cover transition-transform duration-500 ease-out-strong group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-                <div className="absolute top-4 left-4">
-                  <span className="inline-flex items-center rounded-md border border-border bg-background/70 backdrop-blur px-2 py-1 text-xs font-mono uppercase tracking-wider text-foreground">
+                <div className="absolute left-4 top-4">
+                  <span className="inline-flex items-center rounded-md border border-border bg-background/70 px-2 py-1 font-mono text-xs uppercase tracking-wider text-foreground backdrop-blur">
                     {p.category}
                   </span>
                 </div>
               </div>
 
               <div className="p-6">
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <h3 className="text-lg font-semibold">{p.title}</h3>
-                  <ArrowUpRight className="h-5 w-5 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
+                <div className="mb-2 flex items-start justify-between gap-3">
+                  <h3 className="font-display text-lg font-semibold tracking-tight">
+                    {p.title}
+                  </h3>
+                  <ArrowUpRight
+                    strokeWidth={1.5}
+                    className="h-5 w-5 shrink-0 text-muted-foreground transition-[transform,color] duration-300 ease-out-strong group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+                  />
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="mb-4 text-sm text-muted-foreground">
                   {p.description}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {projectTech[i].map((tech) => (
                     <span
                       key={tech}
-                      className="text-xs font-mono px-2 py-1 rounded-md border border-border text-muted-foreground"
+                      className="rounded-md border border-border px-2 py-1 font-mono text-xs text-muted-foreground"
                     >
                       {tech}
                     </span>

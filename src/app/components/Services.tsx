@@ -13,6 +13,7 @@ import {
   Workflow,
   type LucideIcon,
 } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useT } from "../i18n";
 
 const serviceIcons: LucideIcon[] = [
@@ -25,6 +26,15 @@ const serviceIcons: LucideIcon[] = [
   Workflow,
 ];
 
+/**
+ * Bento spans, checked against both breakpoints so no cell is left empty.
+ *
+ *   lg (3 cols): 2+1 / 1+2 / 2+1 / 3  = 12 cells over 4 full rows
+ *   md (2 cols): 1+1 / 1+1 / 1+1 / 2  =  8 cells over 4 full rows
+ *
+ * The md entry on the last item is what closes the hole: seven single-span
+ * cards in a two-column grid leaves one dead cell in the final row.
+ */
 const serviceSpans: string[] = [
   "lg:col-span-2",
   "lg:col-span-1",
@@ -32,73 +42,91 @@ const serviceSpans: string[] = [
   "lg:col-span-2",
   "lg:col-span-2",
   "lg:col-span-1",
-  "lg:col-span-3",
+  "md:col-span-2 lg:col-span-3",
 ];
 
 export function Services() {
   const { t } = useT();
 
   return (
-    <section
-      id="services"
-      className="relative py-24 md:py-32 border-t border-border"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-brand mb-4">
+    <section id="services" className="relative scroll-mt-24 py-32 md:py-48">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-20 max-w-3xl">
+          <div className="mb-5 font-mono text-xs uppercase tracking-[0.2em] text-brand">
             {t.services.tag}
           </div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
+          <h2 className="font-display text-[clamp(1.85rem,3.4vw,2.9rem)] font-semibold leading-[1.1] tracking-display">
             {t.services.title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">{t.services.sub}</p>
+          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+            {t.services.sub}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid auto-rows-fr grid-flow-dense grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {t.services.items.map((s, i) => {
             const Icon = serviceIcons[i];
             const span = serviceSpans[i];
             return (
+              // The reveal lives on a wrapper, not on the card. Both want
+              // `transform`, and an animation with `fill: both` keeps its
+              // final value applied forever — which outranks the hover
+              // transition in the cascade and would silently swallow the
+              // lift once the card had revealed.
               <div
                 key={s.title}
-                className={`${span} group relative rounded-2xl border border-border bg-card/50 backdrop-blur p-6 md:p-8 hover:border-primary/40 transition-colors overflow-hidden`}
+                style={{ "--i": i } as CSSProperties}
+                className={`${span} reveal reveal-stagger`}
               >
-                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_0%,rgba(109,70,255,0.18),transparent_60%)]" />
+                <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card/70 p-6 elev-1 transition-[transform,border-color,box-shadow] duration-300 ease-out-strong hover:-translate-y-1 hover:border-primary/40 hover:elev-2 md:p-8">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(109,70,255,0.18),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-                <div className="relative flex items-start justify-between mb-6">
-                  <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-primary/10 border border-primary/20">
-                    <Icon className="h-5 w-5 text-primary" />
+                  <div className="relative mb-6 flex items-start justify-between">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
+                      <Icon
+                        strokeWidth={1.5}
+                        className="h-5 w-5 text-primary"
+                      />
+                    </div>
+                    <ArrowUpRight
+                      strokeWidth={1.5}
+                      className="h-5 w-5 text-muted-foreground transition-[transform,color] duration-300 ease-out-strong group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+                    />
                   </div>
-                  <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
-                </div>
 
-                <div className="relative font-mono text-xs uppercase tracking-[0.15em] text-brand mb-2">
-                  {s.short}
-                </div>
-                <h3 className="relative text-xl font-semibold mb-2">
-                  {s.title}
-                </h3>
-                <p className="relative text-muted-foreground mb-5">
-                  {s.description}
-                </p>
+                  <div className="relative mb-2 font-mono text-xs uppercase tracking-[0.15em] text-brand">
+                    {s.short}
+                  </div>
+                  <h3 className="relative mb-2 font-display text-xl font-semibold tracking-tight">
+                    {s.title}
+                  </h3>
+                  <p className="relative mb-5 text-muted-foreground">
+                    {s.description}
+                  </p>
 
-                <ul className="relative flex flex-wrap gap-2">
-                  {s.features.map((f) => (
-                    <li
-                      key={f}
-                      className="text-xs font-mono px-2 py-1 rounded-md border border-border bg-secondary/40 text-muted-foreground"
-                    >
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+                  <ul className="relative mt-auto flex flex-wrap gap-2">
+                    {s.features.map((f) => (
+                      <li
+                        key={f}
+                        className="rounded-md border border-border bg-secondary/40 px-2 py-1 font-mono text-xs text-muted-foreground"
+                      >
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             );
           })}
         </div>
 
-        <div className="mt-12 text-center">
-          <Button asChild variant="outline" size="lg">
+        <div className="mt-14">
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="rounded-full px-7"
+          >
             <Link href="/services">{t.services.detailBtn}</Link>
           </Button>
         </div>

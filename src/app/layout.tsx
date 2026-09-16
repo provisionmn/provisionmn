@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
+import { SkipLink } from "./components/SkipLink";
 import { LanguageProvider } from "./i18n";
 import { QuoteProvider } from "./quote-context";
-import { jetbrainsMono, manrope, sora } from "./fonts";
+import { geologica, jetbrainsMono, manrope, sora } from "./fonts";
 import "../styles/index.css";
 
 export const metadata: Metadata = {
@@ -22,6 +23,9 @@ export const metadata: Metadata = {
     description:
       "Fullstack, mobile, AI, DevOps, security, Odoo, UX/UI — нэг багаар technology stack-ийн бүх давхаргыг.",
   },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export const viewport: Viewport = {
@@ -39,12 +43,13 @@ export default function RootLayout({
     // suppressHydrationWarning. `lang` is likewise rewritten by LanguageProvider.
     <html
       lang="mn"
-      className={`dark ${manrope.variable} ${jetbrainsMono.variable} ${sora.variable}`}
+      className={`dark ${manrope.variable} ${geologica.variable} ${jetbrainsMono.variable} ${sora.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen">
+      <body className="min-h-screen w-full max-w-full overflow-x-hidden">
         <LanguageProvider>
           <QuoteProvider>
+            <SkipLink />
             <Header />
             {children}
             <Footer />

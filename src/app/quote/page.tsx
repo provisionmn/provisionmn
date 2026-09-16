@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function QuotePage() {
   return (
-    <main className="pt-20 pb-12 px-4">
+    <main id="main" className="px-4 pb-24 pt-28 sm:px-6 lg:px-8">
       <QuoteRequest />
     </main>
   );

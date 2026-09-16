@@ -33,13 +33,13 @@ The image is Next's standalone output on `node:22-alpine`, ~200MB, running as no
 Two things about the image that are easy to break:
 
 - **`next/font` fetches Google Fonts at build time**, so the builder stage needs network. The payoff is that the running image makes no external font requests — the woff2 files are served from `/_next/static/media/`. Verified: no `fonts.gstatic.com` reference survives into the HTML.
-- **There is no `public/` directory.** The builder stage runs `mkdir -p public` so the runner's `COPY` stays valid either way; adding one later needs no Dockerfile change.
+- **`public/` holds only the hero media** (`public/hero/`: the scrub clip, poster and ending frame). The builder stage still runs `mkdir -p public`, which is harmless now that the directory exists, and the runner's `COPY` picks the files up with no Dockerfile change.
 
 ## Architecture
 
 Marketing site for Provision.mn, originally generated from Figma Make, ported to Vite, then migrated to **Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4**.
 
-There is **no backend and no persistence**. Nothing in `src/` calls `fetch`, and there are no env vars. `QuoteRequest` fakes a 2s submit, shows a success card, and returns to `/` after 3s — the data goes nowhere.
+There is **no backend and no persistence**. Nothing in `src/` calls `fetch`, and there are no env vars. `QuoteRequest` and `Contact` both fake a submit and then render a success card — the data goes nowhere. The success card is a dead end on purpose: it carries a reference number, so it waits for the user to choose *home* or *new request* rather than redirecting itself.
 
 ### Routes
 
@@ -47,7 +47,7 @@ There is **no backend and no persistence**. Nothing in `src/` calls `fetch`, and
 
 | Route | Page file | Renders |
 | --- | --- | --- |
-| `/` | `page.tsx` | Hero, Services, Products, About, Portfolio, Contact + Chatbot |
+| `/` | `page.tsx` | Hero, Marquee, Services, Products, Process, Portfolio, About, Faq, Contact + Chatbot |
 | `/services` | `services/page.tsx` | `ServicesDetail` |
 | `/calculator` | `calculator/page.tsx` | `PriceCalculator` |
 | `/quote` | `quote/page.tsx` | `QuoteRequest` |
@@ -80,7 +80,7 @@ It is in-memory by design: reloading `/quote` drops the prefill and renders a bl
 
 - `t` is the **whole nested dictionary object**, not a lookup function: `t.nav.services`, `t.services.items[0].features`. Types derive from the `mn` dict (`type Dict = (typeof dicts)["mn"]`), so **any key added to `mn` must be added to `en` or the build breaks**; the two trees must stay structurally identical, arrays included.
 - **`lang` must initialise to `"mn"`, never to `localStorage`.** The server always prerenders Mongolian; reading storage during render desyncs the first client render and triggers a hydration error. The stored preference is applied in an effect after mount, and only then written back.
-- **i18n coverage is partial.** Only the landing sections are translated (`Header`, `Hero`, `Services`, `Products`, `About`, `Portfolio`, `Contact`, `Footer`). `ServicesDetail`, `PriceCalculator`, `QuoteRequest`, and `Chatbot` hold hardcoded Mongolian strings. When touching those four, either keep strings inline as-is or move the whole component into the dict — do not half-migrate.
+- **i18n coverage is partial.** Only the landing sections are translated (`Header`, `Hero`, `Services`, `Products`, `Process`, `About`, `Portfolio`, `Faq`, `Contact`, `Footer`). The hero's journey captions live under `t.journey`. `ServicesDetail`, `PriceCalculator`, `QuoteRequest`, and `Chatbot` hold hardcoded Mongolian strings. When touching those four, either keep strings inline as-is or move the whole component into the dict — do not half-migrate.
 
 ### Hydration rules
 
@@ -92,15 +92,25 @@ UI copy is Mongolian (Cyrillic). Preserve existing Mongolian strings when editin
 
 ### Component layers (`src/app/components/`)
 
-- **Page sections** (top level): `Header`, `Hero`, `HeroScene`, `Services`, `ServicesDetail`, `Products`, `About`, `Portfolio`, `Contact`, `Footer`, `PriceCalculator`, `QuoteRequest`, `Chatbot`.
-- **`ui/`**: shadcn/ui primitives (Radix UI + CVA + Tailwind). Use `cn()` from `ui/utils.ts` for class merging. Pruned to the 11 the site actually renders — `alert`, `badge`, `button`, `card`, `checkbox`, `input`, `label`, `scroll-area`, `select`, `textarea`, `utils.ts`. The other 37 shadcn primitives were deleted along with the dependencies that only they used. To bring one back: `npx shadcn@latest add <name>`, then install its Radix package.
+- **Page sections** (top level): `Header`, `Hero`, `Marquee`, `Services`, `ServicesDetail`, `Products`, `Process`, `Portfolio`, `About`, `Faq`, `Contact`, `Footer`, `PriceCalculator`, `QuoteRequest`, `Chatbot`.
+- **`scrub/useScrubHero.ts`**: the scroll-video engine behind `Hero` (see *Scroll-scrubbed hero* below).
+- **`Process`** holds the page's one interactive moment: press and hold "lock the scope". A rAF loop writes a single `--p` (0..1) on the section root, and everything visual (dot row, drawn line, lit steps, button fill) is CSS derived from `--p`. Letting go early drains it back; completing it reveals the calculator CTA. Reduced motion gets the finished state, live in both directions.
+- **`ui/`**: shadcn/ui primitives (Radix UI + CVA + Tailwind). Use `cn()` from `ui/utils.ts` for class merging. Pruned to the 7 the site actually renders — `badge`, `button`, `checkbox`, `input`, `select`, `textarea`, `utils.ts`. (`alert`, `card`, `label` and `scroll-area` went when the calculator, quote form and chatbot were rebuilt on plain markup; `@radix-ui/react-label` and `@radix-ui/react-scroll-area` went with them.) The other 37 shadcn primitives were deleted along with the dependencies that only they used. To bring one back: `npx shadcn@latest add <name>`, then install its Radix package.
 - **`figma/ImageWithFallback.tsx`**: drop-in `<img>` replacement that swaps in a placeholder SVG on error — used for the Unsplash shots in `Portfolio`. The site does not use `next/image` anywhere.
 
-### 3D Hero scene
+### Scroll-scrubbed hero
 
-`HeroScene.tsx` (react-three-fiber + drei distorted-blob) sits behind three guards in `Hero.tsx`: `React.lazy` (keeps three.js out of the entry chunk), a `hasWebGL()` check run in an effect (so the prerendered HTML never contains a canvas), and a `SceneBoundary` error boundary that renders `null` on failure. Keep all three. The WebGL check doubles as the SSR guard — `sceneEnabled` starts `false`, so the lazy import is never reached during prerender.
+The 3D blob (`HeroScene.tsx`, three.js, react-three-fiber, drei) is gone. `Hero.tsx` is now a 400vh section whose sticky stage plays a generated 6-second clip (`public/hero/hero-scrub.mp4`: violet and blue sparks drifting down and settling into a row of light) scrubbed by scroll, with three caption bands over it.
 
-Verified after the migration: three.js stays in its own chunk and is absent from the landing page's initial JS.
+- **Engine: `components/scrub/useScrubHero.ts`.** The video is fetched as a streamed Blob, not set as `src`, so seeking works on hosts without HTTP Range support. The poster loads first, then the blob, behind a progress ring and a 20s no-progress watchdog. Displayed progress eases toward scroll progress in a dt-normalised rAF loop that stops when converged or off-screen. Seeks are gated: never write `currentTime` while one is in flight, and reset on `error` so the gate can't deadlock. Nothing runs during render.
+- **The five static-hero gates live in two places and must stay character-for-character identical:** `STATIC_HERO_GATES` in the hook and the `@media` list above `.static-hero` in `globals.css`. Phones, portrait tablets, coarse-pointer portrait, landscape phones and reduced motion get `.static-hero` (the ending frame, `hero-ending.jpg`) and never download the video or poster. The decision is live on every gate's `change` event, not made once at load.
+- **Bands write only on change.** `applyFrame` sets each band's `opacity` and `--k` (0..1 assembly) directly on the DOM, delta-gated. Every entrance is CSS off `--k`, transform and opacity only. A band below 0.5 opacity gets `inert` so its links leave the tab order.
+- **Legibility is measured, not eyeballed.** Each band has a per-band scrim (`--scrim-a`, `SCRIM_ALPHA` in `Hero.tsx`) tuned so the lightest pixel of that band's busiest frame, under the scrim, still gives brand mist ≥ 3.5:1. If the clip is replaced, re-run that audit before shipping.
+- **Re-encoding the clip:** `ffmpeg -i raw.mp4 -c:v libx264 -crf 20 -preset slow -g 8 -keyint_min 8 -pix_fmt yuv420p -movflags +faststart -an public/hero/hero-scrub.mp4`. The short keyframe interval (`-g 8`) is what makes scrubbing smooth. Then re-extract the poster (first frame) and the ending frame, and update `VIDEO_BYTES`.
+- **The hero stays dark in both themes**, because it is footage. Its text is brand mist on ink regardless of `.dark`.
+- The section pulls itself 72px up (`margin-top: -72px`) to sit under the sticky header pill. Change it if the header height changes.
+
+There is no browser on the agent server. Verify the scrub in a real browser on the Vercel preview, especially Chrome at the top and bottom of the hero, where choppiness shows first.
 
 ### Brand system
 
@@ -110,7 +120,7 @@ The palette is **four colours**, declared once at the top of `globals.css` as `-
 
 | Name | Hex | Role in the UI |
 | --- | --- | --- |
-| Violet | `#6D46FF` | `--primary`, light `--brand`, logo gradient start, 3D blob |
+| Violet | `#6D46FF` | `--primary`, light `--brand`, logo gradient start, the hero clip's glow |
 | Blue | `#2563EB` | logo gradient end, headline gradient stop, charts |
 | Ink | `#0B0F1A` | dark `--background`, light `--foreground`, `themeColor` |
 | Mist | `#E6E8EF` | dark `--foreground`, light `--secondary`/`--muted`, borders at 12% |
@@ -149,7 +159,8 @@ Theming is CSS custom properties mapped to Tailwind tokens via `@theme inline`. 
 
 Fonts are declared in `src/app/fonts.ts` and shared by `layout.tsx` and `Logo.tsx`:
 
-- **Manrope** — all UI and body copy, subsets `latin` + `cyrillic` + `cyrillic-ext`. Exposed as `--font-manrope`, consumed by the `body` rule in `globals.css` and by `--font-sans`. Chosen to sit with the Sora wordmark while drawing its Cyrillic as part of the family. The brand book names Sora as *the* typeface, but Sora has no Cyrillic — so Manrope carries every heading and paragraph and Sora is confined to the wordmark. Do not "fix" this by moving headings to Sora.
+- **Manrope** — all UI and body copy, subsets `latin` + `cyrillic` + `cyrillic-ext`. Exposed as `--font-manrope`, consumed by the `body` rule in `globals.css` and by `--font-sans`. Chosen to sit with the Sora wordmark while drawing its Cyrillic as part of the family. The brand book names Sora as *the* typeface, but Sora has no Cyrillic — so Manrope carries every paragraph, label and button and Sora is confined to the wordmark. Do not "fix" this by moving headings to Sora.
+- **Geologica 500–700**: the display face. Drives `--font-display`, i.e. the `font-display` utility on h1/h2 and the hero captions. It replaced Geist, which only reaches `cyrillic-ext` through a workaround (Next's metadata doesn't list the subset for Geist, so Ө/Ү were never preloaded). Geologica lists `latin` + `cyrillic` + `cyrillic-ext` in next/font and its binary has all four letters (178 Cyrillic glyphs). The shortlist it beat (Commissioner, IBM Plex Sans, Source Serif 4) all pass the same check; Unbounded, Sofia Sans, Jura, Wix Madefor Display, Instrument Sans and Bricolage Grotesque do not. `--tracking-display: -0.035em` was tuned for Geist; loosen it if Geologica headings look cramped.
 - **JetBrains Mono** — `--font-mono`, i.e. every `font-mono` utility: the Hero terminal, eyebrow labels, code. Not a cosmetic choice — the terminal block sets Mongolian ("14 өдөрт") and the default system mono stack (Consolas, Liberation Mono, …) has no ө, so that one letter used to fall out to another family mid-line.
 
 **Choosing a font for this repo — two traps, both already hit here:**
@@ -186,6 +197,6 @@ Typography: the second `@layer base` block in `globals.css` styles `h1`-`h4`, `p
 
 - This repo was exported from Figma Make. The original `package.json` had duplicate `"pkg@x.y.z": "npm:pkg@x.y.z"` entries and source files imported with `@version` suffixes (`from "@radix-ui/react-slot@1.1.2"`). Both were cleaned up. If reintroducing code from Figma Make, strip `@<version>` from any new import specifiers.
 - The Vite migration left a `figmaAssetResolver` plugin mapping `figma:asset/<filename>` → `src/assets/<filename>`. It died with `vite.config.ts`; nothing imported through it and `src/assets/` never existed. Re-importing Figma Make code that uses `figma:asset/` specifiers means adding a Turbopack `resolveAlias` in `next.config.mjs`.
-- `package.json` was pruned from 60 dependencies to 15 + 7 dev. Everything declared is now reachable from the four routes, so treat an unused-looking dependency as a bug rather than Figma-export residue. The `@mui/*`, `react-dnd`, `react-slick`, `recharts`, `react-router`, `next-themes`, `motion`, `sonner` and `react-hook-form` leftovers are all gone; `react-router` in particular was never a routing option here — routing is the App Router.
+- `package.json` was pruned from 60 dependencies to 13 + 7 dev. Everything declared is now reachable from the four routes, so treat an unused-looking dependency as a bug rather than Figma-export residue. The `@mui/*`, `react-dnd`, `react-slick`, `recharts`, `react-router`, `next-themes`, `motion`, `sonner` and `react-hook-form` leftovers are all gone; `react-router` in particular was never a routing option here — routing is the App Router.
 - Two dependencies look unused to a naive import scan but are load-bearing: `react-dom` (Next requires it at runtime; nothing imports it directly since `main.tsx` was deleted) and `tw-animate-css` (imported from `styles/index.css`, not from TypeScript).
 - `npm audit` reports 3 high-severity advisories in `postcss` and `sharp`. Both are transitive dependencies of `next` itself; `npm audit fix --force` "resolves" them by downgrading to `next@9.3.3`. Leave them alone.
