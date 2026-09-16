@@ -20,7 +20,7 @@ Three targets — the Docker image did **not** replace Vercel, and the VPS runs 
 
 - **Vercel** — pushing to `main` triggers a production deploy; branch/PR pushes get preview deploys.
 - **GHCR** — `.github/workflows/docker.yml` builds a container and pushes it to `ghcr.io/provisionmn/provisionmn` on `main` and on `v*` tags. Pull requests build the image but do not push it. No secrets needed; it authenticates with the built-in `GITHUB_TOKEN`.
-- **VPS `provision.mn`** — since 2026-09-15 the apex domain's A record points at `202.131.1.126` (the shared amf.mn host), which serves `ghcr.io/provisionmn/provisionmn:latest` from `deploy/docker-compose.yml`. Vercel still builds every push; it just no longer answers for `provision.mn`.
+- **VPS `provision.mn`** — since 2026-09-15 the apex domain's A record points at `202.131.1.126` (the shared amf.mn host), which serves `ghcr.io/provisionmn/provisionmn` from `deploy/docker-compose.yml`. Vercel still builds every push; it just no longer answers for `provision.mn`. **Since 2026-09-16 this is automatic**: the `deploy` job in the same workflow SSHes in after the image is pushed and rolls the stack to that commit's `sha-<short>` tag — see *Automatic deploys* below.
 
 ```bash
 docker pull ghcr.io/provisionmn/provisionmn:latest
@@ -40,12 +40,56 @@ Two things about the image that are easy to break:
 
 `deploy/docker-compose.yml` is the deployed definition; the host keeps a copy of it at `/opt/provision/provisionmn/` (it is not a git checkout — copy the file over when you change it). It publishes **no host port**: the box runs one shared edge Traefik (`/opt/provision/traefik`, owned by the `provision_odoo` repo) that holds :80/:443, the `provision` Docker network and the `letsencrypt` ACME resolver, and this stack attaches to that network and declares ``Host(`provision.mn`)`` on container labels. Everything runs as the unprivileged `provision` user, whose `~/.docker/config.json` carries the GHCR credentials — **the package is private, so `docker pull` only works as that user**.
 
-Releasing is one command; the site is prerendered and stateless, so there is nothing to migrate or back up:
+Releasing is automatic on `main` (below). By hand it is one command; the site is prerendered and stateless, so there is nothing to migrate or back up:
 
 ```bash
 ssh provision@202.131.1.126
 cd /opt/provision/provisionmn && docker compose pull && docker compose up -d
 ```
+
+### Automatic deploys
+
+The `deploy` job in `.github/workflows/docker.yml` runs after `build` on `main`
+pushes (and on `workflow_dispatch` from `main`). It does not `docker compose`
+anything itself — it SSHes in and runs one word:
+
+```
+ssh provision@202.131.1.126 "deploy sha-<short-sha>"
+```
+
+**That key cannot run anything else.** `deploy/deploy.sh` is installed on the
+host as `/opt/provision/provisionmn/deploy.sh` and wired in as a forced
+command:
+
+```
+restrict,command="/opt/provision/provisionmn/deploy.sh" ssh-ed25519 AAAA… github-actions-deploy
+```
+
+so the request lands in `SSH_ORIGINAL_COMMAND` and the script accepts exactly
+`check` (print `docker compose ps`, change nothing) or `deploy [<tag>]`, with
+the tag regex-checked before it reaches `IMAGE_TAG`. A leaked `VPS_SSH_KEY`
+buys an attacker a redeploy of our own image, not a shell. Four consequences
+worth knowing:
+
+- **The repo copy is not the live copy.** `deploy/deploy.sh` is the source of
+  truth for humans; nothing syncs it. Change it → `scp` it to the host, same as
+  `docker-compose.yml`. This is deliberate: if CI could rewrite the forced
+  command, the forced command would not be a boundary.
+- **Deploys pin `sha-<short>`, not `latest`.** So a run says which commit it
+  shipped even if two land together. The container's `IMAGE_TAG` is set for
+  that one `up -d`; a later manual `docker compose up -d` falls back to
+  `latest` (the same digest).
+- **Green means healthy, not "the command exited 0".** The script waits up to
+  90s for the container's `HEALTHCHECK` to report `healthy` and dumps 50 lines
+  of logs if it doesn't; the job then curls `https://provision.mn/` from the
+  runner, which is the only part that exercises Traefik and the certificate.
+- **The host's public key is pinned in the workflow** (`VPS_HOST_KEY`), not
+  discovered with `ssh-keyscan`. Rebuild the box and that line needs updating.
+
+`workflow_dispatch` takes a `deploy_check` boolean that sends `check` instead
+of `deploy` — a way to prove the SSH path works from a branch without shipping
+anything. The only secret involved is `VPS_SSH_KEY` (the private half of the
+key above).
 
 `www.provision.mn` has **no DNS record**, so the compose file deliberately routes the apex only — adding a `www` router before the record exists just makes Traefik retry a doomed ACME order. Note also that Traefik does not re-attempt a failed ACME order on its own: if a certificate is missing after a DNS change, `docker compose up -d --force-recreate traefik` in the Odoo stack is what re-triggers it.
 
