@@ -722,6 +722,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("lang");
+      // Read storage after mount so the first render matches server Mongolian.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved === "en") setLang("en");
     } catch {
       // ignore

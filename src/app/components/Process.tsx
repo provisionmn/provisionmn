@@ -118,7 +118,6 @@ export function Process() {
       if (rafId.current !== null) cancelAnimationFrame(rafId.current);
     };
     // write() only touches refs; the effect must run once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const steps = t.process.steps;

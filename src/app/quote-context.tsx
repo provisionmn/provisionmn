@@ -8,16 +8,29 @@ import { createContext, useContext, useState, type ReactNode } from "react";
  * prefill and renders a blank form, which is the same behaviour the old
  * single-page version had on refresh.
  */
+export interface QuoteData {
+  projectType?: string;
+  complexity?: string;
+  features?: string[];
+  timeline?: string;
+  teamSize?: string;
+  description?: string;
+  estimatedPrice?: number;
+  estimatedHours?: number;
+  estimatedWeeks?: number;
+  createdAt?: string;
+}
+
 interface QuoteCtx {
-  quote: any;
-  setQuote: (data: any) => void;
+  quote: QuoteData | null;
+  setQuote: (data: QuoteData) => void;
   clearQuote: () => void;
 }
 
 const Context = createContext<QuoteCtx | null>(null);
 
 export function QuoteProvider({ children }: { children: ReactNode }) {
-  const [quote, setQuote] = useState<any>(null);
+  const [quote, setQuote] = useState<QuoteData | null>(null);
 
   return (
     <Context.Provider

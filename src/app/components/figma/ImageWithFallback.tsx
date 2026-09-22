@@ -1,3 +1,5 @@
+/* Native images preserve arbitrary caller dimensions and the inline data-URI error fallback. */
+/* eslint-disable @next/next/no-img-element */
 import React, { useState } from 'react'
 
 const ERROR_IMG_SRC =

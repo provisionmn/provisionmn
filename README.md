@@ -40,9 +40,18 @@ npm run dev        # Next dev server (Turbopack)
 npm run build      # production build (tsc-г дотроо ажиллуулна)
 npm run start      # production build-ыг локалд үзэх
 npm run typecheck  # зөвхөн tsc --noEmit
+npm run lint       # ESLint: алдаа, warning-гүй байх
+npm test           # Vitest + Testing Library
+npm run test:watch # тестийг өөрчлөлт бүрд ажиллуулах
 ```
 
 > Build дээр `tsc` алдаа гарвал Next-ийн code-frame renderer крилл үсгэн дээр panic хийж, алдааг харуулахгүйгээр унана. Тэр үед `npx tsc --noEmit`-ийг шууд ажиллуулж жинхэнэ алдааг хараарай.
+
+### Автомат шалгалт
+
+Цэвэр checkout дээр `npm ci`, дараа нь `npm run lint`, `npm test`, `npm run typecheck`, `npm run build` ажиллуулна. GitHub Actions нь lint/test/typecheck амжилттай болсон үед Docker build/push руу орно; production build Dockerfile дотор ажиллана.
+
+`tests/` дэх jsdom тестүүд тооцоолуурын үнэ, нэмэлт функц хасах, тайлбарын урт, calculator → quote prefill болон формын validation-ийг шалгана. Бодит browser layout, network/backend хүргэлтийг шалгахгүй. Тестийн үед зөвхөн Next navigation болон jsdom-д байхгүй хэмжилт/scroll API-г орлуулна.
 
 ## Deployment
 
