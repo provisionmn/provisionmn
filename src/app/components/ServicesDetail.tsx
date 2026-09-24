@@ -150,7 +150,7 @@ export function ServicesDetail() {
 
           <div className="max-w-3xl">
             <div className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-brand">
-              // Services
+              {"// Services"}
             </div>
             <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight text-balance md:text-6xl">
               Санаанаас production хүртэл
@@ -262,7 +262,7 @@ export function ServicesDetail() {
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-4">
               <div className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-brand">
-                // Process
+                {"// Process"}
               </div>
               <h2 className="text-3xl font-semibold tracking-tight text-balance md:text-4xl">
                 Бидний ажлын үйл явц
@@ -302,7 +302,7 @@ export function ServicesDetail() {
           <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-16">
             <div className="md:col-span-5">
               <div className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-brand">
-                // Why us
+                {"// Why us"}
               </div>
               <h2 className="text-3xl font-semibold tracking-tight text-balance md:text-4xl">
                 Яагаад биднийг сонгох ёстой?

@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuote } from "../quote-context";
+import { useQuote, type QuoteData } from "../quote-context";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -62,7 +62,7 @@ type Field =
   | "description"
   | "captcha";
 
-interface QuoteFormData {
+interface QuoteFormData extends QuoteData {
   name: string;
   email: string;
   phone: string;
@@ -74,7 +74,6 @@ interface QuoteFormData {
   estimatedPrice: number;
   // The calculator/chatbot prefill can carry extra fields (complexity,
   // features, estimatedHours…) that are spread in verbatim.
-  [key: string]: any;
 }
 
 function makeCaptcha() {
@@ -120,6 +119,8 @@ export function QuoteRequest() {
   // Must be client-only: the question is randomised, so generating it during
   // render makes the server and client markup disagree (hydration mismatch).
   useEffect(() => {
+    // Client-only randomness preserves the server hydration markup.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCaptcha(makeCaptcha());
   }, []);
 

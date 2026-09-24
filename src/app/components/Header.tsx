@@ -58,6 +58,8 @@ export function Header() {
   }, [mobileOpen]);
 
   // Navigating away leaves the panel open over the new page otherwise.
+  // Route changes close the existing mobile panel after navigation.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMobileOpen(false), [pathname]);
 
   useEffect(() => {
@@ -70,6 +72,8 @@ export function Header() {
   // when two do, the earlier one in `ids` wins, which is document order.
   useEffect(() => {
     if (!onHome) {
+      // Clear the landing-page observer state on other routes.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveId("");
       return;
     }

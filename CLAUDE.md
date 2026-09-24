@@ -10,7 +10,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run start` — serve the production build locally
 - `npm run typecheck` — `tsc --noEmit` on its own
 
-There are no tests and no lint config. `npm run build` and `npm run typecheck` are the only automated verification.
+- `npm run lint` — ESLint Next.js Core Web Vitals + TypeScript, zero warnings
+- `npm test` — Vitest + Testing Library in jsdom (calculator/quote flow and contact validation)
+- `npm run test:watch` — watch tests while developing
+
+Run `npm ci`, `npm run lint`, `npm test`, `npm run typecheck`, and `npm run build` before a PR. CI gates the Docker build/push on lint, tests and typecheck; the Dockerfile runs the production build. Tests use real components/context and mock only Next navigation and missing jsdom geometry APIs. They do not verify browser layout or a real backend submission. Keep tests in `tests/`; keep hydration-related lint exceptions local and explained.
 
 **Known build trap:** when `tsc` reports an error, Next 16's Rust code-frame renderer panics (`end byte index … is not a char boundary`) instead of printing it — the source files are Mongolian, and it slices UTF-8 by byte offset. The build then dies with `SIGABRT` and no usable message. Run `npx tsc --noEmit` directly to see the real errors.
 
