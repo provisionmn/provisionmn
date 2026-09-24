@@ -99,6 +99,8 @@ The root layout still sets `metadataBase` to `https://provisionmn.vercel.app`; g
 
 ## Architecture
 
+GA4 is optional: root layout mounts `@next/third-parties/google` only in production with a valid `NEXT_PUBLIC_GA_MEASUREMENT_ID` (`G-…`). The ID is embedded at build time; Docker/Actions passes the repository variable as a build argument, omitted on PR builds. Keep Vercel Preview unset. Use GA4 enhanced measurement history tracking for App Router page views; do not add a second manual page-view listener. Do not send form values or treat simulated form success as a lead. Setup and verification: README → Google Analytics 4.
+
 Marketing site for Provision.mn, originally generated from Figma Make, ported to Vite, then migrated to **Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4**.
 
 There is **no backend or request persistence**; the language preference is stored locally. The forms make no API requests; `scrub/useScrubHero.ts` does call `fetch` to load the hero video. There are no application API credentials or database settings. Build/deployment settings include `DOCKER_BUILD` and the deployment workflow variables. `QuoteRequest` and `Contact` both fake a submit and then render a success card — the data goes nowhere. Contact waits 1.2 seconds and offers a retry/reset button. QuoteRequest waits 1.4 seconds, creates a browser-local `REQ-${Date.now()}` reference, and offers *home* or *new request*. Neither form automatically redirects or confirms backend delivery.

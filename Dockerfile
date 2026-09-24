@@ -17,6 +17,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Switches next.config.mjs to `output: "standalone"`. Without it the runner
 # stage below has no server.js to copy.
 ENV DOCKER_BUILD=1
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID=""
+ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

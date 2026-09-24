@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { SkipLink } from "./components/SkipLink";
@@ -38,6 +39,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
+  const analyticsEnabled =
+    process.env.NODE_ENV === "production" && /^G-[A-Z0-9]+$/.test(gaId ?? "");
+
   return (
     // `dark` is the default theme; Header mutates this class at runtime, hence
     // suppressHydrationWarning. `lang` is likewise rewritten by LanguageProvider.
@@ -55,6 +60,7 @@ export default function RootLayout({
             <Footer />
           </QuoteProvider>
         </LanguageProvider>
+        {analyticsEnabled && gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );

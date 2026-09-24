@@ -99,6 +99,9 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          # Keep preview builds out of the production GA4 property.
+          build-args: |
+            NEXT_PUBLIC_GA_MEASUREMENT_ID=${{ github.event_name != 'pull_request' && vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || '' }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
