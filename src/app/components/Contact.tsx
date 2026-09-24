@@ -13,6 +13,7 @@ import {
   Phone,
   type LucideIcon,
 } from "lucide-react";
+import { Turnstile } from "./Turnstile";
 import { useRequestSubmit } from "../use-request-submit";
 import { useT } from "../i18n";
 
@@ -202,6 +203,11 @@ export function Contact() {
               onSubmit={handleSubmit}
               className="lg:col-span-3 rounded-2xl border border-border bg-card/70 p-6 md:p-8 space-y-5 elev-1"
             >
+              <Turnstile
+                key={request.challengeKey}
+                onToken={request.setCaptchaToken}
+                onRetry={request.resetCaptcha}
+              />
               {request.failure && (
                 <p role="alert" className="text-sm text-destructive">
                   {t.intake[request.failure]}

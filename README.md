@@ -123,4 +123,15 @@ Internal — Provision.mn өмчийн материал.
 - Deploy хийхээс өмнө migration-г ажиллуулж, шинэ `deploy/docker-compose.yml`-ийг хостын `/opt/provision/provisionmn/docker-compose.yml` руу хуулна. CI нь энэ файлыг автоматаар sync хийдэггүй. Runtime тохиргоо бэлэн болсны дараа шинэ image deploy хийнэ.
 - Хүсэлт унших public API байхгүй. Эрхтэй оператор PostgreSQL-ээс хүсэлтүүдийг үзнэ. Backup-д `pg_dump -Fc provisionmn` ашиглаж, хандалт хязгаарласан хадгалалт болон retention-ийг тохируулна; энэ PR автомат backup эсвэл админ UI нэмэхгүй.
 - `PG_INTEGRATION_URL` тохируулсан үед `npm test -- tests/request-storage.test.tsx` бодит PostgreSQL дээр session-local TEMP хүснэгт ашиглан insert, concurrent retry, conflict, rate limit-ийг шалгана. Production хүснэгтэд тест өгөгдөл оруулахгүй.
-- Quote-ийн арифметик асуулт UI validation хэвээр; серверийн CAPTCHA хамгаалалт биш. API дээр origin болон баазад тулгуурласан давтамжийн шалгалт ажиллана.
+- Хоёр форм Cloudflare Turnstile ашиглана. Сервер Siteverify-ээр success, hostname болон `form_request` action-ийг шалгана. Түлхүүр дутуу, token хүчингүй, эсвэл үйлчилгээ ажиллахгүй үед хүсэлт хадгалахгүй.
+- API-д Traefik RemoteAddr-аар IP бүрийн 5/минут (burst 10) хязгаар болон нийт 20 зэрэг хүсэлтийн хязгаар тавьсан. Database-ийн цагийн хязгаар давхар үйлчилнэ. Энэ нь шууд Traefik-д ханддаг одоогийн VPS-д зориулагдсан; CDN/proxy урд нь нэмбэл trusted proxy/IP тохиргоог дахин шалгана. `X-Forwarded-For`-ийг application дотроос шууд итгэж ашиглахгүй.
+
+### Turnstile идэвхжүүлэх
+
+1. Cloudflare dashboard → Turnstile → Add widget; hostname `provision.mn`, Managed mode сонгоно.
+2. Public Site key-г GitHub repository Actions **Variables** → `NEXT_PUBLIC_TURNSTILE_SITE_KEY`-д оруулна. Энэ нь build-time утга.
+3. Secret key-г VPS `/opt/provision/provisionmn/database.env` файлд `TURNSTILE_SECRET_KEY=…` гэж нэмнэ (0600 эрхийг хадгал). Secret-г GitHub variable, source эсвэл чатад оруулахгүй.
+4. Хостын Compose шинэчлэгдсэн, хоёр түлхүүр тохируулагдсан үед л merge/build/deploy хийнэ. Тохиргоогүй build нь формын илгээлтийг хаана.
+5. Production-д хоёр формын challenge, илгээлт, token хугацаа дуусах/дахин оролдох болон rate limit-ийг browser-оор шалгана. Шинэ token авахад idempotency key хадгалагдах тул сүлжээний дараах retry нь давхар бүртгэл үүсгэхгүй.
+
+Локал `.env.local`-д Cloudflare-ийн [test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/), `APP_ORIGIN=http://localhost:3000` ашиглана. Test keys-г production-д бүү ашигла. [Server verification](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/) болон [Traefik rate limits](https://doc.traefik.io/traefik/v3.5/reference/routing-configuration/http/middlewares/ratelimit/).

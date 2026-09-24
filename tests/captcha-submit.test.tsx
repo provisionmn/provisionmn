@@ -1,0 +1,23 @@
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, expect, it, vi } from 'vitest';
+import { useRequestSubmit } from '../src/app/use-request-submit';
+const originalFetch = globalThis.fetch;
+afterEach(() => { globalThis.fetch = originalFetch; });
+it('blocks missing tokens and requires a fresh token after a failed request', async () => {
+  const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 503 });
+  vi.stubGlobal('fetch', fetchMock);
+  const { result } = renderHook(useRequestSubmit);
+  await act(async () => { expect(await result.current.submit({ name: 'Test' })).toBeNull(); });
+  expect(fetchMock).not.toHaveBeenCalled();
+  expect(result.current.failure).toBe('captcha');
+  act(() => result.current.setCaptchaToken('first-token'));
+  await act(async () => { await result.current.submit({ name: 'Test' }); });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  await act(async () => { await result.current.submit({ name: 'Test' }); });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  act(() => result.current.setCaptchaToken('fresh-token'));
+  await act(async () => { await result.current.submit({ name: 'Test' }); });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(fetchMock.mock.calls[0][1].headers['Idempotency-Key']).toBe(fetchMock.mock.calls[1][1].headers['Idempotency-Key']);
+  expect(JSON.parse(fetchMock.mock.calls[1][1].body).captchaToken).toBe('fresh-token');
+});

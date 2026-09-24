@@ -1,3 +1,4 @@
+import { verifyTurnstile } from "../src/server/turnstile";
 import { beforeEach, expect, it, vi } from "vitest";
 import { POST } from "../src/app/api/requests/route";
 import {
@@ -11,6 +12,7 @@ vi.mock("../src/server/requests", async (importOriginal) => {
     await importOriginal<typeof import("../src/server/requests")>();
   return { ...original, saveSubmission: vi.fn() };
 });
+vi.mock("../src/server/turnstile", () => ({ verifyTurnstile: vi.fn() }));
 const valid = {
   kind: "contact",
   name: "Test",
@@ -31,6 +33,7 @@ function request(body: unknown = valid, origin = "https://provision.mn") {
 }
 beforeEach(() => {
   vi.mocked(saveSubmission).mockReset();
+  vi.mocked(verifyTurnstile).mockResolvedValue("ok");
   vi.stubEnv("APP_ORIGIN", "https://provision.mn");
 });
 it("persists only validated fields and returns the database reference", async () => {
@@ -100,4 +103,21 @@ it("normalizes input and requires a phone for quotes", () => {
       projectType: "website",
     }).success,
   ).toBe(false);
+});
+
+it("never stores a request when verification fails or is unavailable", async () => {
+  vi.mocked(verifyTurnstile).mockResolvedValue("invalid");
+  expect((await POST(request())).status).toBe(403);
+  expect(saveSubmission).not.toHaveBeenCalled();
+  vi.mocked(verifyTurnstile).mockResolvedValue("unavailable");
+  expect((await POST(request())).status).toBe(503);
+  expect(saveSubmission).not.toHaveBeenCalled();
+});
+it("sends the token to verification but does not persist it", async () => {
+  vi.mocked(saveSubmission).mockResolvedValue(id);
+  await POST(request({ ...valid, captchaToken: "secret-token" }));
+  expect(verifyTurnstile).toHaveBeenCalledWith("secret-token");
+  expect(vi.mocked(saveSubmission).mock.calls[0][1]).not.toHaveProperty(
+    "captchaToken",
+  );
 });

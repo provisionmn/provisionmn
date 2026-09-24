@@ -1,5 +1,6 @@
 "use client";
 
+import { Turnstile } from "./Turnstile";
 import { useRequestSubmit } from "../use-request-submit";
 import { useT } from "../i18n";
 import { formatCopy } from "../flow-copy";
@@ -24,8 +25,6 @@ import {
   CheckCircle,
   Copy,
   Loader2,
-  RefreshCw,
-  Shield,
   SlidersHorizontal,
 } from "lucide-react";
 
@@ -51,15 +50,6 @@ interface QuoteFormData extends QuoteData {
   estimatedPrice: number;
   // The calculator/chatbot prefill can carry extra fields (complexity,
   // features, estimatedHours…) that are spread in verbatim.
-}
-
-function makeCaptcha() {
-  const a = Math.floor(Math.random() * 9) + 1;
-  const b = Math.floor(Math.random() * 9) + 1;
-  // Addition only. A multiplication captcha filters out humans in a hurry
-  // as effectively as it filters out bots, and this form guards nothing but
-  // an inbox.
-  return { question: `${a} + ${b}`, answer: String(a + b) };
 }
 
 export function QuoteRequest() {
@@ -108,8 +98,6 @@ export function QuoteRequest() {
   const [invalidFields, setErrors] = useState<Partial<Record<Field, string>>>(
     {},
   );
-  const [captcha, setCaptcha] = useState({ question: "", answer: "" });
-  const [captchaInput, setCaptchaInput] = useState("");
   const isSubmitting = request.pending;
   const [requestId, setRequestId] = useState("");
   const [copied, setCopied] = useState(false);
@@ -119,21 +107,13 @@ export function QuoteRequest() {
   // a direct visit to /quote returns to the landing page instead.
   const backHref = initialData ? "/calculator" : "/";
 
-  // Must be client-only: the question is randomised, so generating it during
-  // render makes the server and client markup disagree (hydration mismatch).
-  useEffect(() => {
-    // Client-only randomness preserves the server hydration markup.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCaptcha(makeCaptcha());
-  }, []);
-
   // Move focus to the confirmation once it replaces the form, otherwise a
   // keyboard or screen-reader user is left on a button that no longer exists.
   useEffect(() => {
     if (requestId) successRef.current?.focus();
   }, [requestId]);
 
-  const validate = (values: QuoteFormData, captchaValue: string) => {
+  const validate = (values: QuoteFormData) => {
     const next: Partial<Record<Field, string>> = {};
     if (!values.name.trim()) next.name = copy.pleaseEnterYourName;
     if (!EMAIL.test(values.email.trim()))
@@ -146,8 +126,6 @@ export function QuoteRequest() {
         copy.pleaseDescribeYourProjectInAtLeast,
         MIN_DESCRIPTION,
       );
-    if (captchaValue.trim() !== captcha.answer)
-      next.captcha = copy.theAnswerDoesNotMatch;
     return next;
   };
 
@@ -165,7 +143,7 @@ export function QuoteRequest() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const found = validate(formData, captchaInput);
+    const found = validate(formData);
     setErrors(found);
     if (Object.keys(found).length > 0) {
       const first = Object.keys(found)[0];
@@ -194,8 +172,6 @@ export function QuoteRequest() {
       estimatedPrice: 0,
     });
     setErrors({});
-    setCaptcha(makeCaptcha());
-    setCaptchaInput("");
     setRequestId("");
     setCopied(false);
     window.scrollTo({ top: 0 });
@@ -212,7 +188,7 @@ export function QuoteRequest() {
     }
   };
 
-  const currentErrors = validate(formData, captchaInput);
+  const currentErrors = validate(formData);
   const errors = Object.fromEntries(
     Object.keys(invalidFields).map((field) => [
       field,
@@ -531,56 +507,11 @@ export function QuoteRequest() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-background/50 p-4">
-          <label
-            htmlFor={`${uid}-captcha`}
-            className="mb-3 flex items-center gap-2 font-mono text-xs text-muted-foreground"
-          >
-            <Shield strokeWidth={1.5} className="h-3.5 w-3.5" />
-            {copy.humanVerification}
-            {required}
-          </label>
-          <div className="flex items-center gap-2">
-            <div
-              aria-hidden={captcha.question === ""}
-              className="flex h-9 min-w-[92px] items-center justify-center rounded-md border border-border bg-card px-3 font-mono text-sm tabular-nums text-foreground"
-            >
-              {captcha.question ? `${captcha.question} = ?` : "…"}
-            </div>
-            <Input
-              {...fieldProps("captcha")}
-              inputMode="numeric"
-              // `type="number"` adds spinners and swallows arrow keys for a
-              // field that is two digits at most.
-              value={captchaInput}
-              onChange={(e) => {
-                setCaptchaInput(e.target.value);
-                if (errors.captcha)
-                  setErrors((prev) => {
-                    const next = { ...prev };
-                    delete next.captcha;
-                    return next;
-                  });
-              }}
-              placeholder={copy.answer}
-              autoComplete="off"
-              className="w-24"
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setCaptcha(makeCaptcha());
-                setCaptchaInput("");
-              }}
-              aria-label={copy.getAnotherQuestion}
-            >
-              <RefreshCw strokeWidth={1.5} className="h-4 w-4" />
-            </Button>
-          </div>
-          {error("captcha")}
-        </div>
+        <Turnstile
+          key={request.challengeKey}
+          onToken={request.setCaptchaToken}
+          onRetry={request.resetCaptcha}
+        />
 
         <div className="flex flex-col gap-3 pt-1 sm:flex-row-reverse">
           {/* Enabled unconditionally: submitting is how the user finds out

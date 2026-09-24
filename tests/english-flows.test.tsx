@@ -48,12 +48,10 @@ beforeEach(() => {
   navigation.push.mockReset();
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({ id: "a13bd758-91c2-4db6-adc5-0e6de1575745" }),
-      }),
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: "a13bd758-91c2-4db6-adc5-0e6de1575745" }),
+    }),
   );
 });
 afterEach(() => {
@@ -132,13 +130,6 @@ it("relocalizes existing validation and completes the quote UI in English", asyn
   fireEvent.change(screen.getByLabelText(/Phone number/), {
     target: { value: "+976 99112233" },
   });
-  const numbers = screen
-    .getByText(/^\d+ \+ \d+ = \?$/)
-    .textContent!.match(/\d+/g)!
-    .map(Number);
-  fireEvent.change(screen.getByLabelText(/Human verification/), {
-    target: { value: String(numbers[0] + numbers[1]) },
-  });
   vi.mocked(fetch).mockResolvedValueOnce({
     ok: false,
     status: 503,
@@ -191,4 +182,20 @@ it("switches chatbot language mid-conversation without changing the estimate or 
   expect(
     screen.getByRole("combobox", { name: /Төслийн төрөл/ }),
   ).toHaveTextContent("Вэб сайт хөгжүүлэлт");
+});
+
+vi.mock("../src/app/components/Turnstile", async () => {
+  const { useEffect } = await import("react");
+  return {
+    Turnstile: function MockTurnstile({
+      onToken,
+    }: {
+      onToken: (token: string) => void;
+    }) {
+      useEffect(() => {
+        onToken("test-token");
+      }, [onToken]);
+      return <div>Verification widget</div>;
+    },
+  };
 });

@@ -103,7 +103,7 @@ GA4 is optional: root layout mounts `@next/third-parties/google` only in product
 
 Marketing site for Provision.mn, originally generated from Figma Make, ported to Vite, then migrated to **Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4**.
 
-Contact and QuoteRequest POST to `/api/requests` and show success only after PostgreSQL commits a record. `src/server/requests.ts` owns validation and parameterized persistence; `src/app/use-request-submit.ts` preserves an idempotency key for unchanged-payload retries and prevents concurrent client submissions. Stable server UUIDs replace browser-generated references. Emails are not sent yet. Never expose DATABASE_URL to client code or log submitted personal data. Runtime DATABASE_URL and APP_ORIGIN are configured through the host database.env / Compose; see README for migration and deployment order. Quote arithmetic is client-only validation, not server anti-bot protection.
+Contact and QuoteRequest POST to `/api/requests` and show success only after PostgreSQL commits a record. `src/server/requests.ts` owns validation and parameterized persistence; `src/app/use-request-submit.ts` preserves an idempotency key for unchanged-payload retries and prevents concurrent client submissions. Stable server UUIDs replace browser-generated references. Emails are not sent yet. Never expose DATABASE_URL to client code or log submitted personal data. Runtime DATABASE_URL and APP_ORIGIN are configured through the host database.env / Compose; see README for migration and deployment order. Both forms use Turnstile with server-side hostname/action verification before persistence; missing config fails closed. Client retries refresh the single-use token without changing the data idempotency key. Traefik limits only /api/requests by RemoteAddr (5/minute, burst 10) plus 20 concurrent requests. Configure NEXT_PUBLIC_TURNSTILE_SITE_KEY before build and TURNSTILE_SECRET_KEY in the existing host database.env before deployment.
 
 ### Routes
 
@@ -148,7 +148,7 @@ It is in-memory by design: reloading `/quote` drops the prefill and renders a bl
 
 ### Hydration rules
 
-Prerendering makes render-time nondeterminism a hard error rather than a curiosity. `Math.random()` / `Date.now()` must not run during render — `QuoteRequest`'s captcha generates in a `useEffect` for exactly this reason. The same applies to `localStorage` (see i18n above). `<html>` carries `suppressHydrationWarning` because `Header` and `LanguageProvider` both mutate its attributes after mount.
+Prerendering makes render-time nondeterminism a hard error rather than a curiosity. `Math.random()` / `Date.now()` must not run during render. Turnstile mounts client-side after hydration; the old arithmetic captcha has been removed. The same applies to `localStorage` (see i18n above). `<html>` carries `suppressHydrationWarning` because `Header` and `LanguageProvider` both mutate its attributes after mount.
 
 ### Language of UI copy
 

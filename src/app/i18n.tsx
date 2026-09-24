@@ -16,9 +16,16 @@ const dicts = {
   mn: {
     flow: mnFlow,
     intake: {
-      saved: "Таны хүсэлт хадгалагдлаа. Бид таны оруулсан холбоо барих мэдээллээр холбогдоно.",
-      failed: "Хүсэлтийг хадгалсныг баталгаажуулж чадсангүй. Мэдээллээ шалгаад дахин илгээнэ үү.",
-      limited: "Хэт олон хүсэлт ирсэн байна. Нэг цагийн дараа дахин оролдоно уу.",
+      verification: "Ботын хамгаалалт",
+      captcha: "Ботын шалгалтыг дуусгаад дахин илгээнэ үү.",
+      retryVerification: "Шалгалтыг дахин ачаалах",
+      verificationUnavailable:
+        "Хүсэлт илгээх түр боломжгүй байна. Дараа дахин оролдоно уу.",
+      saved:
+        "Таны хүсэлт хадгалагдлаа. Бид таны оруулсан холбоо барих мэдээллээр холбогдоно.",
+      failed:
+        "Хүсэлтийг хадгалсныг баталгаажуулж чадсангүй. Мэдээллээ шалгаад дахин илгээнэ үү.",
+      limited: "Хэт олон хүсэлт ирсэн байна. Түр хүлээгээд дахин оролдоно уу.",
     },
     nav: {
       services: "Үйлчилгээ",
@@ -366,9 +373,16 @@ const dicts = {
   en: {
     flow: enFlow,
     intake: {
-      saved: "Your request has been saved. We will follow up using the contact details you provided.",
-      failed: "We could not confirm your request was saved. Check your details and try again.",
-      limited: "Too many requests. Please try again in one hour.",
+      verification: "Spam protection",
+      captcha: "Complete the verification and submit again.",
+      retryVerification: "Reload verification",
+      verificationUnavailable:
+        "Submissions are temporarily unavailable. Please try again later.",
+      saved:
+        "Your request has been saved. We will follow up using the contact details you provided.",
+      failed:
+        "We could not confirm your request was saved. Check your details and try again.",
+      limited: "Too many requests. Please wait before trying again.",
     },
     nav: {
       services: "Services",

@@ -1,3 +1,4 @@
+import { verifyTurnstile } from "../../../server/turnstile";
 import { z } from "zod";
 import {
   saveSubmission,
@@ -52,6 +53,16 @@ export async function POST(request: Request) {
   }
   const parsed = submissionSchema.safeParse(input);
   if (!parsed.success) return respond({ error: "invalid_request" }, 400);
+  const token =
+    typeof input === "object" && input !== null && "captchaToken" in input
+      ? input.captchaToken
+      : undefined;
+  const verification = await verifyTurnstile(token);
+  if (verification !== "ok")
+    return respond(
+      { error: verification === "invalid" ? "captcha_failed" : "unavailable" },
+      verification === "invalid" ? 403 : 503,
+    );
   try {
     const id = await saveSubmission(key!, parsed.data);
     return respond({ id }, 201);

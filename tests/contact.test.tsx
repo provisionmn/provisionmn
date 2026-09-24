@@ -7,12 +7,10 @@ import { LanguageProvider } from "../src/app/i18n";
 beforeEach(() => {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({ id: "a13bd758-91c2-4db6-adc5-0e6de1575745" }),
-      }),
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: "a13bd758-91c2-4db6-adc5-0e6de1575745" }),
+    }),
   );
 });
 afterEach(() => {
@@ -104,12 +102,35 @@ it("keeps entered data on failure and retries with the same idempotency key", as
   );
   expect(screen.getByLabelText("Name")).toHaveValue("Retry Test");
   expect(screen.queryByText("Brief received")).not.toBeInTheDocument();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Complete verification" }),
+  );
   fireEvent.submit(container.querySelector("form")!);
   expect(await screen.findByText("Brief received")).toBeInTheDocument();
   expect(fetchMock.mock.calls[0][1]?.headers).toEqual(
     fetchMock.mock.calls[1][1]?.headers,
   );
-  expect(fetchMock.mock.calls[0][1]?.body).toEqual(
-    fetchMock.mock.calls[1][1]?.body,
-  );
+  expect(
+    JSON.parse(fetchMock.mock.calls[1][1]?.body as string).captchaToken,
+  ).toBe("renewed-token");
+});
+
+vi.mock("../src/app/components/Turnstile", async () => {
+  const { useEffect } = await import("react");
+  return {
+    Turnstile: function MockTurnstile({
+      onToken,
+    }: {
+      onToken: (token: string) => void;
+    }) {
+      useEffect(() => {
+        onToken("test-token");
+      }, [onToken]);
+      return (
+        <button type="button" onClick={() => onToken("renewed-token")}>
+          Complete verification
+        </button>
+      );
+    },
+  };
 });

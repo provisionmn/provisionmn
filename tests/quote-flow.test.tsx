@@ -173,8 +173,23 @@ describe("calculator → quote", () => {
       screen.getByRole("button", { name: "Хүсэлт илгээх" }),
     );
     expect(screen.getByLabelText(/Овог нэр/)).toHaveFocus();
-    expect(screen.getAllByRole("alert")).toHaveLength(6);
-    expect(screen.getByText("Хариу таарахгүй байна.")).toBeInTheDocument();
+    expect(screen.getAllByRole("alert")).toHaveLength(5);
     expect(screen.queryByText("Илгээж байна…")).not.toBeInTheDocument();
   });
+});
+
+vi.mock("../src/app/components/Turnstile", async () => {
+  const { useEffect } = await import("react");
+  return {
+    Turnstile: function MockTurnstile({
+      onToken,
+    }: {
+      onToken: (token: string) => void;
+    }) {
+      useEffect(() => {
+        onToken("test-token");
+      }, [onToken]);
+      return <div>Verification widget</div>;
+    },
+  };
 });

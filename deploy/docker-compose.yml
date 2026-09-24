@@ -36,6 +36,19 @@ services:
       - "traefik.http.routers.provisionmn.tls=true"
       - "traefik.http.routers.provisionmn.tls.certresolver=letsencrypt"
       - "traefik.http.services.provisionmn.loadbalancer.server.port=3000"
+      # Only intake is limited; page/assets traffic is unaffected. RemoteAddr
+      # is used at the directly exposed edge, never a caller-supplied XFF value.
+      - "traefik.http.routers.provisionmn-intake.rule=Host(`provision.mn`) && Path(`/api/requests`)"
+      - "traefik.http.routers.provisionmn-intake.priority=100"
+      - "traefik.http.routers.provisionmn-intake.entrypoints=websecure"
+      - "traefik.http.routers.provisionmn-intake.tls=true"
+      - "traefik.http.routers.provisionmn-intake.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.provisionmn-intake.service=provisionmn"
+      - "traefik.http.routers.provisionmn-intake.middlewares=provisionmn-intake-rate,provisionmn-intake-inflight"
+      - "traefik.http.middlewares.provisionmn-intake-rate.ratelimit.average=5"
+      - "traefik.http.middlewares.provisionmn-intake-rate.ratelimit.period=1m"
+      - "traefik.http.middlewares.provisionmn-intake-rate.ratelimit.burst=10"
+      - "traefik.http.middlewares.provisionmn-intake-inflight.inflightreq.amount=20"
     logging:
       driver: json-file
       options:

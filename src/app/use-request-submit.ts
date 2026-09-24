@@ -4,10 +4,22 @@ import { useRef, useState } from "react";
 export function useRequestSubmit() {
   const busy = useRef(false);
   const retry = useRef<{ payload: string; key: string } | null>(null);
-  const [failure, setFailure] = useState<"failed" | "limited" | null>(null);
+  const [failure, setFailure] = useState<
+    "failed" | "limited" | "captcha" | null
+  >(null);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [challengeKey, setChallengeKey] = useState(0);
+  function resetCaptcha() {
+    setCaptchaToken("");
+    setChallengeKey((value) => value + 1);
+  }
   const [pending, setPending] = useState(false);
   async function submit(data: object): Promise<string | null> {
     if (busy.current) return null;
+    if (!captchaToken) {
+      setFailure("captcha");
+      return null;
+    }
     busy.current = true;
     setPending(true);
     setFailure(null);
@@ -21,11 +33,17 @@ export function useRequestSubmit() {
           "Content-Type": "application/json",
           "Idempotency-Key": retry.current!.key,
         },
-        body: payload,
+        body: JSON.stringify({ ...data, captchaToken }),
         signal: AbortSignal.timeout(15000),
       });
       if (!response.ok) {
-        setFailure(response.status === 429 ? "limited" : "failed");
+        setFailure(
+          response.status === 429
+            ? "limited"
+            : response.status === 403
+              ? "captcha"
+              : "failed",
+        );
         return null;
       }
       const body = await response.json();
@@ -36,6 +54,7 @@ export function useRequestSubmit() {
       setFailure("failed");
       return null;
     } finally {
+      resetCaptcha();
       busy.current = false;
       setPending(false);
     }
@@ -44,5 +63,13 @@ export function useRequestSubmit() {
     retry.current = null;
     setFailure(null);
   }
-  return { submit, reset, failure, pending };
+  return {
+    submit,
+    reset,
+    failure,
+    pending,
+    challengeKey,
+    setCaptchaToken,
+    resetCaptcha,
+  };
 }
