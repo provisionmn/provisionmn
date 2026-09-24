@@ -2,14 +2,14 @@
 
 Marketing site for Provision.mn — Монголын инженерийн студи. Fullstack, mobile, AI, DevOps, Odoo, UX/UI болон процесс автоматжуулалт (RPA).
 
-🌐 **Production:** https://provisionmn.vercel.app
+🌐 **Production:** https://provision.mn (VPS + Traefik)
 
 ## Stack
 
 - **Next.js 16** (App Router, Turbopack) + **React 19** + **TypeScript**
 - **Tailwind v4** (`@tailwindcss/postcss`) — CSS custom property theming, dark mode
 - **shadcn/ui** (Radix UI + CVA) — UI primitives
-- **react-three-fiber** + **drei** — Hero дэх 3D distorted blob scene
+- **Scroll-video hero** — scroll-оор удирдах MP4; гар утас болон reduced-motion үед статик зураг
 - **Lucide React** — иконууд
 - **i18n** — Mongolian / English (`src/app/i18n.tsx`, React Context, no library)
 
@@ -19,16 +19,16 @@ App Router дээрх 4 маршрут, бүгд статикаар prerender х
 
 | Маршрут | Агуулга |
 | --- | --- |
-| `/` | Landing (Hero / Services / Products / About / Portfolio / Contact + Chatbot) |
+| `/` | Landing (Hero / Marquee / Services / Products / Process / Portfolio / About / FAQ / Contact + Chatbot) |
 | `/services` | Үйлчилгээний дэлгэрэнгүй |
 | `/calculator` | Үнийн тооцоолуур |
-| `/quote` | Оффер хүсэх форм |
+| `/quote` | Үнийн санал хүсэх форм |
 
-`src/app/layout.tsx` нь `<html>`, provider-ууд болон бүх хуудсанд нийтлэг `Header` + `Footer`-ыг эзэмшинэ. Хуудасны `page.tsx` файлууд нь Server Component — тус бүр өөрийн `metadata` (title, description) экспортолдог тул тэднийг Client Component болгож болохгүй. Иймд навигаци нь section компонент дотор `Link` / `useRouter`-ээр хийгддэг.
+`src/app/layout.tsx` нь `<html>`, provider-ууд болон бүх хуудсанд нийтлэг `Header` + `Footer`-ыг эзэмшинэ. Хуудасны `page.tsx` файлууд нь Server Component. Дэд хуудсууд өөрийн `metadata` экспортолдог; нүүр хуудас `layout.tsx`-ийн metadata-г өвлөнө. Metadata экспортолдог файлыг Client Component болгож болохгүй. Иймд навигаци нь section компонент дотор `Link` / `useRouter`-ээр хийгддэг.
 
 Тооцоолуураас формд дамжих өгөгдлийг `src/app/quote-context.tsx` (`useQuote`) зөөнө — санах ойд л байдаг тул `/quote`-г дахин ачаалахад prefill арилж, хоосон форм гарна.
 
-Backend болон хадгалалт байхгүй — форм илгээхэд амжилтын төлөв харуулаад 3 секундын дараа `/` руу буцна.
+Backend болон хүсэлтийн хадгалалт байхгүй. Contact 1.2 секунд, QuoteRequest 1.4 секунд хүлээгээд зөвхөн дэлгэц дээр амжилтын төлөв харуулдаг; мэдээлэл сервер, имэйл рүү илгээгдэхгүй. QuoteRequest-ийн `REQ-…` дугаар browser-т үүсдэг. Автоматаар өөр хуудас руу шилжихгүй: хэрэглэгч нүүр хуудас руу буцах эсвэл шинэ хүсэлт эхлүүлэх үйлдлийг сонгоно; Contact дээр дахин илгээх товч байна.
 
 Хэлийг `LanguageProvider` (`src/app/i18n.tsx`)-аар удирддаг, localStorage-д хадгална. Landing-ийн секцүүд `useT()`-ээр орчуулагддаг; ServicesDetail / PriceCalculator / QuoteRequest / Chatbot нь монгол текстээ шууд агуулсан хэвээр.
 
@@ -55,11 +55,15 @@ npm run test:watch # тестийг өөрчлөлт бүрд ажиллуула
 
 ## Deployment
 
-Хоёр бие даасан суваг байна — Docker image нь Vercel-ийг **орлохгүй**:
+Гурван хэсэгтэй:
 
-**Vercel.** `main`-д push хийхэд автомат production deploy. Branch / PR push → preview deploy.
+**VPS / provision.mn.** `main`-ийн quality → Docker build/push амжилттай болсны дараа Actions нь `deploy sha-<short>` командыг SSH-ээр ажиллуулна. `deploy/deploy.sh` контейнер healthy болсныг шалгаж, workflow гаднаас HTTPS 200 хариу шалгана. `v*` тэг нь image нийтэлнэ, VPS deploy эхлүүлэхгүй.
 
-**GitHub Packages (ghcr.io).** `.github/workflows/docker.yml` нь `main` болон `v*` тэг дээр image build хийж түлхэнэ. Pull request дээр зөвхөн build хийж, push хийхгүй (шалгалт). Нэмэлт secret хэрэггүй — `GITHUB_TOKEN`-оор нэвтэрнэ.
+`deploy/docker-compose.yml` нь shared `provision` network, Traefik router ашиглана; host port нээхгүй. VPS дээрх compose болон deploy script-ийн хуулбарыг CI шинэчилдэггүй. `VPS_SSH_KEY` нь зөвхөн `check` болон `deploy [<tag>]` ажиллуулах forced-command түлхүүр. Дэлгэрэнгүй ажиллагааг [CLAUDE.md](CLAUDE.md#deployment)-ээс үзнэ үү.
+
+**Vercel.** GitHub integration нь `main` дээр production, branch/PR дээр preview deploy оролддог. `provision.mn`-ийн production traffic VPS рүү очно. Vercel-ийн шалгалт болон VPS deploy-ийн үр дүн тусдаа.
+
+**GitHub Packages (ghcr.io).** `.github/workflows/docker.yml` нь `main` болон `v*` тэг дээр image build хийж түлхэнэ. Pull request дээр зөвхөн build хийж, push хийхгүй (шалгалт). Registry publish нь `GITHUB_TOKEN` ашиглана; VPS deploy нь тусдаа `VPS_SSH_KEY` шаарддаг. Private image татахын өмнө тухайн хэрэглэгч GHCR-д нэвтэрсэн байна.
 
 ```bash
 docker pull ghcr.io/provisionmn/provisionmn:latest
@@ -68,7 +72,7 @@ docker run -p 3000:3000 ghcr.io/provisionmn/provisionmn:latest
 
 Тэгүүд: `latest` (default branch), branch нэр, `v*` тэг, богино sha.
 
-Image нь `node:22-alpine` дээрх Next standalone output, ~200MB, non-root `nextjs` хэрэглэгчээр ажиллана, `/` дээр healthcheck-тэй.
+Image нь `node:22-alpine` дээрх Next standalone output, non-root `nextjs` хэрэглэгчээр ажиллана, `/` дээр healthcheck-тэй.
 
 > `output: "standalone"` нь `DOCKER_BUILD` env-ээр хаалттай бөгөөд зөвхөн Dockerfile түүнийг тавьдаг. Тиймээс локал болон Vercel дээрх `npm run build` урьдын хэвээр ажиллана.
 
@@ -80,17 +84,16 @@ Image нь `node:22-alpine` дээрх Next standalone output, ~200MB, non-root 
 - `--success` нь брэндийн бус, функциональ өнгө (номд ногоон байхгүй ч "live" төлөв, ✓ тэмдэгт шаарддаг) — `text-success` / `bg-success`
 - Лого нь `components/Logo.tsx` доторх inline SVG (растер файл байхгүй; `logo.png` бол зөвхөн лавлагаа). Тэмдэг нь **зузаан chevron-ы контур** — round cap/join бүхий stroke-ыг mask-аар хоосолсон: төв шугам `M 16 16 L 58 50 L 16 84`, гадна 32, дотор 21.4. Хоёр өргөнийг хамт өөрчлөх ёстой
 - Лого болон түүний градиент theme-ээс хамаардаггүй — violet → blue нь light, dark аль алин дээр уншигдана
-- Фонт: UI/body-д **Manrope**, `font-mono`-д **JetBrains Mono** (терминал блок "14 өдөрт" гэх монгол текст агуулдаг, системийн анхдагч mono-д **ө** байхгүй), зөвхөн "Provision" wordmark-д **Sora** — Sora кирилл subset-гүй тул монгол текстэд хэрэглэхгүй (ном Sora-г нэрлэсэн ч гарчигт шилжүүлж болохгүй)
-- Фонт солихдоо: **Ө (U+04E8), Ү (U+04AE) нь `cyrillic` биш `cyrillic-ext` дотор**. Мөн `cyrillic-ext` зарласан нь glyph байгаа гэсэн үг биш — Onest, Wix Madefor Text хоёр зарласан мөртлөө Ө/Ү-гүй. Subset жагсаалтад биш, жинхэнэ woff2-ын cmap-д итгэ (CLAUDE.md дээр шалгах script бий)
+- Фонт: гарчиг, hero caption-д **Geologica**, UI/body-д **Manrope**, `font-mono`-д **JetBrains Mono** (mono шошго, тоон мэдээлэлд), зөвхөн "Provision" wordmark-д **Sora** — Sora кирилл subset-гүй тул монгол текстэд хэрэглэхгүй (ном Sora-г нэрлэсэн ч гарчигт шилжүүлж болохгүй)
+- Фонт солихдоо: Монгол үсгийн preload-д `cyrillic-ext` subset-ийг зарлана; subset нэр дангаараа Ө/Ү glyph байгаа эсэхийг батлахгүй. Subset жагсаалтад биш, жинхэнэ woff2-ын cmap-д итгэ (CLAUDE.md дээр шалгах script бий)
 - Tailwind v4-ийн `@theme inline` -аар theme tokens-ыг CSS custom property-аас map хийдэг
 - Base font size 14px (`--font-size`) — px hardcode хийхгүй
 - Dark mode-ыг `layout.tsx` дээр `class="dark"`-аар анхдагчаар асаасан; Header-ийн товч сэлгэнэ (хадгалагдахгүй)
-- Hero-гийн 3D scene нь `lazy` + WebGL шалгалт + error boundary-гийн ард — дэмжигдэхгүй browser дээр чимээгүй унтарч, three.js нь эхний bundle-д ордоггүй
-- Inter-ийг `next/font`-оор ачаална — `cyrillic` subset нь Ө, Ү-г гаргана
+- Hero-ийн `scrub/useScrubHero.ts` нь `/hero/hero-scrub.mp4`-ийг fetch хийж Blob болгон scroll-той синхрончилно. Статик горимд `hero-ending.jpg`, видео алдаатай үед poster ашиглана. Фонтууд `next/font`-оор build үед татагдаж, сайтаас өөрөөс нь үйлчлэгдэнэ.
 - Prerender хийгддэг тул render дотор `Math.random()` / `Date.now()` / `localStorage` ашиглаж болохгүй (hydration алдаа өгнө)
 - `@/*` → `src/*` path alias
-- `components/ui/` дотор зөвхөн ашиглаж буй 11 shadcn primitive үлдсэн; шинээр хэрэгтэй бол `npx shadcn@latest add <name>`
-- `npm audit`-ийн 3 сэрэмжлүүлэг нь `next`-ийн дотоод `postcss` / `sharp`-аас гардаг — засах гэвэл Next-ийг 9.3.3 болгож буулгана, тиймээс хөндөхгүй
+- `components/ui/` дотор `badge`, `button`, `checkbox`, `input`, `select`, `textarea` гэсэн 6 primitive, `utils.ts` helper бий; шинээр хэрэгтэй бол `npx shadcn@latest add <name>`
+- Dependency-ийн аюулгүй байдлыг `npm audit`-аар тухайн lockfile дээр дахин шалгана. Advisory болон санал болгосон засвар өөрчлөгддөг тул хуучин тоо, downgrade зөвлөгөөг дагахгүй; upgrade хийхдээ өөрчлөлтийг хянаж, бүх шалгалтыг ажиллуулна.
 
 ## License
 
