@@ -1,3 +1,7 @@
+"use client";
+
+import { useT } from "../i18n";
+
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -22,108 +26,106 @@ interface DetailService {
   price: string;
 }
 
-const services: DetailService[] = [
-  {
-    icon: Code2,
-    short: "Web · Frontend · API",
-    title: "Веб хөгжүүлэлт",
-    description:
-      "Орчин үеийн, хурдан ба найдвартай вебсайт болон веб систем. Дизайнаас deploy хүртэл нэг багаар.",
-    points: [
-      "Responsive дизайн",
-      "SEO оновчилгоо",
-      "CMS систем",
-      "E-commerce платформ",
-    ],
-    stackLabel: "Технологиуд",
-    stack: ["React", "Next.js", "Vue.js", "Laravel"],
-    duration: "2–8 долоо хоног",
-    price: "₮500,000-с",
-  },
-  {
-    icon: Smartphone,
-    short: "iOS · Android · Cross-platform",
-    title: "Мобайл хөгжүүлэлт",
-    description:
-      "iOS болон Android платформын аппликейшн. Native-тэй эн зэрэгцэх UX, дэлгүүрт нийтлэх хүртэл дагалдана.",
-    points: [
-      "Native хөгжүүлэлт",
-      "Cross-platform",
-      "UI/UX дизайн",
-      "App Store зөвшөөрөл",
-    ],
-    stackLabel: "Технологиуд",
-    stack: ["React Native", "Flutter", "Swift", "Kotlin"],
-    duration: "4–12 долоо хоног",
-    price: "₮800,000-с",
-  },
-  {
-    icon: Settings,
-    short: "ERP · Custom модуль",
-    title: "Odoo ERP систем",
-    description:
-      "Бизнес удирдлагын цогц систем. Монгол стандартад нийцүүлсэн хэрэгжүүлэлт, шаардлагатай газарт нь custom модуль.",
-    points: [
-      "Санхүү удирдлага",
-      "Бараа материалын удирдлага",
-      "CRM систем",
-      "Хүний нөөцийн удирдлага",
-    ],
-    stackLabel: "Модулууд",
-    stack: ["Борлуулалт", "Худалдан авалт", "Агуулах", "Хүний нөөц"],
-    duration: "6–16 долоо хоног",
-    price: "₮1,200,000-с",
-  },
-];
-
-const process: { step: string; title: string; description: string }[] = [
-  {
-    step: "01",
-    title: "Хэрэгцээний судалгаа",
-    description:
-      "Таны бизнесийн хэрэгцээг сайтар судалж, шаардлагыг тодорхойлно",
-  },
-  {
-    step: "02",
-    title: "Төлөвлөлт",
-    description: "Техникийн шийдэл, дизайн болон хуваарийг боловсруулна",
-  },
-  {
-    step: "03",
-    title: "Дизайн",
-    description: "UI/UX дизайныг таны брэндэд тохируулан бэлтгэнэ",
-  },
-  {
-    step: "04",
-    title: "Хөгжүүлэлт",
-    description: "Орчин үеийн технологи ашиглан системийг хөгжүүлнэ",
-  },
-  {
-    step: "05",
-    title: "Туршилт",
-    description: "Системийн бүх функцийг нарийвчлан шалгаж туршина",
-  },
-  {
-    step: "06",
-    title: "Ашиглалтад оруулах",
-    description: "Системийг амжилттай ашиглалтад оруулж дэмжлэг үзүүлнэ",
-  },
-];
-
 // Kept in step with the landing page's About stats — the two surfaces used to
 // quote different figures for the same company.
-const stats: { number: string; label: string }[] = [
-  { number: "60+", label: "Launch хийсэн төсөл" },
-  { number: "6", label: "Full-time хөгжүүлэгч" },
-  { number: "10+", label: "Жилийн туршлага" },
-  { number: "24/7", label: "Дэмжлэгийн үйлчилгээ" },
-];
 
 /** Mono chip used for stack / module tags, matching the landing sections. */
 const chip =
   "rounded-md border-border bg-secondary/40 px-2 py-1 font-mono text-xs font-normal text-muted-foreground";
 
 export function ServicesDetail() {
+  const {
+    t: { flow: copy },
+  } = useT();
+  const services: DetailService[] = [
+    {
+      icon: Code2,
+      short: "Web · Frontend · API",
+      title: copy.webDevelopment,
+      description: copy.modernFastAndReliableWebsitesAndWeb,
+      points: [
+        copy.responsiveDesign,
+        copy.seoOptimization,
+        copy.cmsSystem,
+        copy.eCommercePlatform,
+      ],
+      stackLabel: copy.technologies,
+      stack: ["React", "Next.js", "Vue.js", "Laravel"],
+      duration: copy.twoToEightWeeks,
+      price: copy.from500000,
+    },
+    {
+      icon: Smartphone,
+      short: "iOS · Android · Cross-platform",
+      title: copy.mobileDevelopment,
+      description: copy.iosAndAndroidAppsWithANative,
+      points: [
+        copy.nativeDevelopment,
+        "Cross-platform",
+        copy.uiUxDesign,
+        copy.appStoreApproval,
+      ],
+      stackLabel: copy.technologies,
+      stack: ["React Native", "Flutter", "Swift", "Kotlin"],
+      duration: copy.fourToTwelveWeeks,
+      price: copy.from800000,
+    },
+    {
+      icon: Settings,
+      short: copy.erpCustomModules,
+      title: copy.odooErpSystem,
+      description: copy.anIntegratedBusinessManagementSystemAdaptedTo,
+      points: [
+        copy.financialManagement,
+        copy.inventoryManagement,
+        copy.crmSystem,
+        copy.humanResourcesManagement,
+      ],
+      stackLabel: copy.modules,
+      stack: [copy.sales, copy.purchasing, copy.warehouse, copy.humanResources],
+      duration: copy.sixToSixteenWeeks,
+      price: copy.from1200000,
+    },
+  ];
+  const process: { step: string; title: string; description: string }[] = [
+    {
+      step: "01",
+      title: copy.discovery,
+      description: copy.weStudyYourBusinessNeedsAndDefine,
+    },
+    {
+      step: "02",
+      title: copy.planning,
+      description: copy.weDesignTheTechnicalSolutionVisualsAnd,
+    },
+    {
+      step: "03",
+      title: copy.design,
+      description: copy.weCreateUiUxDesignsTailoredTo,
+    },
+    {
+      step: "04",
+      title: copy.development,
+      description: copy.weBuildYourSystemUsingModernTechnologies,
+    },
+    {
+      step: "05",
+      title: copy.testing,
+      description: copy.weThoroughlyTestEveryFeatureOfThe,
+    },
+    {
+      step: "06",
+      title: copy.launch,
+      description: copy.weLaunchTheSystemAndProvideOngoing,
+    },
+  ];
+  const stats: { number: string; label: string }[] = [
+    { number: "60+", label: copy.projectsLaunched },
+    { number: "6", label: copy.fullTimeDevelopers },
+    { number: "10+", label: copy.yearsOfExperience },
+    { number: "24/7", label: copy.supportService },
+  ];
+
   return (
     <>
       <section className="relative overflow-hidden border-b border-border">
@@ -144,7 +146,7 @@ export function ServicesDetail() {
           <Button asChild variant="ghost" size="sm" className="-ml-3 mb-10">
             <Link href="/">
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Нүүр хуудас
+              {copy.home}{" "}
             </Link>
           </Button>
 
@@ -153,11 +155,10 @@ export function ServicesDetail() {
               {"// Services"}
             </div>
             <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight text-balance md:text-6xl">
-              Санаанаас production хүртэл
+              {copy.fromIdeaToProduction}{" "}
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-muted-foreground text-pretty md:text-xl">
-              Танай бизнесийн дижитал шийдлийг бүрэн хангах үйлчилгээнүүд —
-              хугацаа, багц, эхлэх үнэ нь тодорхой.
+              {copy.digitalServicesForYourBusinessWithClear}{" "}
             </p>
           </div>
         </div>
@@ -226,7 +227,7 @@ export function ServicesDetail() {
                       <dl className="mt-6 border-t border-border pt-6">
                         <div className="flex items-baseline justify-between gap-4">
                           <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                            Хугацаа
+                            {copy.timeline}{" "}
                           </dt>
                           <dd className="text-sm tabular-nums text-foreground">
                             {service.duration}
@@ -234,7 +235,7 @@ export function ServicesDetail() {
                         </div>
                         <div className="mt-4 flex items-baseline justify-between gap-4">
                           <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                            Эхлэх үнэ
+                            {copy.startingPrice}{" "}
                           </dt>
                           <dd className="text-xl font-semibold tabular-nums tracking-tight text-brand">
                             {service.price}
@@ -244,7 +245,7 @@ export function ServicesDetail() {
 
                       <Button asChild className="mt-6 w-full">
                         <Link href="/calculator">
-                          Тооцоо гаргах
+                          {copy.getAnEstimate}{" "}
                           <ArrowRight className="ml-1 h-4 w-4" />
                         </Link>
                       </Button>
@@ -265,11 +266,10 @@ export function ServicesDetail() {
                 {"// Process"}
               </div>
               <h2 className="text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-                Бидний ажлын үйл явц
+                {copy.howWeWork}{" "}
               </h2>
               <p className="mt-4 text-muted-foreground text-pretty">
-                Таны төслийг амжилттай хэрэгжүүлэх 6 алхам. Алхам бүрийн төгсгөлд
-                харагдах үр дүн гарна.
+                {copy.sixStepsToDeliverYourProjectEach}{" "}
               </p>
             </div>
 
@@ -305,11 +305,10 @@ export function ServicesDetail() {
                 {"// Why us"}
               </div>
               <h2 className="text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-                Яагаад биднийг сонгох ёстой?
+                {copy.whyChooseUs}{" "}
               </h2>
               <p className="mt-4 text-muted-foreground text-pretty">
-                Богино хугацаанд ажилладаг систем хүлээлгэж өгөх, дараа нь түүнийг
-                нь тогтвортой ажиллуулах хоёрыг зэрэг хийдэг баг.
+                {copy.aTeamThatDeliversWorkingSystemsQuickly}{" "}
               </p>
             </div>
 
@@ -345,16 +344,15 @@ export function ServicesDetail() {
             />
             <div className="relative max-w-2xl">
               <h2 className="text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-                Танай төслийн талаар ярилцъя
+                {copy.letSTalkAboutYourProject}{" "}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground text-pretty">
-                Хэрэгцээндээ тохирсон шийдэл, ойролцоо төсөв, хугацааг эхний
-                уулзалтаар тодруулна.
+                {copy.inOurFirstMeetingWeWillClarify}{" "}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg" className="h-12 px-6 text-base">
                   <Link href="/#contact">
-                    Үнэгүй зөвлөгөө авах
+                    {copy.getAFreeConsultation}{" "}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>
                 </Button>
@@ -364,7 +362,7 @@ export function ServicesDetail() {
                   size="lg"
                   className="h-12 px-6 text-base"
                 >
-                  <Link href="/#portfolio">Портфолио үзэх</Link>
+                  <Link href="/#portfolio">{copy.viewPortfolio}</Link>
                 </Button>
               </div>
             </div>

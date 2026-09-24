@@ -1,13 +1,22 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useT } from "../i18n";
+import { formatCopy } from "../flow-copy";
+
+import { useId, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuote } from "../quote-context";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Textarea } from "./ui/textarea";
-import { ArrowLeft, ArrowRight, CalendarRange, Clock, Info } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarRange,
+  Clock,
+  Info,
+} from "lucide-react";
 
 const HOURLY_RATE = 88000; // төгрөг / хүн-цаг
 const MIN_DESCRIPTION = 20;
@@ -17,45 +26,6 @@ const MIN_DESCRIPTION = 20;
 // groups digits the same way on the server and in the browser.
 const group = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const tugrik = (n: number) => `₮${group(n)}`;
-
-const projectTypes = [
-  { value: "website", label: "Вэб сайт", hint: "Танилцуулга, лендинг, портал", baseHours: 40 },
-  { value: "mobile", label: "Мобайл апп", hint: "iOS, Android, cross-platform", baseHours: 80 },
-  { value: "erp", label: "Odoo ERP", hint: "Нэвтрүүлэлт, тохиргоо, модуль", baseHours: 120 },
-  { value: "custom", label: "Захиалгат шийдэл", hint: "Дотоод систем, интеграци", baseHours: 60 },
-] as const;
-
-const complexityLevels = [
-  { value: "simple", label: "Энгийн", hint: "Бэлэн загвар, цөөн дэлгэц", multiplier: 1 },
-  { value: "medium", label: "Дундаж", hint: "Захиалгат дизайн, логик", multiplier: 1.5 },
-  { value: "complex", label: "Төвөгтэй", hint: "Олон дүр, гүн интеграци", multiplier: 2.5 },
-  { value: "enterprise", label: "Энтерпрайз", hint: "Ачаалал, аудит, SLA", multiplier: 4 },
-] as const;
-
-const additionalFeatures = [
-  { id: "responsive", label: "Responsive дизайн", hours: 10 },
-  { id: "cms", label: "Контент удирдлага (CMS)", hours: 20 },
-  { id: "ecommerce", label: "Цахим худалдаа", hours: 30 },
-  { id: "api", label: "API интеграци", hours: 15 },
-  { id: "auth", label: "Хэрэглэгчийн эрхийн систем", hours: 20 },
-  { id: "admin", label: "Админ панел", hours: 25 },
-  { id: "multilang", label: "Олон хэлний дэмжлэг", hours: 15 },
-  { id: "analytics", label: "Аналитик, тайлан", hours: 10 },
-] as const;
-
-const timelines = [
-  { value: "urgent", label: "Яаралтай", hint: "1–2 долоо хоног" },
-  { value: "normal", label: "Стандарт", hint: "2–4 долоо хоног" },
-  { value: "flexible", label: "Уян хатан", hint: "4–8 долоо хоног" },
-  { value: "long", label: "Урт хугацаа", hint: "8+ долоо хоног" },
-] as const;
-
-const teamSizes = [
-  { value: "1", label: "1 хүн" },
-  { value: "2-3", label: "2–3 хүн" },
-  { value: "4-6", label: "4–6 хүн" },
-  { value: "6+", label: "6+ хүн" },
-] as const;
 
 type Option = { value: string; label: string; hint?: string };
 
@@ -71,6 +41,9 @@ function Step({
   required?: boolean;
   children: React.ReactNode;
 }) {
+  const {
+    t: { flow: copy },
+  } = useT();
   return (
     <fieldset className="border-0 p-0">
       <legend className="mb-4 flex items-center gap-3">
@@ -82,11 +55,11 @@ function Step({
         </span>
         {required ? (
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-brand">
-            заавал
+            {copy.required}{" "}
           </span>
         ) : (
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
-            сонголт
+            {copy.optional}{" "}
           </span>
         )}
       </legend>
@@ -154,6 +127,84 @@ function CardRadios({
 }
 
 export function PriceCalculator() {
+  const {
+    t: { flow: copy },
+  } = useT();
+  const projectTypes = [
+    {
+      value: "website",
+      label: copy.website,
+      hint: copy.companySitesLandingPagesPortals,
+      baseHours: 40,
+    },
+    {
+      value: "mobile",
+      label: copy.mobileApp,
+      hint: "iOS, Android, cross-platform",
+      baseHours: 80,
+    },
+    {
+      value: "erp",
+      label: "Odoo ERP",
+      hint: copy.implementationConfigurationModules,
+      baseHours: 120,
+    },
+    {
+      value: "custom",
+      label: copy.customSolution,
+      hint: copy.internalSystemsIntegrations,
+      baseHours: 60,
+    },
+  ] as const;
+  const complexityLevels = [
+    {
+      value: "simple",
+      label: copy.simple,
+      hint: copy.templatesAFewScreens,
+      multiplier: 1,
+    },
+    {
+      value: "medium",
+      label: copy.medium,
+      hint: copy.customDesignAndBusinessLogic,
+      multiplier: 1.5,
+    },
+    {
+      value: "complex",
+      label: copy.complex,
+      hint: copy.multipleRolesDeepIntegrations,
+      multiplier: 2.5,
+    },
+    {
+      value: "enterprise",
+      label: copy.enterprise,
+      hint: copy.scaleAuditSla,
+      multiplier: 4,
+    },
+  ] as const;
+  const additionalFeatures = [
+    { id: "responsive", label: copy.responsiveDesign, hours: 10 },
+    { id: "cms", label: copy.contentManagementCms, hours: 20 },
+    { id: "ecommerce", label: copy.eCommerce, hours: 30 },
+    { id: "api", label: copy.apiIntegration, hours: 15 },
+    { id: "auth", label: copy.userAccessManagement, hours: 20 },
+    { id: "admin", label: copy.adminPanel, hours: 25 },
+    { id: "multilang", label: copy.multilingualSupport, hours: 15 },
+    { id: "analytics", label: copy.analyticsAndReporting, hours: 10 },
+  ] as const;
+  const timelines = [
+    { value: "urgent", label: copy.urgent, hint: copy.oneToTwoWeeks },
+    { value: "normal", label: copy.standard, hint: copy.twoToFourWeeks },
+    { value: "flexible", label: copy.flexible, hint: copy.fourToEightWeeks },
+    { value: "long", label: copy.longTerm, hint: copy.eightPlusWeeks },
+  ] as const;
+  const teamSizes = [
+    { value: "1", label: copy.onePerson },
+    { value: "2-3", label: copy.twoToThreePeople },
+    { value: "4-6", label: copy.fourToSixPeople },
+    { value: "6+", label: copy.sixPlusPeople },
+  ] as const;
+
   const router = useRouter();
   const { setQuote } = useQuote();
   const uid = useId();
@@ -169,9 +220,11 @@ export function PriceCalculator() {
   const [attempted, setAttempted] = useState(false);
 
   const selectedProject = projectTypes.find((p) => p.value === projectType);
-  const selectedComplexity = complexityLevels.find((c) => c.value === complexity);
+  const selectedComplexity = complexityLevels.find(
+    (c) => c.value === complexity,
+  );
 
-  const estimate = useMemo(() => {
+  const estimate = (() => {
     if (!selectedProject || !selectedComplexity) return null;
     const baseHours = selectedProject.baseHours * selectedComplexity.multiplier;
     const featureRows = features
@@ -186,17 +239,17 @@ export function PriceCalculator() {
       price: hours * HOURLY_RATE,
       weeks: Math.ceil(hours / 40),
     };
-  }, [selectedProject, selectedComplexity, features]);
+  })();
 
   // The submit button stays enabled and tells the user what is outstanding.
   // A disabled button with no explanation is a dead end: the form looks
   // finished and the only feedback is that nothing happens.
   const missing = [
-    !projectType && { field: "type", label: "төслийн төрөл" },
-    !complexity && { field: "complexity", label: "төвөгтэй байдал" },
+    !projectType && { field: "type", label: copy.projectType },
+    !complexity && { field: "complexity", label: copy.complexity },
     description.trim().length < MIN_DESCRIPTION && {
       field: "description",
-      label: "тайлбар",
+      label: copy.description,
     },
   ].filter((m): m is { field: string; label: string } => Boolean(m));
 
@@ -223,9 +276,9 @@ export function PriceCalculator() {
     }
 
     setQuote({
-      projectType: selectedProject?.label,
-      complexity: selectedComplexity?.label,
-      features: estimate.featureRows.map((f) => f.label),
+      projectType: selectedProject?.value,
+      complexity: selectedComplexity?.value,
+      features: estimate.featureRows.map((f) => f.id),
       timeline,
       teamSize,
       description,
@@ -242,16 +295,16 @@ export function PriceCalculator() {
   const summaryRows = estimate
     ? [
         {
-          label: `${selectedProject?.label} · суурь`,
-          value: `${selectedProject?.baseHours} цаг`,
+          label: formatCopy(copy.valueBase, selectedProject?.label),
+          value: formatCopy(copy.valueHours, selectedProject?.baseHours),
         },
         {
           label: `${selectedComplexity?.label} · ×${selectedComplexity?.multiplier}`,
-          value: `${estimate.baseHours} цаг`,
+          value: formatCopy(copy.valueHours, estimate.baseHours),
         },
         ...estimate.featureRows.map((f) => ({
           label: f.label,
-          value: `+${f.hours} цаг`,
+          value: formatCopy(copy.valueHours100, f.hours),
         })),
       ]
     : [];
@@ -263,29 +316,29 @@ export function PriceCalculator() {
         className="inline-flex items-center gap-2 rounded-full font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft strokeWidth={1.5} className="h-3.5 w-3.5" />
-        Нүүр хуудас
+        {copy.home}{" "}
       </Link>
 
       <header className="mt-6 max-w-2xl">
         <h1 className="font-display text-[clamp(2rem,4.5vw,3rem)] font-semibold leading-[1.08] tracking-display text-foreground">
-          Төслийн үнийн тооцоолуур
+          {copy.projectCostCalculator}{" "}
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Гурван талбар бөглөхөд л ойролцоо тооцоо гарна. Тооцоо нь{" "}
-          {tugrik(HOURLY_RATE)}/хүн-цаг тарифаар бодогдоно.
+          {copy.fillInThreeFieldsForAnEstimate} {tugrik(HOURLY_RATE)}
+          {copy.perPersonHour}{" "}
         </p>
       </header>
 
       <div className="mt-12 grid gap-10 lg:grid-cols-5 lg:gap-12">
         <div className="space-y-12 lg:col-span-3">
           <div id={`${uid}-type`} className="scroll-mt-28">
-            <Step index={1} title="Төслийн төрөл" required>
+            <Step index={1} title={copy.projectTypeLabel} required>
               <CardRadios
                 name={`${uid}-project-type`}
                 options={projectTypes.map((p) => ({
                   value: p.value,
                   label: p.label,
-                  hint: `${p.hint} · ${p.baseHours} цаг`,
+                  hint: formatCopy(copy.valueValueHours, p.hint, p.baseHours),
                 }))}
                 value={projectType}
                 onChange={setProjectType}
@@ -295,7 +348,7 @@ export function PriceCalculator() {
           </div>
 
           <div id={`${uid}-complexity`} className="scroll-mt-28">
-            <Step index={2} title="Төвөгтэй байдал" required>
+            <Step index={2} title={copy.complexity106} required>
               <CardRadios
                 name={`${uid}-complexity`}
                 options={complexityLevels.map((c) => ({
@@ -310,7 +363,7 @@ export function PriceCalculator() {
             </Step>
           </div>
 
-          <Step index={3} title="Нэмэлт функцууд">
+          <Step index={3} title={copy.additionalFeatures}>
             {/* The whole row is the label, so the hit target is the card
                 rather than the 16px box — this list is mostly used on a
                 phone. */}
@@ -338,7 +391,8 @@ export function PriceCalculator() {
                       {feature.label}
                     </span>
                     <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
-                      +{feature.hours}ц
+                      +{feature.hours}
+                      {copy.h}{" "}
                     </span>
                   </label>
                 );
@@ -346,7 +400,7 @@ export function PriceCalculator() {
             </div>
           </Step>
 
-          <Step index={4} title="Хүссэн хугацаа">
+          <Step index={4} title={copy.preferredTimeline}>
             <CardRadios
               name={`${uid}-timeline`}
               options={timelines}
@@ -355,7 +409,7 @@ export function PriceCalculator() {
             />
           </Step>
 
-          <Step index={5} title="Багийн хэмжээ">
+          <Step index={5} title={copy.teamSize}>
             <CardRadios
               name={`${uid}-team`}
               options={teamSizes}
@@ -366,12 +420,12 @@ export function PriceCalculator() {
           </Step>
 
           <div id={`${uid}-description`} className="scroll-mt-28">
-            <Step index={6} title="Төслийн тайлбар" required>
+            <Step index={6} title={copy.projectDescription} required>
               <Textarea
                 id={`${uid}-description-input`}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Юу шийдэх гэж байгаа, хэн ашиглах, аль системүүдтэй холбогдох вэ?"
+                placeholder={copy.whatProblemAreYouSolvingWhoWill}
                 rows={5}
                 aria-invalid={descriptionShort}
                 aria-describedby={`${uid}-description-help`}
@@ -379,12 +433,22 @@ export function PriceCalculator() {
               <p
                 id={`${uid}-description-help`}
                 className={`mt-2 font-mono text-[11px] ${
-                  descriptionShort ? "text-destructive" : "text-muted-foreground"
+                  descriptionShort
+                    ? "text-destructive"
+                    : "text-muted-foreground"
                 }`}
               >
                 {descriptionShort
-                  ? `Дор хаяж ${MIN_DESCRIPTION} тэмдэгт бичнэ үү — одоо ${description.trim().length}.`
-                  : `${description.trim().length}/${MIN_DESCRIPTION} тэмдэгт`}
+                  ? formatCopy(
+                      copy.pleaseEnterAtLeastValueCharactersCurrently,
+                      MIN_DESCRIPTION,
+                      description.trim().length,
+                    )
+                  : formatCopy(
+                      copy.valueValueCharacters,
+                      description.trim().length,
+                      MIN_DESCRIPTION,
+                    )}
               </p>
             </Step>
           </div>
@@ -396,7 +460,7 @@ export function PriceCalculator() {
           <div className="lg:sticky lg:top-28">
             <div className="rounded-2xl border border-border bg-card/70 p-6 elev-1">
               <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                Урьдчилсан тооцоо
+                {copy.preliminaryEstimate}{" "}
               </div>
 
               <div aria-live="polite" aria-atomic="true">
@@ -409,7 +473,7 @@ export function PriceCalculator() {
                       <div className="rounded-xl border border-border bg-background/60 px-3 py-2.5">
                         <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                           <Clock strokeWidth={1.5} className="h-3 w-3" />
-                          Хүн-цаг
+                          {copy.personHours}{" "}
                         </div>
                         <div className="mt-1 text-lg tabular-nums text-foreground">
                           {group(estimate.hours)}
@@ -417,11 +481,14 @@ export function PriceCalculator() {
                       </div>
                       <div className="rounded-xl border border-border bg-background/60 px-3 py-2.5">
                         <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                          <CalendarRange strokeWidth={1.5} className="h-3 w-3" />
-                          Хугацаа
+                          <CalendarRange
+                            strokeWidth={1.5}
+                            className="h-3 w-3"
+                          />
+                          {copy.timeline}{" "}
                         </div>
                         <div className="mt-1 text-lg tabular-nums text-foreground">
-                          ~{estimate.weeks} 7 хоног
+                          ~{estimate.weeks} {copy.weeks}{" "}
                         </div>
                       </div>
                     </div>
@@ -444,7 +511,8 @@ export function PriceCalculator() {
                       ))}
                       <div className="flex items-baseline justify-between gap-3 border-t border-border pt-2 text-xs">
                         <dt className="text-muted-foreground">
-                          {group(estimate.hours)} цаг × {tugrik(HOURLY_RATE)}
+                          {group(estimate.hours)} {copy.hours}{" "}
+                          {tugrik(HOURLY_RATE)}
                         </dt>
                         <dd className="shrink-0 font-mono tabular-nums text-foreground">
                           {tugrik(estimate.price)}
@@ -454,29 +522,30 @@ export function PriceCalculator() {
                   </>
                 ) : (
                   <p className="mt-4 text-sm text-muted-foreground">
-                    Төслийн төрөл, төвөгтэй байдлыг сонгонгуут тооцоо энд гарч
-                    ирнэ.
+                    {copy.selectAProjectTypeAndComplexityTo}{" "}
                   </p>
                 )}
               </div>
 
               <p className="mt-5 flex items-start gap-2 text-[11px] leading-relaxed text-muted-foreground">
-                <Info strokeWidth={1.5} className="mt-px h-3.5 w-3.5 shrink-0" />
-                Энэ бол чиг баримжаа авах тооцоо. Эцсийн үнэ шаардлага
-                тодорхойлсны дараа гэрээнд тусна.
+                <Info
+                  strokeWidth={1.5}
+                  className="mt-px h-3.5 w-3.5 shrink-0"
+                />
+                {copy.thisIsAnIndicativeEstimateTheFinal}{" "}
               </p>
 
               {/* Below `lg` the sticky bar owns the call to action, so this
                   one would be a second submit button stacked on the first. */}
               <div className="hidden lg:block">
                 <Button type="submit" className="mt-6 h-11 w-full">
-                  Үнийн санал авах
+                  {copy.requestAQuote}{" "}
                   <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
                 </Button>
 
                 {attempted && missing.length > 0 ? (
                   <p role="alert" className="mt-3 text-xs text-destructive">
-                    Дутуу байна: {missing.map((m) => m.label).join(", ")}.
+                    {copy.missing} {missing.map((m) => m.label).join(", ")}.
                   </p>
                 ) : null}
               </div>
@@ -492,21 +561,20 @@ export function PriceCalculator() {
       <div className="sticky bottom-0 z-30 -mx-4 mt-10 border-t border-border bg-background/85 px-4 backdrop-blur-xl lg:hidden">
         {attempted && missing.length > 0 ? (
           <p role="alert" className="pt-2.5 text-xs text-destructive">
-            Дутуу байна: {missing.map((m) => m.label).join(", ")}.
+            {copy.missing} {missing.map((m) => m.label).join(", ")}.
           </p>
         ) : null}
         <div className="flex items-center gap-3 py-3">
           <div className="min-w-0 flex-1">
             <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Урьдчилсан тооцоо
+              {copy.preliminaryEstimate}{" "}
             </div>
             <div className="truncate text-lg font-semibold tabular-nums text-foreground">
               {estimate ? tugrik(estimate.price) : "—"}
             </div>
           </div>
           <Button type="submit" className="h-11 shrink-0 px-5">
-            Үргэлжлүүлэх
-            <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+            {copy.continue} <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
           </Button>
         </div>
       </div>

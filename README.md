@@ -30,7 +30,7 @@ App Router дээрх 4 маршрут, бүгд статикаар prerender х
 
 Backend болон хүсэлтийн хадгалалт байхгүй. Contact 1.2 секунд, QuoteRequest 1.4 секунд хүлээгээд зөвхөн дэлгэц дээр амжилтын төлөв харуулдаг; мэдээлэл сервер, имэйл рүү илгээгдэхгүй. QuoteRequest-ийн `REQ-…` дугаар browser-т үүсдэг. Автоматаар өөр хуудас руу шилжихгүй: хэрэглэгч нүүр хуудас руу буцах эсвэл шинэ хүсэлт эхлүүлэх үйлдлийг сонгоно; Contact дээр дахин илгээх товч байна.
 
-Хэлийг `LanguageProvider` (`src/app/i18n.tsx`)-аар удирддаг, localStorage-д хадгална. Landing-ийн секцүүд `useT()`-ээр орчуулагддаг; ServicesDetail / PriceCalculator / QuoteRequest / Chatbot нь монгол текстээ шууд агуулсан хэвээр.
+Хэлийг `LanguageProvider` (`src/app/i18n.tsx`)-аар удирддаг, localStorage-д хадгална. Landing болон ServicesDetail / PriceCalculator / QuoteRequest / Chatbot бүгд `useT()`-ээр орчуулагдана. Дэд хуудсуудын текст `src/app/flow-copy.ts`-д бий; сонголтын утгууд хэлнээс үл хамаарах ID ашиглана.
 
 ## Хөгжүүлэлт
 
@@ -59,7 +59,7 @@ npm run test:watch # тестийг өөрчлөлт бүрд ажиллуула
 
 1. GA4 → Admin → Data streams → Web хэсгээс `https://provision.mn` stream-ийн **Measurement ID** (`G-…`)-г авна.
 2. VPS build-д: GitHub repository → Settings → Secrets and variables → Actions → **Variables** дотор `NEXT_PUBLIC_GA_MEASUREMENT_ID` нэмнэ. Энэ нь public ID; secret биш. Workflow Docker build argument-аар дамжуулна. PR build-д ID дамжуулахгүй.
-3. Локал production build-д `.env.example`-ийг `.env.local` руу хуулж ID-г бөглөнө. Vercel ашиглавал зөвхөн Production environment-д энэ хувьсагчийг тохируулна; Preview-д хоосон үлдээнэ.
+3. Локал production build-д `.env.example`-ийг `.env.local` руу хуулж ID-г бөглөнө.
 4. ID нь **build үед** HTML-д ордог: өөрчилсний дараа шинэ build/deploy шаардлагатай. Контейнерийн runtime env-г өөрчлөх нь хангалтгүй.
 5. GA4 Web stream → Enhanced measurement → Page views → Advanced settings дахь **Page changes based on browser history events**-ийг асаана. App Router шилжилтийг үүгээр хэмжинэ; давхар custom `page_view` илгээхгүй.
 6. Deploy-ийн дараа Analytics Realtime/DebugView дээр нүүр → `/services` → `/calculator` → `/quote`, browser back/forward шилжилтийг шалгана. Initial load болон шилжилт бүр нэг `page_view` үүсэх ёстой. Зар хаагч хэмжилтийг зогсоож болно.
@@ -70,13 +70,13 @@ npm run test:watch # тестийг өөрчлөлт бүрд ажиллуула
 
 ## Deployment
 
-Гурван хэсэгтэй:
+GHCR image болон VPS deploy гэсэн хоёр хэсэгтэй:
 
 **VPS / provision.mn.** `main`-ийн quality → Docker build/push амжилттай болсны дараа Actions нь `deploy sha-<short>` командыг SSH-ээр ажиллуулна. `deploy/deploy.sh` контейнер healthy болсныг шалгаж, workflow гаднаас HTTPS 200 хариу шалгана. `v*` тэг нь image нийтэлнэ, VPS deploy эхлүүлэхгүй.
 
 `deploy/docker-compose.yml` нь shared `provision` network, Traefik router ашиглана; host port нээхгүй. VPS дээрх compose болон deploy script-ийн хуулбарыг CI шинэчилдэггүй. `VPS_SSH_KEY` нь зөвхөн `check` болон `deploy [<tag>]` ажиллуулах forced-command түлхүүр. Дэлгэрэнгүй ажиллагааг [CLAUDE.md](CLAUDE.md#deployment)-ээс үзнэ үү.
 
-**Vercel.** GitHub integration нь `main` дээр production, branch/PR дээр preview deploy оролддог. `provision.mn`-ийн production traffic VPS рүү очно. Vercel-ийн шалгалт болон VPS deploy-ийн үр дүн тусдаа.
+**Vercel автомат deploy унтарсан.** `vercel.json` дахь `git.deploymentEnabled: false` нь Git push/PR-ээс production болон preview deploy үүсгэхийг зогсооно. Энэ нь хуучин deployment-ууд болон Vercel project-ийг устгахгүй. [Vercel тохиргооны заавар](https://vercel.com/docs/project-configuration/git-configuration).
 
 **GitHub Packages (ghcr.io).** `.github/workflows/docker.yml` нь `main` болон `v*` тэг дээр image build хийж түлхэнэ. Pull request дээр зөвхөн build хийж, push хийхгүй (шалгалт). Registry publish нь `GITHUB_TOKEN` ашиглана; VPS deploy нь тусдаа `VPS_SSH_KEY` шаарддаг. Private image татахын өмнө тухайн хэрэглэгч GHCR-д нэвтэрсэн байна.
 
@@ -89,7 +89,7 @@ docker run -p 3000:3000 ghcr.io/provisionmn/provisionmn:latest
 
 Image нь `node:22-alpine` дээрх Next standalone output, non-root `nextjs` хэрэглэгчээр ажиллана, `/` дээр healthcheck-тэй.
 
-> `output: "standalone"` нь `DOCKER_BUILD` env-ээр хаалттай бөгөөд зөвхөн Dockerfile түүнийг тавьдаг. Тиймээс локал болон Vercel дээрх `npm run build` урьдын хэвээр ажиллана.
+> `output: "standalone"` нь `DOCKER_BUILD` env-ээр хаалттай бөгөөд зөвхөн Dockerfile түүнийг тавьдаг. Тиймээс локал `npm run build` урьдын хэвээр ажиллана.
 
 ## Notable details
 

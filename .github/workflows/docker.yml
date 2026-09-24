@@ -13,8 +13,8 @@ name: Build & Push Docker Image
 # Build-д нэмэлт secret шаардлагагүй: ghcr.io-д GITHUB_TOKEN-оор нэвтэрнэ.
 # Deploy-д ганц secret хэрэгтэй: VPS_SSH_KEY.
 #
-# Анхаар: энэ нь Vercel deploy-г ОРЛОХГҮЙ. Vercel хэвээрээ main-аас build
-# хийсээр байна; харин provision.mn домэйнд VPS дээрх энэ image хариулна.
+# Vercel автомат Git deploy vercel.json-д унтарсан.
+# provision.mn домэйнд VPS дээрх энэ image хариулна.
 
 on:
   push:

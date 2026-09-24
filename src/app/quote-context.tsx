@@ -8,6 +8,7 @@ import { createContext, useContext, useState, type ReactNode } from "react";
  * prefill and renders a blank form, which is the same behaviour the old
  * single-page version had on refresh.
  */
+// Option fields carry stable IDs, never translated display labels.
 export interface QuoteData {
   projectType?: string;
   complexity?: string;

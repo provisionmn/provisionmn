@@ -1,5 +1,8 @@
 "use client";
 
+import { useT } from "../i18n";
+import { formatCopy, type FlowCopy } from "../flow-copy";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuote } from "../quote-context";
@@ -9,7 +12,7 @@ import { MessageCircle, Send, Sparkles, X } from "lucide-react";
 
 interface Message {
   id: number;
-  text: string;
+  text: string | ((copy: FlowCopy) => string);
   sender: "user" | "bot";
   options?: string[];
 }
@@ -22,79 +25,74 @@ interface ProjectData {
 
 type ChatState = "greeting" | "details" | "teamSize" | "quote";
 
-const PROJECT_TYPES = ["Вэб сайт", "Мобайл апп", "Odoo ERP", "Бусад"];
-const QUOTE_CTA = "Дэлгэрэнгүй үнийн санал авах";
-const RESTART = "Өөр төсөл тооцуулах";
-
-const GREETING: Message = {
-  id: 0,
-  sender: "bot",
-  text: "Сайн байна уу! Би Provision.mn-ийн туслах байна. Төслийнхөө талаар хэдэн зүйл асуугаад урьдчилсан тооцоо гаргаж өгье. Та ямар төрлийн төсөл хийх гэж байна?",
-  options: PROJECT_TYPES,
-};
-
 const group = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-const detailOptions = (projectType: string) => {
-  switch (projectType) {
-    case "Вэб сайт":
-      return [
-        "Энгийн танилцуулах сайт",
-        "E-commerce дэлгүүр",
-        "Блог, мэдээний сайт",
-        "Захиалгат функц",
-      ];
-    case "Мобайл апп":
-      return ["iOS апп", "Android апп", "Cross-platform", "Захиалгат функц"];
-    case "Odoo ERP":
-      return ["Борлуулалт", "Нярав", "Санхүү", "Хүний нөөц", "Бүгд"];
-    default:
-      return undefined;
-  }
-};
-
-const TEAM_OPTIONS = [
-  "1 хүн (фрийлансер)",
-  "2-3 хүн (жижиг баг)",
-  "4-6 хүн (дундаж баг)",
-  "6+ хүн (том баг)",
-];
-
-function calculateEstimate(data: ProjectData) {
-  let basePrice = 600000;
-  let weeks = 4;
-
-  switch (data.projectType) {
-    case "Вэб сайт":
-      basePrice = 800000;
-      weeks = 3;
-      break;
-    case "Мобайл апп":
-      basePrice = 1200000;
-      weeks = 6;
-      break;
-    case "Odoo ERP":
-      basePrice = 2000000;
-      weeks = 12;
-      break;
-  }
-
-  const team = data.teamSize ?? "";
-  const multiplier = team.includes("1 хүн")
-    ? 1
-    : team.includes("2-3")
-      ? 1.5
-      : team.includes("4-6")
-        ? 2
-        : 2.5;
-
-  return {
-    price: Math.round(basePrice * multiplier),
-    weeks: Math.round(weeks * multiplier * 0.8),
-  };
-}
-
 export function Chatbot() {
+  const {
+    t: { flow: copy },
+  } = useT();
+  const PROJECT_TYPES = ["website", "mobile", "erp", "custom"];
+  const QUOTE_CTA = "quote";
+  const RESTART = "restart";
+  const optionKeys: Record<string, keyof FlowCopy> = {
+    website: "website",
+    mobile: "mobileApp",
+    custom: "other",
+    quote: "requestADetailedQuote",
+    restart: "estimateAnotherProject",
+    "1": "soloFreelancer",
+    "2-3": "smallTeam",
+    "4-6": "mediumTeam",
+    "6+": "largeTeam",
+  };
+  const optionLabel = (value: string, words: FlowCopy) =>
+    value === "erp"
+      ? "Odoo ERP"
+      : value === "cross-platform"
+        ? "Cross-platform"
+        : (words[optionKeys[value] ?? (value as keyof FlowCopy)] ?? value);
+  const GREETING: Message = {
+    id: 0,
+    sender: "bot",
+    text: (words) => words.helloIMTheProvisionMnAssistant,
+    options: PROJECT_TYPES,
+  };
+  const detailOptions = (type: string) => {
+    switch (type) {
+      case "website":
+        return [
+          "simpleCompanyWebsite",
+          "eCommerceStore",
+          "blogOrNewsSite",
+          "customFeatures",
+        ];
+      case "mobile":
+        return ["iosApp", "androidApp", "cross-platform", "customFeatures"];
+      case "erp":
+        return ["sales", "inventory", "finance", "humanResources", "all"];
+      default:
+        return undefined;
+    }
+  };
+  const TEAM_OPTIONS = ["1", "2-3", "4-6", "6+"];
+  function calculateEstimate(data: ProjectData) {
+    const [basePrice, weeks] =
+      data.projectType === "website"
+        ? [800000, 3]
+        : data.projectType === "mobile"
+          ? [1200000, 6]
+          : data.projectType === "erp"
+            ? [2000000, 12]
+            : [600000, 4];
+    const team = data.teamSize ?? "";
+    const multiplier =
+      team === "1" ? 1 : team === "2-3" ? 1.5 : team === "4-6" ? 2 : 2.5;
+    return {
+      price: Math.round(basePrice * multiplier),
+      weeks: Math.round(weeks * multiplier * 0.8),
+    };
+  }
+
   const router = useRouter();
   const { setQuote } = useQuote();
 
@@ -146,7 +144,7 @@ export function Chatbot() {
 
   /** Bot replies land after a short beat, with a visible typing indicator —
    *  a silent one-second pause reads as a broken button. */
-  const reply = (text: string, options?: string[]) => {
+  const reply = (text: Message["text"], options?: string[]) => {
     setIsTyping(true);
     const timer = setTimeout(() => {
       setIsTyping(false);
@@ -163,12 +161,19 @@ export function Chatbot() {
         // with no reply at all.
         const matched =
           PROJECT_TYPES.find(
-            (type) => type.toLowerCase() === input.trim().toLowerCase(),
-          ) ?? "Бусад";
+            (type) =>
+              type === input ||
+              optionLabel(type, copy).toLowerCase() ===
+                input.trim().toLowerCase(),
+          ) ?? "custom";
         setProjectData({ projectType: matched });
         setChatState("details");
         reply(
-          `${matched} — ойлголоо. Ямар функцууд хэрэгтэй вэ? Товчоор бичээд ч болно.`,
+          (words) =>
+            formatCopy(
+              words.valueUnderstoodWhichFeaturesDoYouNeed,
+              optionLabel(matched, words),
+            ),
           detailOptions(matched),
         );
         break;
@@ -176,33 +181,40 @@ export function Chatbot() {
       case "details":
         setProjectData((prev) => ({ ...prev, details: input }));
         setChatState("teamSize");
-        reply(
-          "Баярлалаа. Хэр хэмжээний баг хэрэгтэй гэж бодож байна?",
-          TEAM_OPTIONS,
-        );
+        reply((words) => words.thankYouWhatTeamSizeDoYou, TEAM_OPTIONS);
         break;
       case "teamSize": {
-        const data = { ...projectData, teamSize: input };
+        const teamSize =
+          TEAM_OPTIONS.find(
+            (team) =>
+              team === input ||
+              optionLabel(team, copy).toLowerCase() === input.toLowerCase(),
+          ) ?? input;
+        const data = { ...projectData, teamSize };
         const estimate = calculateEstimate(data);
         setProjectData(data);
         setChatState("quote");
         reply(
-          [
-            "Урьдчилсан тооцоо:",
-            `• Төрөл — ${data.projectType}`,
-            `• Хугацаа — ойролцоогоор ${estimate.weeks} долоо хоног`,
-            `• Баг — ${input}`,
-            `• Үнэ — ₮${group(estimate.price)}`,
-            "",
-            "Энэ бол чиг баримжаа авах тооцоо. Албан ёсны санал авах уу?",
-          ].join("\n"),
+          (words) =>
+            [
+              words.estimateHeading,
+              formatCopy(
+                words.typeValue,
+                optionLabel(data.projectType ?? "custom", words),
+              ),
+              formatCopy(words.timelineAboutValueWeeks, estimate.weeks),
+              formatCopy(words.teamValue, optionLabel(teamSize, words)),
+              formatCopy(words.priceValue, group(estimate.price)),
+              "",
+              words.thisIsAnIndicativeEstimateWouldYou,
+            ].join("\n"),
           [QUOTE_CTA, RESTART],
         );
         break;
       }
       case "quote":
         reply(
-          "Дэлгэрэнгүй санал авах эсвэл дахин тооцоолохыг сонгоно уу.",
+          (words) => words.chooseADetailedQuoteOrStartAnother,
           [QUOTE_CTA, RESTART],
         );
         break;
@@ -237,8 +249,8 @@ export function Chatbot() {
       restart();
       return;
     }
-    push({ text: option, sender: "user" });
-    advance(option);
+    push({ text: (words) => optionLabel(option, words), sender: "user" });
+    advance(chatState === "details" ? optionLabel(option, copy) : option);
   };
 
   const send = () => {
@@ -254,7 +266,7 @@ export function Chatbot() {
       <Button
         ref={launcherRef}
         onClick={() => setIsOpen(true)}
-        aria-label="Туслахтай ярих"
+        aria-label={copy.chatWithTheAssistant}
         className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full elev-3"
       >
         <MessageCircle strokeWidth={1.5} className="h-6 w-6" />
@@ -268,7 +280,7 @@ export function Chatbot() {
     <div
       role="dialog"
       aria-modal="false"
-      aria-label="Provision туслах"
+      aria-label={copy.provisionAssistant}
       className="fixed inset-x-4 bottom-4 z-50 flex max-h-[min(600px,calc(100dvh-2rem))] flex-col overflow-hidden rounded-2xl border border-border bg-card elev-3 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[380px]"
     >
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -278,10 +290,10 @@ export function Chatbot() {
           </span>
           <div>
             <div className="text-sm font-medium text-foreground">
-              Provision туслах
+              {copy.provisionAssistant}{" "}
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Урьдчилсан тооцоо
+              {copy.preliminaryEstimate}{" "}
             </div>
           </div>
         </div>
@@ -289,7 +301,7 @@ export function Chatbot() {
           variant="ghost"
           size="icon"
           onClick={close}
-          aria-label="Хаах"
+          aria-label={copy.close}
           className="rounded-full"
         >
           <X strokeWidth={1.5} className="h-4 w-4" />
@@ -314,10 +326,14 @@ export function Chatbot() {
                     : "rounded-bl-sm bg-secondary text-foreground"
                 }`}
               >
-                {message.text}
+                {typeof message.text === "function"
+                  ? message.text(copy)
+                  : message.text}
               </p>
             </div>
-            {message.options ? (
+            {message.options &&
+            message.id === messages.at(-1)?.id &&
+            !isTyping ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {message.options.map((option) => (
                   <button
@@ -326,7 +342,7 @@ export function Chatbot() {
                     onClick={() => handleOption(option)}
                     className="rounded-full border border-border px-3 py-1.5 text-left text-xs text-foreground transition-[background-color,border-color,transform] duration-[160ms] ease-out-strong hover:border-primary/50 hover:bg-secondary active:scale-[0.97]"
                   >
-                    {option}
+                    {optionLabel(option, copy)}
                   </button>
                 ))}
               </div>
@@ -337,7 +353,7 @@ export function Chatbot() {
         {isTyping ? (
           <div className="flex justify-start">
             <span className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-secondary px-3.5 py-3">
-              <span className="sr-only">Бичиж байна…</span>
+              <span className="sr-only">{copy.typing}</span>
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
@@ -363,8 +379,8 @@ export function Chatbot() {
           ref={inputRef}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Мессеж бичих…"
-          aria-label="Мессеж"
+          placeholder={copy.writeAMessage}
+          aria-label={copy.message}
           autoComplete="off"
           className="flex-1"
         />
@@ -372,7 +388,7 @@ export function Chatbot() {
           type="submit"
           size="icon"
           disabled={!draft.trim() || isTyping}
-          aria-label="Илгээх"
+          aria-label={copy.send}
         >
           <Send strokeWidth={1.5} className="h-4 w-4" />
         </Button>

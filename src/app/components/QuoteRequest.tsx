@@ -1,5 +1,8 @@
 "use client";
 
+import { useT } from "../i18n";
+import { formatCopy } from "../flow-copy";
+
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -32,35 +35,8 @@ const MIN_DESCRIPTION = 20;
 
 const group = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-const projectTypeOptions = [
-  { value: "Вэб сайт", label: "Вэб сайт хөгжүүлэлт" },
-  { value: "Мобайл апп", label: "Мобайл апп хөгжүүлэлт" },
-  { value: "Odoo ERP", label: "Odoo ERP систем" },
-  { value: "Захиалгат шийдэл", label: "Захиалгат шийдэл" },
-];
-
-const budgetOptions = [
-  { value: "500000-1000000", label: "₮500,000 – ₮1,000,000" },
-  { value: "1000000-2000000", label: "₮1,000,000 – ₮2,000,000" },
-  { value: "2000000-5000000", label: "₮2,000,000 – ₮5,000,000" },
-  { value: "5000000+", label: "₮5,000,000-с дээш" },
-  { value: "discuss", label: "Ярилцаж тохирно" },
-];
-
-const timelineOptions = [
-  { value: "urgent", label: "Яаралтай (1–2 долоо хоног)" },
-  { value: "normal", label: "Стандарт (2–4 долоо хоног)" },
-  { value: "flexible", label: "Уян хатан (4–8 долоо хоног)" },
-  { value: "long", label: "Урт хугацаа (8+ долоо хоног)" },
-];
-
 type Field =
-  | "name"
-  | "email"
-  | "phone"
-  | "projectType"
-  | "description"
-  | "captcha";
+  "name" | "email" | "phone" | "projectType" | "description" | "captcha";
 
 interface QuoteFormData extends QuoteData {
   name: string;
@@ -86,6 +62,29 @@ function makeCaptcha() {
 }
 
 export function QuoteRequest() {
+  const {
+    t: { flow: copy },
+  } = useT();
+  const projectTypeOptions = [
+    { value: "website", label: copy.websiteDevelopment },
+    { value: "mobile", label: copy.mobileAppDevelopment },
+    { value: "erp", label: copy.odooErpSystem },
+    { value: "custom", label: copy.customSolution },
+  ];
+  const budgetOptions = [
+    { value: "500000-1000000", label: "₮500,000 – ₮1,000,000" },
+    { value: "1000000-2000000", label: "₮1,000,000 – ₮2,000,000" },
+    { value: "2000000-5000000", label: "₮2,000,000 – ₮5,000,000" },
+    { value: "5000000+", label: copy.over5000000 },
+    { value: "discuss", label: copy.letSDiscuss },
+  ];
+  const timelineOptions = [
+    { value: "urgent", label: copy.urgent12Weeks },
+    { value: "normal", label: copy.standard24Weeks },
+    { value: "flexible", label: copy.flexible48Weeks },
+    { value: "long", label: copy.longTerm8Weeks },
+  ];
+
   const router = useRouter();
   const uid = useId();
   const { quote: initialData, clearQuote } = useQuote();
@@ -104,7 +103,9 @@ export function QuoteRequest() {
   };
 
   const [formData, setFormData] = useState<QuoteFormData>(initialForm);
-  const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
+  const [invalidFields, setErrors] = useState<Partial<Record<Field, string>>>(
+    {},
+  );
   const [captcha, setCaptcha] = useState({ question: "", answer: "" });
   const [captchaInput, setCaptchaInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,16 +133,19 @@ export function QuoteRequest() {
 
   const validate = (values: QuoteFormData, captchaValue: string) => {
     const next: Partial<Record<Field, string>> = {};
-    if (!values.name.trim()) next.name = "Нэрээ бичнэ үү.";
+    if (!values.name.trim()) next.name = copy.pleaseEnterYourName;
     if (!EMAIL.test(values.email.trim()))
-      next.email = "Хүчинтэй имэйл хаяг оруулна уу.";
+      next.email = copy.pleaseEnterAValidEmailAddress;
     if (!PHONE.test(values.phone.trim()))
-      next.phone = "Холбогдох утасны дугаараа оруулна уу.";
-    if (!values.projectType) next.projectType = "Төслийн төрлөө сонгоно уу.";
+      next.phone = copy.pleaseEnterYourPhoneNumber;
+    if (!values.projectType) next.projectType = copy.pleaseSelectAProjectType;
     if (values.description.trim().length < MIN_DESCRIPTION)
-      next.description = `Төслөө дор хаяж ${MIN_DESCRIPTION} тэмдэгтээр тайлбарлана уу.`;
+      next.description = formatCopy(
+        copy.pleaseDescribeYourProjectInAtLeast,
+        MIN_DESCRIPTION,
+      );
     if (captchaValue.trim() !== captcha.answer)
-      next.captcha = "Хариу таарахгүй байна.";
+      next.captcha = copy.theAnswerDoesNotMatch;
     return next;
   };
 
@@ -209,6 +213,14 @@ export function QuoteRequest() {
     }
   };
 
+  const currentErrors = validate(formData, captchaInput);
+  const errors = Object.fromEntries(
+    Object.keys(invalidFields).map((field) => [
+      field,
+      currentErrors[field as Field],
+    ]),
+  ) as Partial<Record<Field, string>>;
+
   const error = (field: Field) =>
     errors[field] ? (
       <p
@@ -246,18 +258,18 @@ export function QuoteRequest() {
           <CheckCircle strokeWidth={1.5} className="h-6 w-6 text-success" />
         </div>
         <h1 className="mt-6 font-display text-3xl font-semibold tracking-display text-foreground">
-          Хүсэлт хүлээн авлаа
+          {copy.requestReceived}{" "}
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Бид 24 цагийн дотор{" "}
-          <span className="text-foreground">{formData.email}</span> хаяг руу
-          дэлгэрэнгүй үнийн санал илгээнэ.
+          {copy.weWillSendADetailedQuoteWithin}{" "}
+          <span className="text-foreground">{formData.email}</span>{" "}
+          {copy.text}{" "}
         </p>
 
         <div className="mt-8 flex items-center justify-between gap-4 rounded-xl border border-border bg-background/60 px-4 py-3">
           <div className="min-w-0">
             <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              Хүсэлтийн дугаар
+              {copy.requestReference}{" "}
             </div>
             <div className="mt-0.5 truncate font-mono text-sm text-foreground">
               {requestId}
@@ -273,12 +285,12 @@ export function QuoteRequest() {
             {copied ? (
               <>
                 <Check strokeWidth={1.5} className="h-4 w-4 text-success" />
-                Хуулсан
+                {copy.copied}{" "}
               </>
             ) : (
               <>
                 <Copy strokeWidth={1.5} className="h-4 w-4" />
-                Хуулах
+                {copy.copy}{" "}
               </>
             )}
           </Button>
@@ -292,14 +304,10 @@ export function QuoteRequest() {
               router.push("/");
             }}
           >
-            Нүүр хуудас руу
+            {copy.backToHome}{" "}
           </Button>
-          <Button
-            variant="outline"
-            className="h-11 flex-1"
-            onClick={startOver}
-          >
-            Шинэ хүсэлт үүсгэх
+          <Button variant="outline" className="h-11 flex-1" onClick={startOver}>
+            {copy.startANewRequest}{" "}
           </Button>
         </div>
       </div>
@@ -313,16 +321,15 @@ export function QuoteRequest() {
         className="inline-flex items-center gap-2 rounded-full font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft strokeWidth={1.5} className="h-3.5 w-3.5" />
-        {initialData ? "Тооцоолуур руу буцах" : "Нүүр хуудас"}
+        {initialData ? copy.backToCalculator : copy.home}
       </Link>
 
       <header className="mt-6">
         <h1 className="font-display text-[clamp(2rem,4.5vw,3rem)] font-semibold leading-[1.08] tracking-display text-foreground">
-          Үнийн санал хүсэх
+          {copy.quotePageTitle}{" "}
         </h1>
         <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-          Дэлгэрэнгүй бичих тусам үнийн санал нь бодит болно. Бид 24 цагийн
-          дотор хариу өгнө.
+          {copy.theMoreDetailYouShareTheMore}{" "}
         </p>
       </header>
 
@@ -334,13 +341,13 @@ export function QuoteRequest() {
             <div>
               <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-brand">
                 <SlidersHorizontal strokeWidth={1.5} className="h-3 w-3" />
-                Тооцоолуураас
+                {copy.fromTheCalculator}{" "}
               </div>
               <div className="mt-1.5 text-xl font-semibold tabular-nums text-foreground">
                 ₮{group(formData.estimatedPrice)}
                 {formData.estimatedHours ? (
                   <span className="ml-2 font-mono text-xs font-normal text-muted-foreground">
-                    {formData.estimatedHours} хүн-цаг
+                    {formData.estimatedHours} {copy.personHoursLowercase}{" "}
                   </span>
                 ) : null}
               </div>
@@ -349,7 +356,7 @@ export function QuoteRequest() {
               href="/calculator"
               className="font-mono text-xs text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
             >
-              Тооцоог засах
+              {copy.editEstimate}{" "}
             </Link>
           </div>
         </div>
@@ -363,20 +370,22 @@ export function QuoteRequest() {
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label htmlFor={`${uid}-name`} className={labelClass}>
-              Овог нэр{required}
+              {copy.fullName}
+              {required}
             </label>
             <Input
               {...fieldProps("name")}
               value={formData.name}
               onChange={(e) => setField("name", e.target.value)}
-              placeholder="Батболд Ганбат"
+              placeholder={copy.alexSmith}
               autoComplete="name"
             />
             {error("name")}
           </div>
           <div>
             <label htmlFor={`${uid}-email`} className={labelClass}>
-              Имэйл хаяг{required}
+              {copy.emailAddress}
+              {required}
             </label>
             <Input
               {...fieldProps("email")}
@@ -394,7 +403,8 @@ export function QuoteRequest() {
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label htmlFor={`${uid}-phone`} className={labelClass}>
-              Утасны дугаар{required}
+              {copy.phoneNumber}
+              {required}
             </label>
             <Input
               {...fieldProps("phone")}
@@ -409,14 +419,16 @@ export function QuoteRequest() {
           </div>
           <div>
             <label htmlFor={`${uid}-company`} className={labelClass}>
-              Компанийн нэр{" "}
-              <span className="text-muted-foreground/60">(сонголт)</span>
+              {copy.companyName}{" "}
+              <span className="text-muted-foreground/60">
+                {copy.optionalParenthetical}
+              </span>
             </label>
             <Input
               id={`${uid}-company`}
               value={formData.company}
               onChange={(e) => setField("company", e.target.value)}
-              placeholder="Компани ХХК"
+              placeholder={copy.companyLtd}
               autoComplete="organization"
             />
           </div>
@@ -424,7 +436,8 @@ export function QuoteRequest() {
 
         <div>
           <label htmlFor={`${uid}-projectType`} className={labelClass}>
-            Төслийн төрөл{required}
+            {copy.projectTypeLabel}
+            {required}
           </label>
           <Select
             value={formData.projectType}
@@ -434,7 +447,7 @@ export function QuoteRequest() {
                 focusable — `required` on a Radix Select does nothing, which
                 is why this form validates in JS instead. */}
             <SelectTrigger {...fieldProps("projectType")} className="w-full">
-              <SelectValue placeholder="Төслийн төрлийг сонгоно уу" />
+              <SelectValue placeholder={copy.selectAProjectType} />
             </SelectTrigger>
             <SelectContent>
               {projectTypeOptions.map((option) => (
@@ -449,20 +462,22 @@ export function QuoteRequest() {
 
         <div>
           <label htmlFor={`${uid}-description`} className={labelClass}>
-            Төслийн дэлгэрэнгүй тайлбар{required}
+            {copy.detailedProjectDescription}
+            {required}
           </label>
           <Textarea
             {...fieldProps("description")}
             value={formData.description}
             onChange={(e) => setField("description", e.target.value)}
-            placeholder="Юу шийдэх гэж байгаа, хэн ашиглах, аль системүүдтэй холбогдох вэ?"
+            placeholder={copy.whatProblemAreYouSolvingWhoWill}
             rows={5}
           />
           {errors.description ? (
             error("description")
           ) : (
             <p className="mt-2 font-mono text-[11px] text-muted-foreground">
-              {formData.description.trim().length}/{MIN_DESCRIPTION} тэмдэгт
+              {formData.description.trim().length}/{MIN_DESCRIPTION}{" "}
+              {copy.characters}{" "}
             </p>
           )}
         </div>
@@ -470,15 +485,17 @@ export function QuoteRequest() {
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label htmlFor={`${uid}-budget`} className={labelClass}>
-              Төсөв{" "}
-              <span className="text-muted-foreground/60">(сонголт)</span>
+              {copy.budget}{" "}
+              <span className="text-muted-foreground/60">
+                {copy.optionalParenthetical}
+              </span>
             </label>
             <Select
               value={formData.budget}
               onValueChange={(value) => setField("budget", value)}
             >
               <SelectTrigger id={`${uid}-budget`} className="w-full">
-                <SelectValue placeholder="Төсвийн хэмжээ" />
+                <SelectValue placeholder={copy.budgetRange} />
               </SelectTrigger>
               <SelectContent>
                 {budgetOptions.map((option) => (
@@ -491,15 +508,17 @@ export function QuoteRequest() {
           </div>
           <div>
             <label htmlFor={`${uid}-timeline`} className={labelClass}>
-              Хугацаа{" "}
-              <span className="text-muted-foreground/60">(сонголт)</span>
+              {copy.timeline}{" "}
+              <span className="text-muted-foreground/60">
+                {copy.optionalParenthetical}
+              </span>
             </label>
             <Select
               value={formData.timeline}
               onValueChange={(value) => setField("timeline", value)}
             >
               <SelectTrigger id={`${uid}-timeline`} className="w-full">
-                <SelectValue placeholder="Хүссэн хугацаа" />
+                <SelectValue placeholder={copy.preferredTimeline} />
               </SelectTrigger>
               <SelectContent>
                 {timelineOptions.map((option) => (
@@ -518,7 +537,8 @@ export function QuoteRequest() {
             className="mb-3 flex items-center gap-2 font-mono text-xs text-muted-foreground"
           >
             <Shield strokeWidth={1.5} className="h-3.5 w-3.5" />
-            Робот эсэхийг шалгах{required}
+            {copy.humanVerification}
+            {required}
           </label>
           <div className="flex items-center gap-2">
             <div
@@ -542,7 +562,7 @@ export function QuoteRequest() {
                     return next;
                   });
               }}
-              placeholder="Хариу"
+              placeholder={copy.answer}
               autoComplete="off"
               className="w-24"
             />
@@ -554,7 +574,7 @@ export function QuoteRequest() {
                 setCaptcha(makeCaptcha());
                 setCaptchaInput("");
               }}
-              aria-label="Өөр асуулт авах"
+              aria-label={copy.getAnotherQuestion}
             >
               <RefreshCw strokeWidth={1.5} className="h-4 w-4" />
             </Button>
@@ -573,10 +593,10 @@ export function QuoteRequest() {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Илгээж байна…
+                {copy.sending}{" "}
               </>
             ) : (
-              "Хүсэлт илгээх"
+              copy.sendRequest
             )}
           </Button>
           <Button
@@ -585,7 +605,7 @@ export function QuoteRequest() {
             className="h-11 sm:flex-1"
             onClick={() => router.push(backHref)}
           >
-            Буцах
+            {copy.back}{" "}
           </Button>
         </div>
       </form>
