@@ -17,3 +17,6 @@ LICENSE
 *.Zone.Identifier
 Dockerfile
 .dockerignore
+
+# Server-only PostgreSQL credentials
+database.env

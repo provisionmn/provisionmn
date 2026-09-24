@@ -13,7 +13,7 @@ Repository guidance shared by Claude and Codex.
 - `npm test` — Vitest + Testing Library in jsdom (calculator/quote flow and contact validation)
 - `npm run test:watch` — watch tests while developing
 
-Run `npm ci`, `npm run lint`, `npm test`, `npm run typecheck`, and `npm run build` before a PR. CI gates the Docker build/push on lint, tests and typecheck; the Dockerfile runs the production build. Tests use real components/context and mock only Next navigation and missing jsdom geometry APIs. They do not verify browser layout or a real backend submission. Keep tests in `tests/`; keep hydration-related lint exceptions local and explained.
+Run `npm ci`, `npm run lint`, `npm test`, `npm run typecheck`, and `npm run build` before a PR. CI gates the Docker build/push on lint, tests and typecheck; the Dockerfile runs the production build. Tests use real components/context and mock only Next navigation and missing jsdom geometry APIs. They do not verify browser layout. API tests mock persistence; the optional PG_INTEGRATION_URL test exercises real PostgreSQL via a session-local TEMP table. Keep tests in `tests/`; keep hydration-related lint exceptions local and explained.
 
 **Known build trap:** when `tsc` reports an error, Next 16's Rust code-frame renderer panics (`end byte index … is not a char boundary`) instead of printing it — the source files are Mongolian, and it slices UTF-8 by byte offset. The build then dies with `SIGABRT` and no usable message. Run `npx tsc --noEmit` directly to see the real errors.
 
@@ -43,7 +43,7 @@ Two things about the image that are easy to break:
 
 `deploy/docker-compose.yml` is the deployed definition; the host keeps a copy of it at `/opt/provision/provisionmn/` (it is not a git checkout — copy the file over when you change it). It publishes **no host port**: the box runs one shared edge Traefik (`/opt/provision/traefik`, owned by the `provision_odoo` repo) that holds :80/:443, the `provision` Docker network and the `letsencrypt` ACME resolver, and this stack attaches to that network and declares ``Host(`provision.mn`)`` on container labels. Everything runs as the unprivileged `provision` user, whose `~/.docker/config.json` carries the GHCR credentials — **the private package requires registry authentication; the host's configured account is `provision`**.
 
-Releasing is automatic on `main` (below). By hand it is one command; the site is prerendered and stateless, so there is nothing to migrate or back up:
+Releasing is automatic on `main` (below). By hand it is one command; the pages are prerendered, but form requests persist in native PostgreSQL. Apply pending SQL migrations and maintain database backups before releases:
 
 ```bash
 ssh provision@202.131.1.126
@@ -103,7 +103,7 @@ GA4 is optional: root layout mounts `@next/third-parties/google` only in product
 
 Marketing site for Provision.mn, originally generated from Figma Make, ported to Vite, then migrated to **Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4**.
 
-There is **no backend or request persistence**; the language preference is stored locally. The forms make no API requests; `scrub/useScrubHero.ts` does call `fetch` to load the hero video. There are no application API credentials or database settings. Build/deployment settings include `DOCKER_BUILD` and the deployment workflow variables. `QuoteRequest` and `Contact` both fake a submit and then render a success card — the data goes nowhere. Contact waits 1.2 seconds and offers a retry/reset button. QuoteRequest waits 1.4 seconds, creates a browser-local `REQ-${Date.now()}` reference, and offers *home* or *new request*. Neither form automatically redirects or confirms backend delivery.
+Contact and QuoteRequest POST to `/api/requests` and show success only after PostgreSQL commits a record. `src/server/requests.ts` owns validation and parameterized persistence; `src/app/use-request-submit.ts` preserves an idempotency key for unchanged-payload retries and prevents concurrent client submissions. Stable server UUIDs replace browser-generated references. Emails are not sent yet. Never expose DATABASE_URL to client code or log submitted personal data. Runtime DATABASE_URL and APP_ORIGIN are configured through the host database.env / Compose; see README for migration and deployment order. Quote arithmetic is client-only validation, not server anti-bot protection.
 
 ### Routes
 

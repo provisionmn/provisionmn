@@ -13,6 +13,7 @@ import {
   Phone,
   type LucideIcon,
 } from "lucide-react";
+import { useRequestSubmit } from "../use-request-submit";
 import { useT } from "../i18n";
 
 type Field = "name" | "email" | "brief";
@@ -31,6 +32,8 @@ const emptyForm = {
 export function Contact() {
   const { t } = useT();
   const id = useId();
+  const request = useRequestSubmit();
+  const [requestId, setRequestId] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [status, setStatus] = useState<Status>("idle");
@@ -95,10 +98,15 @@ export function Contact() {
     }
 
     setStatus("sending");
-    // No backend — the brief is acknowledged in the UI only, matching the
-    // quote form. Swap this for a real POST when an endpoint exists.
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setStatus("sent");
+    const savedId = await request.submit({
+      ...form,
+      kind: "contact",
+      description: form.brief,
+    });
+    if (savedId) {
+      setRequestId(savedId);
+      setStatus("sent");
+    } else setStatus("idle");
   };
 
   const fieldError = (field: Field) =>
@@ -121,10 +129,7 @@ export function Contact() {
   const labelClass = "block text-sm font-mono text-muted-foreground";
 
   return (
-    <section
-      id="contact"
-      className="relative scroll-mt-24 py-32 md:py-48"
-    >
+    <section id="contact" className="relative scroll-mt-24 py-32 md:py-48">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/*
           The closing CTA is an ink slab in both themes, so it carries the
@@ -139,7 +144,10 @@ export function Contact() {
             className="pointer-events-none absolute inset-0 bg-mesh"
             aria-hidden
           />
-          <div className="pointer-events-none absolute inset-0 bg-grain" aria-hidden />
+          <div
+            className="pointer-events-none absolute inset-0 bg-grain"
+            aria-hidden
+          />
           <div className="relative">
             <div className="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-brand">
               {t.contact.tag}
@@ -172,10 +180,15 @@ export function Contact() {
               <p className="mt-3 text-muted-foreground">
                 {t.contact.successBody.replace("{email}", form.email)}
               </p>
+              <p className="mt-3 break-all font-mono text-sm">
+                {t.flow.requestReference}: {requestId}
+              </p>
               <Button
                 variant="outline"
                 className="mt-8"
                 onClick={() => {
+                  request.reset();
+                  setRequestId("");
                   setForm(emptyForm);
                   setStatus("idle");
                 }}
@@ -189,6 +202,11 @@ export function Contact() {
               onSubmit={handleSubmit}
               className="lg:col-span-3 rounded-2xl border border-border bg-card/70 p-6 md:p-8 space-y-5 elev-1"
             >
+              {request.failure && (
+                <p role="alert" className="text-sm text-destructive">
+                  {t.intake[request.failure]}
+                </p>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor={`${id}-name`} className={labelClass}>

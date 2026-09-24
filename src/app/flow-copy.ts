@@ -168,7 +168,7 @@ export const mnFlow = {
   backToCalculator: "Тооцоолуур руу буцах",
   quotePageTitle: "Үнийн санал хүсэх",
   theMoreDetailYouShareTheMore:
-    "Дэлгэрэнгүй бичих тусам үнийн санал нь бодит болно. Бид 24 цагийн дотор хариу өгнө.",
+    "Дэлгэрэнгүй бичих тусам үнийн санал нь бодит болно. Холбоо барих мэдээллээ зөв оруулна уу.",
   fromTheCalculator: "Тооцоолуураас",
   personHoursLowercase: "хүн-цаг",
   editEstimate: "Тооцоог засах",
@@ -399,7 +399,7 @@ export const enFlow = {
   backToCalculator: "Back to calculator",
   quotePageTitle: "Request a quote",
   theMoreDetailYouShareTheMore:
-    "The more detail you share, the more accurate the quote. We will respond within 24 hours.",
+    "The more detail you share, the more accurate the quote. Please check your contact details.",
   fromTheCalculator: "From the calculator",
   personHoursLowercase: "person-hours",
   editEstimate: "Edit estimate",

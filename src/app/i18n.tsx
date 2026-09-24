@@ -15,6 +15,11 @@ export type Language = "mn" | "en";
 const dicts = {
   mn: {
     flow: mnFlow,
+    intake: {
+      saved: "Таны хүсэлт хадгалагдлаа. Бид таны оруулсан холбоо барих мэдээллээр холбогдоно.",
+      failed: "Хүсэлтийг хадгалсныг баталгаажуулж чадсангүй. Мэдээллээ шалгаад дахин илгээнэ үү.",
+      limited: "Хэт олон хүсэлт ирсэн байна. Нэг цагийн дараа дахин оролдоно уу.",
+    },
     nav: {
       services: "Үйлчилгээ",
       products: "Бүтээгдэхүүн",
@@ -232,7 +237,7 @@ const dicts = {
     contact: {
       tag: "// Contact",
       title: "Төслийн тухай ярилцъя",
-      sub: "Товч brief илгээгээрэй — 24 цагт буцаж хариулна.",
+      sub: "Төслийнхөө тухай товч бичиж, холбоо барих мэдээллээ үлдээгээрэй.",
       name: "Нэр",
       namePlaceholder: "Таны нэр",
       email: "И-мэйл",
@@ -254,7 +259,7 @@ const dicts = {
       ],
       sending: "Илгээж байна…",
       successTitle: "Хүсэлт хүлээн авлаа",
-      successBody: "Ажлын нэг өдрийн дотор {email} хаягаар тодруулга илгээнэ.",
+      successBody: "Таны хүсэлт хадгалагдлаа. Холбоо барих хаяг: {email}.",
       successAgain: "Дахин илгээх",
       optional: "заавал биш",
       errors: {
@@ -360,6 +365,11 @@ const dicts = {
 
   en: {
     flow: enFlow,
+    intake: {
+      saved: "Your request has been saved. We will follow up using the contact details you provided.",
+      failed: "We could not confirm your request was saved. Check your details and try again.",
+      limited: "Too many requests. Please try again in one hour.",
+    },
     nav: {
       services: "Services",
       products: "Products",
@@ -577,7 +587,7 @@ const dicts = {
     contact: {
       tag: "// Contact",
       title: "Let's talk about your project",
-      sub: "Send us a brief — we'll reply within 24 hours.",
+      sub: "Tell us about your project and leave your contact details.",
       name: "Name",
       namePlaceholder: "Your name",
       email: "Email",
@@ -599,7 +609,7 @@ const dicts = {
       ],
       sending: "Sending…",
       successTitle: "Brief received",
-      successBody: "We'll follow up at {email} within one business day.",
+      successBody: "Your request has been saved. Contact email: {email}.",
       successAgain: "Send another",
       optional: "optional",
       errors: {

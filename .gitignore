@@ -35,3 +35,6 @@ lerna-debug.log*
 
 # personal
 claude-session.txt
+
+# Server-only PostgreSQL credentials
+database.env

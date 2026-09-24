@@ -7,8 +7,8 @@
 # port of its own.
 #
 # The image is Next 16 standalone output (see the repo Dockerfile); the site
-# is fully prerendered, has no backend, no env vars and no persistence, so
-# there is nothing to back up here and a redeploy is just a new image tag.
+# serves prerendered pages and a form API backed by native PostgreSQL.
+# database.env stays on the host, mode 0600. Back up the provisionmn database.
 #
 #   IMAGE_TAG=ghcr.io/provisionmn/provisionmn:<sha> docker compose up -d
 
@@ -19,6 +19,10 @@ services:
     image: ${IMAGE_TAG:-ghcr.io/provisionmn/provisionmn:latest}
     container_name: provisionmn-web
     restart: unless-stopped
+    env_file:
+      - ./database.env
+    environment:
+      APP_ORIGIN: https://provision.mn
     # Static site; 512 MB is far above what it uses and keeps a runaway
     # process from starving the Odoo containers on the same box.
     mem_limit: 512m

@@ -28,7 +28,7 @@ App Router дээрх 4 маршрут, бүгд статикаар prerender х
 
 Тооцоолуураас формд дамжих өгөгдлийг `src/app/quote-context.tsx` (`useQuote`) зөөнө — санах ойд л байдаг тул `/quote`-г дахин ачаалахад prefill арилж, хоосон форм гарна.
 
-Backend болон хүсэлтийн хадгалалт байхгүй. Contact 1.2 секунд, QuoteRequest 1.4 секунд хүлээгээд зөвхөн дэлгэц дээр амжилтын төлөв харуулдаг; мэдээлэл сервер, имэйл рүү илгээгдэхгүй. QuoteRequest-ийн `REQ-…` дугаар browser-т үүсдэг. Автоматаар өөр хуудас руу шилжихгүй: хэрэглэгч нүүр хуудас руу буцах эсвэл шинэ хүсэлт эхлүүлэх үйлдлийг сонгоно; Contact дээр дахин илгээх товч байна.
+Contact болон QuoteRequest нь `POST /api/requests` руу илгээж, PostgreSQL-ийн `form_requests` хүснэгтэд амжилттай хадгалсны дараа серверийн UUID дугаар харуулна. Имэйл мэдэгдэл хараахан холбогдоогүй. API нь серверийн validation, 16 KiB хэмжээний хязгаар, нэг имэйлээс 5/цаг, нийт 100/цаг хязгаар болон idempotency key ашиглана. Дахин оролдоход ижил мэдээлэлтэй хүсэлт давхар хадгалагдахгүй. Client-ийн тооцоолсон үнэ нь албан ёсны үнэ биш.
 
 Хэлийг `LanguageProvider` (`src/app/i18n.tsx`)-аар удирддаг, localStorage-д хадгална. Landing болон ServicesDetail / PriceCalculator / QuoteRequest / Chatbot бүгд `useT()`-ээр орчуулагдана. Дэд хуудсуудын текст `src/app/flow-copy.ts`-д бий; сонголтын утгууд хэлнээс үл хамаарах ID ашиглана.
 
@@ -113,3 +113,14 @@ Image нь `node:22-alpine` дээрх Next standalone output, non-root `nextjs`
 ## License
 
 Internal — Provision.mn өмчийн материал.
+
+
+## Формын PostgreSQL тохиргоо
+
+- Локал `.env.local`: `DATABASE_URL` болон `APP_ORIGIN=http://localhost:3000` оруулна. Production origin: `https://provision.mn`. Эдгээр нь runtime, серверийн хувьсагчид.
+- Migration: `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f deploy/migrations/001_form_requests.sql`. Дахин ажиллуулахад байгаа хүснэгтийг устгахгүй.
+- VPS native PostgreSQL: `provisionmn` бааз, `provisionmn_app` role. Нууц тохиргоо `/opt/provision/provisionmn/database.env` (0600), host `172.18.0.1:5432`; Compose энэ файлыг runtime-д уншина.
+- Deploy хийхээс өмнө migration-г ажиллуулж, шинэ `deploy/docker-compose.yml`-ийг хостын `/opt/provision/provisionmn/docker-compose.yml` руу хуулна. CI нь энэ файлыг автоматаар sync хийдэггүй. Runtime тохиргоо бэлэн болсны дараа шинэ image deploy хийнэ.
+- Хүсэлт унших public API байхгүй. Эрхтэй оператор PostgreSQL-ээс хүсэлтүүдийг үзнэ. Backup-д `pg_dump -Fc provisionmn` ашиглаж, хандалт хязгаарласан хадгалалт болон retention-ийг тохируулна; энэ PR автомат backup эсвэл админ UI нэмэхгүй.
+- `PG_INTEGRATION_URL` тохируулсан үед `npm test -- tests/request-storage.test.tsx` бодит PostgreSQL дээр session-local TEMP хүснэгт ашиглан insert, concurrent retry, conflict, rate limit-ийг шалгана. Production хүснэгтэд тест өгөгдөл оруулахгүй.
+- Quote-ийн арифметик асуулт UI validation хэвээр; серверийн CAPTCHA хамгаалалт биш. API дээр origin болон баазад тулгуурласан давтамжийн шалгалт ажиллана.

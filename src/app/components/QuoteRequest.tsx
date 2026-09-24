@@ -1,5 +1,6 @@
 "use client";
 
+import { useRequestSubmit } from "../use-request-submit";
 import { useT } from "../i18n";
 import { formatCopy } from "../flow-copy";
 
@@ -63,7 +64,7 @@ function makeCaptcha() {
 
 export function QuoteRequest() {
   const {
-    t: { flow: copy },
+    t: { flow: copy, intake },
   } = useT();
   const projectTypeOptions = [
     { value: "website", label: copy.websiteDevelopment },
@@ -86,6 +87,7 @@ export function QuoteRequest() {
   ];
 
   const router = useRouter();
+  const request = useRequestSubmit();
   const uid = useId();
   const { quote: initialData, clearQuote } = useQuote();
 
@@ -108,7 +110,7 @@ export function QuoteRequest() {
   );
   const [captcha, setCaptcha] = useState({ question: "", answer: "" });
   const [captchaInput, setCaptchaInput] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmitting = request.pending;
   const [requestId, setRequestId] = useState("");
   const [copied, setCopied] = useState(false);
   const successRef = useRef<HTMLDivElement>(null);
@@ -173,15 +175,12 @@ export function QuoteRequest() {
       return;
     }
 
-    setIsSubmitting(true);
-    // No backend: the request is only acknowledged in the UI. Swap this for a
-    // real POST when an endpoint exists.
-    await new Promise((resolve) => setTimeout(resolve, 1400));
-    setRequestId(`REQ-${Date.now()}`);
-    setIsSubmitting(false);
+    const savedId = await request.submit({ ...formData, kind: "quote" });
+    if (savedId) setRequestId(savedId);
   };
 
   const startOver = () => {
+    request.reset();
     clearQuote();
     setFormData({
       name: "",
@@ -260,11 +259,7 @@ export function QuoteRequest() {
         <h1 className="mt-6 font-display text-3xl font-semibold tracking-display text-foreground">
           {copy.requestReceived}{" "}
         </h1>
-        <p className="mt-3 text-muted-foreground">
-          {copy.weWillSendADetailedQuoteWithin}{" "}
-          <span className="text-foreground">{formData.email}</span>{" "}
-          {copy.text}{" "}
-        </p>
+        <p className="mt-3 text-muted-foreground">{intake.saved}</p>
 
         <div className="mt-8 flex items-center justify-between gap-4 rounded-xl border border-border bg-background/60 px-4 py-3">
           <div className="min-w-0">
@@ -367,6 +362,11 @@ export function QuoteRequest() {
         onSubmit={handleSubmit}
         className="mt-8 space-y-6 rounded-2xl border border-border bg-card/70 p-6 elev-1 md:p-8"
       >
+        {request.failure && (
+          <p role="alert" className="text-sm text-destructive">
+            {intake[request.failure]}
+          </p>
+        )}
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label htmlFor={`${uid}-name`} className={labelClass}>
