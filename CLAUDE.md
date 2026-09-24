@@ -19,11 +19,11 @@ Run `npm ci`, `npm run lint`, `npm test`, `npm run typecheck`, and `npm run buil
 
 ## Deployment
 
-Three targets — the Docker image did **not** replace Vercel, and the VPS runs that image:
+Deployment uses GHCR and the VPS:
 
-- **Vercel** — its GitHub integration attempts production deploys on `main` and preview deploys on branch/PR pushes. Check Vercel status independently of the VPS workflow.
+- **Vercel Git deployments are disabled** by `vercel.json` (`git.deploymentEnabled: false`, `github.silent: true`). This stops automatic production/preview deployments for commits containing this configuration; it does not delete old deployments or disconnect the installed GitHub app.
 - **GHCR** — `.github/workflows/docker.yml` builds a container and pushes it to `ghcr.io/provisionmn/provisionmn` on `main` and on `v*` tags. Pull requests build the image but do not push it. No secrets needed; it authenticates with the built-in `GITHUB_TOKEN`.
-- **VPS `provision.mn`** — since 2026-09-15 the apex domain's A record points at `202.131.1.126` (the shared amf.mn host), which serves `ghcr.io/provisionmn/provisionmn` from `deploy/docker-compose.yml`. Vercel still attempts builds; it just no longer answers for `provision.mn`. **Since 2026-09-16 this is automatic**: the `deploy` job in the same workflow SSHes in after the image is pushed and rolls the stack to that commit's `sha-<short>` tag — see *Automatic deploys* below.
+- **VPS `provision.mn`** — since 2026-09-15 the apex domain's A record points at `202.131.1.126` (the shared amf.mn host), which serves `ghcr.io/provisionmn/provisionmn` from `deploy/docker-compose.yml`. **Since 2026-09-16 this is automatic**: the `deploy` job in the same workflow SSHes in after the image is pushed and rolls the stack to that commit's `sha-<short>` tag — see *Automatic deploys* below.
 
 ```bash
 docker pull ghcr.io/provisionmn/provisionmn:latest
@@ -32,7 +32,7 @@ docker run -p 3000:3000 ghcr.io/provisionmn/provisionmn:latest
 
 The image is Next's standalone output on `node:22-alpine`, running as non-root `nextjs` with a healthcheck on `/`.
 
-**`output: "standalone"` is gated behind the `DOCKER_BUILD` env var** in `next.config.mjs`, and only the Dockerfile sets it. That keeps `npm run build` — locally and on Vercel — producing exactly what it did before. If you ever need standalone output outside Docker, set `DOCKER_BUILD=1`; don't un-gate it.
+**`output: "standalone"` is gated behind the `DOCKER_BUILD` env var** in `next.config.mjs`, and only the Dockerfile sets it. That keeps `npm run build` — locally — producing exactly what it did before. If you ever need standalone output outside Docker, set `DOCKER_BUILD=1`; don't un-gate it.
 
 Two things about the image that are easy to break:
 
@@ -95,11 +95,11 @@ key above).
 
 DNS resolution checked on 2026-09-22 returned `202.131.1.126` for `provision.mn` and no address for `www.provision.mn`, so the compose file deliberately routes the apex only — adding a `www` router before the record exists just makes Traefik retry a doomed ACME order. Note also that Traefik does not re-attempt a failed ACME order on its own: if a certificate is missing after a DNS change, `docker compose up -d --force-recreate traefik` in the Odoo stack is what re-triggers it.
 
-The root layout still sets `metadataBase` to `https://provisionmn.vercel.app`; generated metadata URLs have not yet been aligned with the VPS domain. This documentation update does not change that runtime setting.
+The root layout sets `metadataBase` to the production domain `https://provision.mn`.
 
 ## Architecture
 
-GA4 is optional: root layout mounts `@next/third-parties/google` only in production with a valid `NEXT_PUBLIC_GA_MEASUREMENT_ID` (`G-…`). The ID is embedded at build time; Docker/Actions passes the repository variable as a build argument, omitted on PR builds. Keep Vercel Preview unset. Use GA4 enhanced measurement history tracking for App Router page views; do not add a second manual page-view listener. Do not send form values or treat simulated form success as a lead. Setup and verification: README → Google Analytics 4.
+GA4 is optional: root layout mounts `@next/third-parties/google` only in production with a valid `NEXT_PUBLIC_GA_MEASUREMENT_ID` (`G-…`). The ID is embedded at build time; Docker/Actions passes the repository variable as a build argument, omitted on PR builds. Use GA4 enhanced measurement history tracking for App Router page views; do not add a second manual page-view listener. Do not send form values or treat simulated form success as a lead. Setup and verification: README → Google Analytics 4.
 
 Marketing site for Provision.mn, originally generated from Figma Make, ported to Vite, then migrated to **Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4**.
 
@@ -124,7 +124,7 @@ Within `/`, `Header` and `Hero` still navigate by `scrollIntoView` on section id
 
 ### Server vs client components
 
-Everything that calls `useT()` is a Client Component, because the dictionary arrives through React context — this includes the translated landing sections. The calculator, quote form and chatbot are client components for their own state and events. `ServicesDetail` is the one section with no directive: it has no hooks and no handlers, so it stays server-rendered. Don't add `"use client"` to it without a reason.
+Everything that calls `useT()` is a Client Component, because the dictionary arrives through React context — this includes the translated landing sections. The calculator, quote form and chatbot are client components for their own state and events. `ServicesDetail` is also a Client Component so its copy follows the language context; route page files remain Server Components.
 
 Files under `components/ui/` carry no directive; they inherit client-ness from whoever imports them.
 
@@ -144,7 +144,7 @@ It is in-memory by design: reloading `/quote` drops the prefill and renders a bl
 
 - `t` is the **whole nested dictionary object**, not a lookup function: `t.nav.services`, `t.services.items[0].features`. Types derive from the `mn` dict (`type Dict = (typeof dicts)["mn"]`), so **any key added to `mn` must be added to `en` or the build breaks**; the two trees must stay structurally identical, arrays included.
 - **`lang` must initialise to `"mn"`, never to `localStorage`.** The server always prerenders Mongolian; reading storage during render desyncs the first client render and triggers a hydration error. The stored preference is applied in an effect after mount, and only then written back.
-- **i18n coverage is partial.** Only the landing sections are translated (`Header`, `Hero`, `Services`, `Products`, `Process`, `About`, `Portfolio`, `Faq`, `Contact`, `Footer`). The hero's journey captions live under `t.journey`. `ServicesDetail`, `PriceCalculator`, `QuoteRequest`, and `Chatbot` hold hardcoded Mongolian strings. When touching those four, either keep strings inline as-is or move the whole component into the dict — do not half-migrate.
+- **i18n covers landing and all four flows.** `flow-copy.ts` holds matching typed Mongolian/English dictionaries for ServicesDetail, PriceCalculator, QuoteRequest and Chatbot, included as `t.flow`. Use language-independent option IDs for quote prefill and chatbot decisions. Render validation and bot messages in the current language without changing user-entered text.
 
 ### Hydration rules
 
@@ -152,7 +152,7 @@ Prerendering makes render-time nondeterminism a hard error rather than a curiosi
 
 ### Language of UI copy
 
-UI copy is Mongolian (Cyrillic). Preserve existing Mongolian strings when editing — do not translate them to English, and prefer native Mongolian over Russian loanwords when writing new copy.
+UI copy is Mongolian (Cyrillic). Preserve the Mongolian dictionary alongside its English translation, and prefer native Mongolian over Russian loanwords when writing new copy.
 
 ### Component layers (`src/app/components/`)
 

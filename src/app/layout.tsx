@@ -9,7 +9,7 @@ import { geologica, jetbrainsMono, manrope, sora } from "./fonts";
 import "../styles/index.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://provisionmn.vercel.app"),
+  metadataBase: new URL("https://provision.mn"),
   title: {
     default: "Provision.mn — Инженерийн студи",
     template: "%s · Provision.mn",

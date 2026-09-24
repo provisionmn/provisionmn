@@ -1,5 +1,7 @@
 "use client";
 
+import { mnFlow, enFlow } from "./flow-copy";
+
 import {
   createContext,
   useContext,
@@ -12,6 +14,7 @@ export type Language = "mn" | "en";
 
 const dicts = {
   mn: {
+    flow: mnFlow,
     nav: {
       services: "Үйлчилгээ",
       products: "Бүтээгдэхүүн",
@@ -251,8 +254,7 @@ const dicts = {
       ],
       sending: "Илгээж байна…",
       successTitle: "Хүсэлт хүлээн авлаа",
-      successBody:
-        "Ажлын нэг өдрийн дотор {email} хаягаар тодруулга илгээнэ.",
+      successBody: "Ажлын нэг өдрийн дотор {email} хаягаар тодруулга илгээнэ.",
       successAgain: "Дахин илгээх",
       optional: "заавал биш",
       errors: {
@@ -357,6 +359,7 @@ const dicts = {
   },
 
   en: {
+    flow: enFlow,
     nav: {
       services: "Services",
       products: "Products",
@@ -430,8 +433,7 @@ const dicts = {
         {
           title: "UX / UI design",
           short: "Design system · Prototype",
-          description:
-            "Figma to production code — pixel-perfect handoff.",
+          description: "Figma to production code — pixel-perfect handoff.",
           features: ["Design system", "Prototype", "Usability"],
         },
         {
@@ -454,7 +456,8 @@ const dicts = {
       sub: "Industry-specific platforms built on Odoo with AI baked in.",
       flagship: "Flagship product",
       featured: {
-        tagline: "AI-powered comprehensive ERP for non-bank financial institutions",
+        tagline:
+          "AI-powered comprehensive ERP for non-bank financial institutions",
         description:
           "Loan flow, credit scoring, risk assessment, AML/KYC, delinquency management — custom Odoo ERP modules integrated with Claude / OpenAI LLMs for real decision intelligence. Fully compliant with Mongolia's Financial Regulatory Commission (FRC) standards.",
         features: [
