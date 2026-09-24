@@ -53,6 +53,21 @@ npm run test:watch # тестийг өөрчлөлт бүрд ажиллуула
 
 `tests/` дэх jsdom тестүүд тооцоолуурын үнэ, нэмэлт функц хасах, тайлбарын урт, calculator → quote prefill болон формын validation-ийг шалгана. Бодит browser layout, network/backend хүргэлтийг шалгахгүй. Тестийн үед зөвхөн Next navigation болон jsdom-д байхгүй хэмжилт/scroll API-г орлуулна.
 
+## Google Analytics 4
+
+Бүх маршрут root layout дахь `@next/third-parties/google`-ийн `GoogleAnalytics` ашиглана. Скрипт hydration-ийн дараа ачаална. `NEXT_PUBLIC_GA_MEASUREMENT_ID` хоосон/буруу эсвэл `npm run dev` үед Analytics ачаалахгүй.
+
+1. GA4 → Admin → Data streams → Web хэсгээс `https://provision.mn` stream-ийн **Measurement ID** (`G-…`)-г авна.
+2. VPS build-д: GitHub repository → Settings → Secrets and variables → Actions → **Variables** дотор `NEXT_PUBLIC_GA_MEASUREMENT_ID` нэмнэ. Энэ нь public ID; secret биш. Workflow Docker build argument-аар дамжуулна. PR build-д ID дамжуулахгүй.
+3. Локал production build-д `.env.example`-ийг `.env.local` руу хуулж ID-г бөглөнө. Vercel ашиглавал зөвхөн Production environment-д энэ хувьсагчийг тохируулна; Preview-д хоосон үлдээнэ.
+4. ID нь **build үед** HTML-д ордог: өөрчилсний дараа шинэ build/deploy шаардлагатай. Контейнерийн runtime env-г өөрчлөх нь хангалтгүй.
+5. GA4 Web stream → Enhanced measurement → Page views → Advanced settings дахь **Page changes based on browser history events**-ийг асаана. App Router шилжилтийг үүгээр хэмжинэ; давхар custom `page_view` илгээхгүй.
+6. Deploy-ийн дараа Analytics Realtime/DebugView дээр нүүр → `/services` → `/calculator` → `/quote`, browser back/forward шилжилтийг шалгана. Initial load болон шилжилт бүр нэг `page_view` үүсэх ёстой. Зар хаагч хэмжилтийг зогсоож болно.
+
+Формууд одоогоор backend-гүй тул form interactions хэмжилтийг GA4 дээр унтрааж, амжилттай lead гэж тооцохгүй. Код формын утга, имэйл, утас болон тайлбарыг custom event-р илгээхгүй.
+
+Лавлах: [Next.js Google Analytics](https://nextjs.org/docs/app/guides/third-party-libraries#google-analytics), [GA4 SPA measurement](https://developers.google.com/analytics/devguides/collection/ga4/single-page-applications).
+
 ## Deployment
 
 Гурван хэсэгтэй:
