@@ -61,7 +61,7 @@ afterEach(() => {
 it("translates the full service page and switches back to Mongolian", async () => {
   const { container } = mount(<ServicesDetail />);
   expect(
-    screen.getByRole("heading", { name: "Санаанаас production хүртэл" }),
+    screen.getByRole("heading", { name: "Санаанаас хэрэглээнд нэвтрүүлэх хүртэл" }),
   ).toBeInTheDocument();
   await userEvent.click(screen.getByText("Switch language"));
   expect(
@@ -70,7 +70,7 @@ it("translates the full service page and switches back to Mongolian", async () =
   expect(container.textContent).not.toMatch(/[а-яөүё]/i);
   await userEvent.click(screen.getByText("Switch language"));
   expect(
-    screen.getByRole("heading", { name: "Санаанаас production хүртэл" }),
+    screen.getByRole("heading", { name: "Санаанаас хэрэглээнд нэвтрүүлэх хүртэл" }),
   ).toBeInTheDocument();
 });
 

@@ -55,7 +55,7 @@ describe("contact validation", () => {
     fireEvent.change(screen.getByLabelText("И-мэйл"), {
       target: { value: "not-an-email" },
     });
-    fireEvent.change(screen.getByLabelText("Brief"), {
+    fireEvent.change(screen.getByLabelText("Төслийн товч тайлбар"), {
       target: { value: `  ${"a".repeat(19)}  ` },
     });
     fireEvent.submit(container.querySelector("form")!);
@@ -63,7 +63,7 @@ describe("contact validation", () => {
     fireEvent.change(screen.getByLabelText("И-мэйл"), {
       target: { value: "test@example.com" },
     });
-    fireEvent.change(screen.getByLabelText("Brief"), {
+    fireEvent.change(screen.getByLabelText("Төслийн товч тайлбар"), {
       target: { value: "a".repeat(20) },
     });
     // Component test mocks the API response; API persistence is tested separately.
