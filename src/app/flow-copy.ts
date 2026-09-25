@@ -2,7 +2,7 @@
 export const mnFlow = {
   webDevelopment: "Веб хөгжүүлэлт",
   modernFastAndReliableWebsitesAndWeb:
-    "Орчин үеийн, хурдан ба найдвартай вебсайт болон веб систем. Дизайнаас deploy хүртэл нэг багаар.",
+    "Орчин үеийн, хурдан ба найдвартай вебсайт болон веб систем. Дизайнаас ашиглалтад оруулах хүртэл нэг багаар.",
   responsiveDesign: "Responsive дизайн",
   seoOptimization: "SEO оновчилгоо",
   cmsSystem: "CMS систем",
@@ -22,7 +22,7 @@ export const mnFlow = {
   odooErpSystem: "Odoo ERP систем",
   anIntegratedBusinessManagementSystemAdaptedTo:
     "Бизнес удирдлагын цогц систем. Монгол стандартад нийцүүлсэн хэрэгжүүлэлт, шаардлагатай газарт нь custom модуль.",
-  financialManagement: "Санхүү удирдлага",
+  financialManagement: "Санхүүгийн удирдлага",
   inventoryManagement: "Бараа материалын удирдлага",
   crmSystem: "CRM систем",
   humanResourcesManagement: "Хүний нөөцийн удирдлага",
@@ -51,12 +51,12 @@ export const mnFlow = {
   launch: "Ашиглалтад оруулах",
   weLaunchTheSystemAndProvideOngoing:
     "Системийг амжилттай ашиглалтад оруулж дэмжлэг үзүүлнэ",
-  projectsLaunched: "Launch хийсэн төсөл",
-  fullTimeDevelopers: "Full-time хөгжүүлэгч",
+  projectsLaunched: "Хэрэгжүүлсэн төсөл",
+  fullTimeDevelopers: "Үндсэн хөгжүүлэгч",
   yearsOfExperience: "Жилийн туршлага",
   supportService: "Дэмжлэгийн үйлчилгээ",
   home: "Нүүр хуудас",
-  fromIdeaToProduction: "Санаанаас production хүртэл",
+  fromIdeaToProduction: "Санаанаас хэрэглээнд нэвтрүүлэх хүртэл",
   digitalServicesForYourBusinessWithClear:
     "Танай бизнесийн дижитал шийдлийг бүрэн хангах үйлчилгээнүүд — хугацаа, багц, эхлэх үнэ нь тодорхой.",
   timeline: "Хугацаа",
@@ -67,7 +67,7 @@ export const mnFlow = {
     "Таны төслийг амжилттай хэрэгжүүлэх 6 алхам. Алхам бүрийн төгсгөлд харагдах үр дүн гарна.",
   whyChooseUs: "Яагаад биднийг сонгох ёстой?",
   aTeamThatDeliversWorkingSystemsQuickly:
-    "Богино хугацаанд ажилладаг систем хүлээлгэж өгөх, дараа нь түүнийг нь тогтвортой ажиллуулах хоёрыг зэрэг хийдэг баг.",
+    "Системийг богино хугацаанд хөгжүүлж, хүлээлгэн өгсний дараа ч найдвартай ажиллагааг нь хариуцдаг баг.",
   letSTalkAboutYourProject: "Танай төслийн талаар ярилцъя",
   inOurFirstMeetingWeWillClarify:
     "Хэрэгцээндээ тохирсон шийдэл, ойролцоо төсөв, хугацааг эхний уулзалтаар тодруулна.",
@@ -84,7 +84,7 @@ export const mnFlow = {
   medium: "Дундаж",
   customDesignAndBusinessLogic: "Захиалгат дизайн, логик",
   complex: "Төвөгтэй",
-  multipleRolesDeepIntegrations: "Олон дүр, гүн интеграци",
+  multipleRolesDeepIntegrations: "Хэрэглэгчийн олон төрлийн эрх, системүүдийн уялдаа",
   enterprise: "Энтерпрайз",
   scaleAuditSla: "Ачаалал, аудит, SLA",
   contentManagementCms: "Контент удирдлага (CMS)",
