@@ -308,7 +308,7 @@ const dicts = {
         "Вэб, мобайл апп, хиймэл оюун, Odoo, дизайн, автоматжуулалт — нэг багийн цогц үйлчилгээ.",
       services: "Үйлчилгээ",
       company: "Компани",
-      companyLinks: ["Бидний тухай", "Портфолио", "Блог", "Ажлын байр"],
+      companyLinks: { about: "Бидний тухай", portfolio: "Портфолио" },
       serviceLinks: [
         "Fullstack хөгжүүлэлт",
         "Mobile App",
@@ -319,8 +319,6 @@ const dicts = {
         "Процесс автоматжуулалт",
       ],
       rights: "© {year} Provision.mn · Built in Улаанбаатар",
-      terms: "Үйлчилгээний нөхцөл",
-      privacy: "Нууцлалын бодлого",
     },
     journey: {
       band1: "Олон гүйцэтгэгч. Хэн ч хариуцдаггүй.",
@@ -685,7 +683,7 @@ const dicts = {
         "Fullstack, mobile, AI, DevOps, Odoo, UX/UI, RPA — one team across every engineering layer.",
       services: "Services",
       company: "Company",
-      companyLinks: ["About us", "Portfolio", "Blog", "Careers"],
+      companyLinks: { about: "About us", portfolio: "Portfolio" },
       serviceLinks: [
         "Fullstack development",
         "Mobile App",
@@ -696,8 +694,6 @@ const dicts = {
         "Process automation",
       ],
       rights: "© {year} Provision.mn · Built in Ulaanbaatar",
-      terms: "Terms of service",
-      privacy: "Privacy policy",
     },
     journey: {
       band1: "Many vendors. Nobody takes responsibility.",
