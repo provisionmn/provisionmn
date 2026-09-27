@@ -152,6 +152,83 @@ it("relocalizes existing validation and completes the quote UI in English", asyn
   ).toBeInTheDocument();
 });
 
+it.each([
+  ["Website", "Website", "1 person (freelancer)", 3520000, 40, 1],
+  ["Mobile app", "Mobile app", "2-3 people (small team)", 7040000, 80, 2],
+  ["Odoo ERP", "Odoo ERP", "4-6 people (medium team)", 10560000, 120, 3],
+  ["Custom solution", "Other", "6+ people (large team)", 5280000, 60, 2],
+])(
+  "keeps %s baseline pricing consistent between calculator and chat",
+  async (calculatorType, chatType, team, price, hours, weeks) => {
+    const user = userEvent.setup();
+    const calculator = mount(<Flow />);
+    await user.click(screen.getByText("Switch language"));
+    await user.click(
+      screen.getByRole("radio", { name: new RegExp(`^${calculatorType}`) }),
+    );
+    await user.click(screen.getByRole("radio", { name: /^Simple/ }));
+    const formattedPrice = `₮${price.toLocaleString("en-US")}`;
+    expect(screen.getAllByText(formattedPrice).length).toBeGreaterThan(0);
+    expect(screen.getByText(String(hours))).toBeInTheDocument();
+    expect(screen.getByText(`~${weeks} weeks`)).toBeInTheDocument();
+    const description = "A customer order management project";
+    await user.type(screen.getByRole("textbox"), description);
+    await user.click(screen.getByRole("button", { name: "Request a quote" }));
+    const calculatorQuote = JSON.parse(screen.getByTestId("quote").textContent!);
+    expect(calculatorQuote).toMatchObject({
+      estimatedPrice: price,
+      estimatedHours: hours,
+    });
+    calculator.unmount();
+
+    // The persisted English preference also exercises a new provider mount.
+    mount(<Flow chat />);
+    await user.click(
+      await screen.findByRole("button", { name: "Chat with the assistant" }),
+    );
+    await user.click(screen.getByRole("button", { name: chatType }));
+    await screen.findByText(/understood. Which features do you need/);
+    await user.type(screen.getByRole("textbox"), description);
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    await user.click(await screen.findByRole("button", { name: team }));
+    await screen.findByRole("button", { name: "Request a detailed quote" });
+    const englishEstimate = screen.getByText(/This is a simple-project baseline/);
+    expect(englishEstimate).toHaveTextContent(`• Price — ${formattedPrice}`);
+    expect(englishEstimate).toHaveTextContent(`• Person-hours — ${hours}`);
+    expect(englishEstimate).toHaveTextContent(`• Timeline — about ${weeks} weeks`);
+    expect(englishEstimate).toHaveTextContent("extra features is not included");
+    expect(englishEstimate).toHaveTextContent("40 person-hours per week");
+    expect(englishEstimate).toHaveTextContent(
+      "Your team preference does not change this estimate",
+    );
+    await user.click(screen.getByText("Switch language"));
+    const mongolianEstimate = screen.getByText(/Энэ нь энгийн төслийн суурь тооцоо/);
+    expect(mongolianEstimate).toHaveTextContent(`• Үнэ — ${formattedPrice}`);
+    expect(mongolianEstimate).toHaveTextContent(`• Хүн-цаг — ${hours}`);
+    expect(mongolianEstimate).toHaveTextContent(
+      `• Хугацаа — ойролцоогоор ${weeks} долоо хоног`,
+    );
+    expect(mongolianEstimate).toHaveTextContent("нэмэлт функцуудын ажил ороогүй");
+    expect(mongolianEstimate).toHaveTextContent("долоо хоногт 40 хүн-цагаар");
+    expect(mongolianEstimate).toHaveTextContent("Багийн сонголт тооцоонд нөлөөлөхгүй");
+    expect(screen.getByText(description)).toBeInTheDocument();
+    await user.click(screen.getByText("Switch language"));
+    await user.click(
+      screen.getByRole("button", { name: "Request a detailed quote" }),
+    );
+    expect(JSON.parse(screen.getByTestId("quote").textContent!)).toMatchObject({
+      projectType: calculatorQuote.projectType,
+      complexity: calculatorQuote.complexity,
+      features: calculatorQuote.features,
+      estimatedPrice: calculatorQuote.estimatedPrice,
+      estimatedHours: calculatorQuote.estimatedHours,
+      estimatedWeeks: weeks,
+      description,
+    });
+  },
+  10000,
+);
+
 it("switches chatbot language mid-conversation without changing the estimate or user text", async () => {
   mount(<Flow chat />);
   const user = userEvent.setup();
@@ -165,11 +242,11 @@ it("switches chatbot language mid-conversation without changing the estimate or 
     await screen.findByRole("button", { name: "1 person (freelancer)" }),
   );
   await waitFor(
-    () => expect(screen.getByText(/• Price — ₮800,000/)).toBeInTheDocument(),
+    () => expect(screen.getByText(/• Price — ₮3,520,000/)).toBeInTheDocument(),
     { timeout: 2000 },
   );
   await user.click(screen.getByText("Switch language"));
-  expect(screen.getByText(/• Үнэ — ₮800,000/)).toBeInTheDocument();
+  expect(screen.getByText(/• Үнэ — ₮3,520,000/)).toBeInTheDocument();
   await user.click(
     screen.getByRole("button", { name: "Дэлгэрэнгүй үнийн санал авах" }),
   );
@@ -177,7 +254,11 @@ it("switches chatbot language mid-conversation without changing the estimate or 
     projectType: "website",
     teamSize: "1",
     description: "Custom features",
-    estimatedPrice: 800000,
+    complexity: "simple",
+    features: [],
+    estimatedHours: 40,
+    estimatedWeeks: 1,
+    estimatedPrice: 3520000,
   });
   expect(
     screen.getByRole("combobox", { name: /Төслийн төрөл/ }),

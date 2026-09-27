@@ -215,10 +215,11 @@ export const mnFlow = {
   estimateHeading: "Урьдчилсан тооцоо:",
   typeValue: "• Төрөл — {0}",
   timelineAboutValueWeeks: "• Хугацаа — ойролцоогоор {0} долоо хоног",
+  personHoursValue: "• Хүн-цаг — {0}",
   teamValue: "• Баг — {0}",
   priceValue: "• Үнэ — ₮{0}",
   thisIsAnIndicativeEstimateWouldYou:
-    "Энэ бол чиг баримжаа авах тооцоо. Албан ёсны санал авах уу?",
+    "Энэ нь энгийн төслийн суурь тооцоо бөгөөд таны дурдсан нэмэлт функцуудын ажил ороогүй. Хугацааг долоо хоногт 40 хүн-цагаар тооцов. Багийн сонголт тооцоонд нөлөөлөхгүй. Албан ёсны санал авах уу?",
   chooseADetailedQuoteOrStartAnother:
     "Дэлгэрэнгүй санал авах эсвэл дахин тооцоолохыг сонгоно уу.",
   chatWithTheAssistant: "Туслахтай ярих",
@@ -445,10 +446,11 @@ export const enFlow = {
   estimateHeading: "Preliminary estimate:",
   typeValue: "• Type — {0}",
   timelineAboutValueWeeks: "• Timeline — about {0} weeks",
+  personHoursValue: "• Person-hours — {0}",
   teamValue: "• Team — {0}",
   priceValue: "• Price — ₮{0}",
   thisIsAnIndicativeEstimateWouldYou:
-    "This is an indicative estimate. Would you like a formal quote?",
+    "This is a simple-project baseline; work for your requested extra features is not included. Duration assumes 40 person-hours per week. Your team preference does not change this estimate. Would you like a formal quote?",
   chooseADetailedQuoteOrStartAnother:
     "Choose a detailed quote or start another estimate.",
   chatWithTheAssistant: "Chat with the assistant",

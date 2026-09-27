@@ -2,6 +2,13 @@
 
 import { useT } from "../i18n";
 import { formatCopy } from "../flow-copy";
+import {
+  calculateEstimate,
+  COMPLEXITY_MULTIPLIERS,
+  FEATURE_HOURS,
+  HOURLY_RATE,
+  PROJECT_BASE_HOURS,
+} from "../../shared/estimate";
 
 import { useId, useState } from "react";
 import Link from "next/link";
@@ -18,7 +25,6 @@ import {
   Info,
 } from "lucide-react";
 
-const HOURLY_RATE = 88000; // төгрөг / хүн-цаг
 const MIN_DESCRIPTION = 20;
 
 // Deterministic thousands separator. `toLocaleString()` reads the runtime
@@ -135,25 +141,25 @@ export function PriceCalculator() {
       value: "website",
       label: copy.website,
       hint: copy.companySitesLandingPagesPortals,
-      baseHours: 40,
+      baseHours: PROJECT_BASE_HOURS.website,
     },
     {
       value: "mobile",
       label: copy.mobileApp,
       hint: "iOS, Android, cross-platform",
-      baseHours: 80,
+      baseHours: PROJECT_BASE_HOURS.mobile,
     },
     {
       value: "erp",
       label: "Odoo ERP",
       hint: copy.implementationConfigurationModules,
-      baseHours: 120,
+      baseHours: PROJECT_BASE_HOURS.erp,
     },
     {
       value: "custom",
       label: copy.customSolution,
       hint: copy.internalSystemsIntegrations,
-      baseHours: 60,
+      baseHours: PROJECT_BASE_HOURS.custom,
     },
   ] as const;
   const complexityLevels = [
@@ -161,36 +167,36 @@ export function PriceCalculator() {
       value: "simple",
       label: copy.simple,
       hint: copy.templatesAFewScreens,
-      multiplier: 1,
+      multiplier: COMPLEXITY_MULTIPLIERS.simple,
     },
     {
       value: "medium",
       label: copy.medium,
       hint: copy.customDesignAndBusinessLogic,
-      multiplier: 1.5,
+      multiplier: COMPLEXITY_MULTIPLIERS.medium,
     },
     {
       value: "complex",
       label: copy.complex,
       hint: copy.multipleRolesDeepIntegrations,
-      multiplier: 2.5,
+      multiplier: COMPLEXITY_MULTIPLIERS.complex,
     },
     {
       value: "enterprise",
       label: copy.enterprise,
       hint: copy.scaleAuditSla,
-      multiplier: 4,
+      multiplier: COMPLEXITY_MULTIPLIERS.enterprise,
     },
   ] as const;
   const additionalFeatures = [
-    { id: "responsive", label: copy.responsiveDesign, hours: 10 },
-    { id: "cms", label: copy.contentManagementCms, hours: 20 },
-    { id: "ecommerce", label: copy.eCommerce, hours: 30 },
-    { id: "api", label: copy.apiIntegration, hours: 15 },
-    { id: "auth", label: copy.userAccessManagement, hours: 20 },
-    { id: "admin", label: copy.adminPanel, hours: 25 },
-    { id: "multilang", label: copy.multilingualSupport, hours: 15 },
-    { id: "analytics", label: copy.analyticsAndReporting, hours: 10 },
+    { id: "responsive", label: copy.responsiveDesign, hours: FEATURE_HOURS.responsive },
+    { id: "cms", label: copy.contentManagementCms, hours: FEATURE_HOURS.cms },
+    { id: "ecommerce", label: copy.eCommerce, hours: FEATURE_HOURS.ecommerce },
+    { id: "api", label: copy.apiIntegration, hours: FEATURE_HOURS.api },
+    { id: "auth", label: copy.userAccessManagement, hours: FEATURE_HOURS.auth },
+    { id: "admin", label: copy.adminPanel, hours: FEATURE_HOURS.admin },
+    { id: "multilang", label: copy.multilingualSupport, hours: FEATURE_HOURS.multilang },
+    { id: "analytics", label: copy.analyticsAndReporting, hours: FEATURE_HOURS.analytics },
   ] as const;
   const timelines = [
     { value: "urgent", label: copy.urgent, hint: copy.oneToTwoWeeks },
@@ -226,18 +232,16 @@ export function PriceCalculator() {
 
   const estimate = (() => {
     if (!selectedProject || !selectedComplexity) return null;
-    const baseHours = selectedProject.baseHours * selectedComplexity.multiplier;
     const featureRows = features
       .map((id) => additionalFeatures.find((f) => f.id === id))
       .filter((f): f is (typeof additionalFeatures)[number] => Boolean(f));
-    const featureHours = featureRows.reduce((sum, f) => sum + f.hours, 0);
-    const hours = Math.round(baseHours + featureHours);
     return {
-      baseHours,
+      ...calculateEstimate({
+        projectType: selectedProject.value,
+        complexity: selectedComplexity.value,
+        features: featureRows.map((feature) => feature.id),
+      }),
       featureRows,
-      hours,
-      price: hours * HOURLY_RATE,
-      weeks: Math.ceil(hours / 40),
     };
   })();
 

@@ -2,6 +2,7 @@
 
 import { useT } from "../i18n";
 import { formatCopy, type FlowCopy } from "../flow-copy";
+import { calculateEstimate, type ProjectType } from "../../shared/estimate";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,7 +19,7 @@ interface Message {
 }
 
 interface ProjectData {
-  projectType?: string;
+  projectType?: ProjectType;
   details?: string;
   teamSize?: string;
 }
@@ -27,11 +28,19 @@ type ChatState = "greeting" | "details" | "teamSize" | "quote";
 
 const group = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
+// Chat collects a brief, not a full scope. Show the same simple baseline as
+// the calculator and explicitly explain that requested features are excluded.
+const estimateProject = (data: ProjectData) =>
+  calculateEstimate({
+    projectType: data.projectType ?? "custom",
+    complexity: "simple",
+  });
+
 export function Chatbot() {
   const {
     t: { flow: copy },
   } = useT();
-  const PROJECT_TYPES = ["website", "mobile", "erp", "custom"];
+  const PROJECT_TYPES: ProjectType[] = ["website", "mobile", "erp", "custom"];
   const QUOTE_CTA = "quote";
   const RESTART = "restart";
   const optionKeys: Record<string, keyof FlowCopy> = {
@@ -75,23 +84,6 @@ export function Chatbot() {
     }
   };
   const TEAM_OPTIONS = ["1", "2-3", "4-6", "6+"];
-  function calculateEstimate(data: ProjectData) {
-    const [basePrice, weeks] =
-      data.projectType === "website"
-        ? [800000, 3]
-        : data.projectType === "mobile"
-          ? [1200000, 6]
-          : data.projectType === "erp"
-            ? [2000000, 12]
-            : [600000, 4];
-    const team = data.teamSize ?? "";
-    const multiplier =
-      team === "1" ? 1 : team === "2-3" ? 1.5 : team === "4-6" ? 2 : 2.5;
-    return {
-      price: Math.round(basePrice * multiplier),
-      weeks: Math.round(weeks * multiplier * 0.8),
-    };
-  }
 
   const router = useRouter();
   const { setQuote } = useQuote();
@@ -191,7 +183,7 @@ export function Chatbot() {
               optionLabel(team, copy).toLowerCase() === input.toLowerCase(),
           ) ?? input;
         const data = { ...projectData, teamSize };
-        const estimate = calculateEstimate(data);
+        const estimate = estimateProject(data);
         setProjectData(data);
         setChatState("quote");
         reply(
@@ -202,6 +194,7 @@ export function Chatbot() {
                 words.typeValue,
                 optionLabel(data.projectType ?? "custom", words),
               ),
+              formatCopy(words.personHoursValue, group(estimate.hours)),
               formatCopy(words.timelineAboutValueWeeks, estimate.weeks),
               formatCopy(words.teamValue, optionLabel(teamSize, words)),
               formatCopy(words.priceValue, group(estimate.price)),
@@ -233,12 +226,15 @@ export function Chatbot() {
 
   const handleOption = (option: string) => {
     if (option === QUOTE_CTA) {
-      const estimate = calculateEstimate(projectData);
+      const estimate = estimateProject(projectData);
       setQuote({
         projectType: projectData.projectType,
         description: projectData.details,
         teamSize: projectData.teamSize,
+        complexity: "simple",
+        features: [],
         estimatedPrice: estimate.price,
+        estimatedHours: estimate.hours,
         estimatedWeeks: estimate.weeks,
       });
       setIsOpen(false);
