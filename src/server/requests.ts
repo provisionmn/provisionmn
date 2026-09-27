@@ -55,7 +55,7 @@ export class SubmissionError extends Error {
   }
 }
 let pool: Pool | undefined;
-function getPool() {
+export function getPool() {
   if (!process.env.DATABASE_URL) throw new Error("Database unavailable");
   if (!pool) {
     pool = new Pool({
@@ -100,6 +100,11 @@ export async function saveSubmission(key: string, data: Submission) {
     await client.query(
       "INSERT INTO form_requests (id, idempotency_key, payload_hash, kind, email, payload) VALUES ($1, $2, $3, $4, $5, $6::jsonb)",
       [id, key, hash, data.kind, data.email, payload],
+    );
+    // Commit the notification with the request; SMTP never delays the response.
+    await client.query(
+      "INSERT INTO form_notifications (request_id) VALUES ($1)",
+      [id],
     );
     await client.query("COMMIT");
     return id;
