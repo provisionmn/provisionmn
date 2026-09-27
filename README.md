@@ -145,7 +145,7 @@ Internal — Provision.mn өмчийн материал.
 
    ```dotenv
    MAIL_ENABLED=true
-   SMTP_USER=provision.solution.mn@gmail.com
+   SMTP_USER=provision.solutions.mn@gmail.com
    SMTP_PASSWORD=<Gmail App password>
    MAIL_TO=ceo@provision.mn
    ```
