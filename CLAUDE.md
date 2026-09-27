@@ -12,6 +12,7 @@ Repository guidance shared by Claude and Codex.
 - `npm run lint` — ESLint Next.js Core Web Vitals + TypeScript, zero warnings
 - `npm test` — Vitest + Testing Library in jsdom (calculator/quote flow and contact validation)
 - `npm run test:watch` — watch tests while developing
+- `npm run test:browser` — Playwright desktop/mobile flows against an isolated local production build; setup and safety boundaries in `tests/browser/README.md`
 
 Run `npm ci`, `npm run lint`, `npm test`, `npm run typecheck`, and `npm run build` before a PR. CI gates the Docker build/push on lint, tests and typecheck; the Dockerfile runs the production build. Tests use real components/context and mock only Next navigation and missing jsdom geometry APIs. They do not verify browser layout. API tests mock persistence; `PG_INTEGRATION_URL` tests use real PostgreSQL with four connections and real migrations in a unique schema, dropped after the suite. The URL must target a disposable `provisionmn_test` database, never production. PostgreSQL tests are optional locally but mandatory in CI, which provides a PostgreSQL service. See README → PostgreSQL интеграцийн тест for setup. Keep tests in `tests/`; keep hydration-related lint exceptions local and explained.
 

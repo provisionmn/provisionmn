@@ -208,3 +208,10 @@ WHERE request_id = '<request UUID>' AND failed_at IS NOT NULL AND sent_at IS NUL
 ```
 
 Нэг request-д нэг notification, row lock + SKIP LOCKED нь зэрэг worker-уудын давхар илгээлтээс хамгаална. Sent болсон мэдэгдлийг дахин сонгохгүй. Гэхдээ SMTP хүлээн авсны дараа DB commit-оос өмнө сервер тасарвал дахин илгээгдэх боломжтой: SMTP нь exactly-once баталгаа өгөхгүй. Ижил Message-ID болон хүсэлтийн дугаар ашиглана. `sent_at` нь Gmail SMTP хүлээн авсныг заана; Inbox-д хүрснийг батлахгүй. Идэвхжүүлсний дараа бодит тест хүсэлтээр хүлээн авагчийн Inbox/Spam-ыг шалгана.
+
+## Browser regression tests
+
+Run `npx playwright install chromium webkit`, then `npm run test:browser`.
+This builds and runs a local-only app with mocked form/CAPTCHA responses.
+Desktop/mobile coverage, CI artifacts, isolated PostgreSQL tests and manual
+CAPTCHA/SMTP smoke-check boundaries: [browser testing guide](tests/browser/README.md).

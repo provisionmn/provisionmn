@@ -70,8 +70,34 @@ jobs:
           PG_INTEGRATION_URL: postgresql://provisionmn_test:integration_test_only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/provisionmn_test
       - run: npm run typecheck
 
+  browser:
+    name: Browser flows (desktop and mobile)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:browser
+      - name: Browser report, failure screenshots and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-results
+          path: |
+            .context/browser-report/
+            .context/browser-results/
+          include-hidden-files: true
+          retention-days: 14
+
   build:
-    needs: quality
+    needs: [quality, browser]
     runs-on: ubuntu-latest
     permissions:
       contents: read
