@@ -194,6 +194,7 @@ export function Chatbot() {
                 words.typeValue,
                 optionLabel(data.projectType ?? "custom", words),
               ),
+              formatCopy(words.personHoursValue, group(estimate.hours)),
               formatCopy(words.timelineAboutValueWeeks, estimate.weeks),
               formatCopy(words.teamValue, optionLabel(teamSize, words)),
               formatCopy(words.priceValue, group(estimate.price)),

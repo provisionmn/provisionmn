@@ -215,6 +215,7 @@ export const mnFlow = {
   estimateHeading: "Урьдчилсан тооцоо:",
   typeValue: "• Төрөл — {0}",
   timelineAboutValueWeeks: "• Хугацаа — ойролцоогоор {0} долоо хоног",
+  personHoursValue: "• Хүн-цаг — {0}",
   teamValue: "• Баг — {0}",
   priceValue: "• Үнэ — ₮{0}",
   thisIsAnIndicativeEstimateWouldYou:
@@ -445,6 +446,7 @@ export const enFlow = {
   estimateHeading: "Preliminary estimate:",
   typeValue: "• Type — {0}",
   timelineAboutValueWeeks: "• Timeline — about {0} weeks",
+  personHoursValue: "• Person-hours — {0}",
   teamValue: "• Team — {0}",
   priceValue: "• Price — ₮{0}",
   thisIsAnIndicativeEstimateWouldYou:
