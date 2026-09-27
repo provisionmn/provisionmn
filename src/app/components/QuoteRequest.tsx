@@ -1,5 +1,6 @@
 "use client";
 
+import { RequestFailure } from "./RequestFailure";
 import { Turnstile } from "./Turnstile";
 import { useRequestSubmit } from "../use-request-submit";
 import { useT } from "../i18n";
@@ -338,11 +339,7 @@ export function QuoteRequest() {
         onSubmit={handleSubmit}
         className="mt-8 space-y-6 rounded-2xl border border-border bg-card/70 p-6 elev-1 md:p-8"
       >
-        {request.failure && (
-          <p role="alert" className="text-sm text-destructive">
-            {intake[request.failure]}
-          </p>
-        )}
+        <RequestFailure request={request} />
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label htmlFor={`${uid}-name`} className={labelClass}>

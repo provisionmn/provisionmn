@@ -13,6 +13,7 @@ import {
   Phone,
   type LucideIcon,
 } from "lucide-react";
+import { RequestFailure } from "./RequestFailure";
 import { Turnstile } from "./Turnstile";
 import { useRequestSubmit } from "../use-request-submit";
 import { useT } from "../i18n";
@@ -208,11 +209,7 @@ export function Contact() {
                 onToken={request.setCaptchaToken}
                 onRetry={request.resetCaptcha}
               />
-              {request.failure && (
-                <p role="alert" className="text-sm text-destructive">
-                  {t.intake[request.failure]}
-                </p>
-              )}
+              <RequestFailure request={request} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor={`${id}-name`} className={labelClass}>

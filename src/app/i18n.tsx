@@ -16,6 +16,26 @@ const dicts = {
   mn: {
     flow: mnFlow,
     intake: {
+      invalid: "Дараах мэдээллийг засаж дахин илгээнэ үү.",
+      tooLarge: "Хүсэлтийн хэмжээ хэтэрсэн байна. Тайлбараа товчилж дахин илгээнэ үү.",
+      validation: {
+        kind: "Формыг дахин ачаалж оролдоно уу.",
+        name: "Нэр: 1–120 тэмдэгт оруулна уу.",
+        email: "Имэйл: зөв бичсэн хаяг оруулна уу (254 тэмдэгтээс ихгүй).",
+        phone: "Утас: үнийн санал авах бол +, тоо, зай, зураас ашиглан 6–40 тэмдэгт оруулна уу.",
+        company: "Байгууллагын нэр: 200 тэмдэгтээс ихгүй байна.",
+        projectType: "Төслийн төрлөө жагсаалтаас сонгоно уу.",
+        description: "Төслийн тайлбар: 20–5000 тэмдэгт оруулна уу.",
+        budget: "Төсөв: жагсаалтаас сонгоно уу (80 тэмдэгтээс ихгүй).",
+        timeline: "Хугацаа: жагсаалтаас сонгоно уу (80 тэмдэгтээс ихгүй).",
+        teamSize: "Багийн хэмжээ: жагсаалтаас сонгоно уу (80 тэмдэгтээс ихгүй).",
+        complexity: "Төслийн төвөгшлийг тооцоолуураас дахин сонгоно уу.",
+        features: "Нэмэлт боломж: 20 хүртэл сонголт, тус бүр 80 тэмдэгтээс ихгүй байна.",
+        estimatedPrice: "Тооцоолсон үнийг тооцоолуураар дахин гаргана уу.",
+        estimatedHours: "Тооцоолсон цагийг тооцоолуураар дахин гаргана уу.",
+        estimatedWeeks: "Тооцоолсон хугацааг тооцоолуураар дахин гаргана уу.",
+      },
+
       verification: "Ботын хамгаалалт",
       captcha: "Ботын шалгалтыг дуусгаад дахин илгээнэ үү.",
       retryVerification: "Шалгалтыг дахин ачаалах",
@@ -373,6 +393,26 @@ const dicts = {
   en: {
     flow: enFlow,
     intake: {
+      invalid: "Correct the following details and submit again.",
+      tooLarge: "Your request is too large. Shorten the description and try again.",
+      validation: {
+        kind: "Reload the form and try again.",
+        name: "Name: enter 1–120 characters.",
+        email: "Email: enter a valid address (up to 254 characters).",
+        phone: "Phone: quotes require 6–40 characters using digits, spaces, hyphens and an optional leading +.",
+        company: "Company name: use up to 200 characters.",
+        projectType: "Select a project type from the list.",
+        description: "Project description: enter 20–5000 characters.",
+        budget: "Select a budget from the list (up to 80 characters).",
+        timeline: "Select a timeline from the list (up to 80 characters).",
+        teamSize: "Select a team size from the list (up to 80 characters).",
+        complexity: "Select the project complexity again in the calculator.",
+        features: "Features: select up to 20 items, each up to 80 characters.",
+        estimatedPrice: "Recalculate the estimated price in the calculator.",
+        estimatedHours: "Recalculate the estimated hours in the calculator.",
+        estimatedWeeks: "Recalculate the estimated duration in the calculator.",
+      },
+
       verification: "Spam protection",
       captcha: "Complete the verification and submit again.",
       retryVerification: "Reload verification",
