@@ -48,7 +48,6 @@ interface QuoteFormData extends QuoteData {
   description: string;
   budget: string;
   timeline: string;
-  estimatedPrice: number;
   // The calculator/chatbot prefill can carry extra fields (complexity,
   // features, estimatedHours…) that are spread in verbatim.
 }
@@ -131,7 +130,20 @@ export function QuoteRequest() {
   };
 
   const setField = (field: keyof QuoteFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "projectType" && value !== prev.projectType) {
+        // Estimates and scope belong to the previous project type. Keep the
+        // user's contact details, description and delivery preferences.
+        delete next.estimatedPrice;
+        delete next.estimatedHours;
+        delete next.estimatedWeeks;
+        delete next.complexity;
+        delete next.features;
+        delete next.createdAt;
+      }
+      return next;
+    });
     // Clear a message once it stops applying, but never introduce a new one
     // mid-typing: fields the user has not reached yet stay unmarked.
     setErrors((prev) => {
@@ -307,7 +319,7 @@ export function QuoteRequest() {
 
       {/* The estimate the user arrived with, restated so the form does not
           look like it forgot. */}
-      {formData.estimatedPrice > 0 ? (
+      {formData.estimatedPrice !== undefined && formData.estimatedPrice > 0 ? (
         <div className="mt-8 rounded-2xl border border-primary/25 bg-primary/[0.06] p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
