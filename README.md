@@ -28,7 +28,7 @@ App Router дээрх 4 маршрут, бүгд статикаар prerender х
 
 Тооцоолуураас формд дамжих өгөгдлийг `src/app/quote-context.tsx` (`useQuote`) зөөнө — санах ойд л байдаг тул `/quote`-г дахин ачаалахад prefill арилж, хоосон форм гарна.
 
-Contact болон QuoteRequest нь `POST /api/requests` руу илгээж, PostgreSQL-ийн `form_requests` хүснэгтэд амжилттай хадгалсны дараа серверийн UUID дугаар харуулна. Имэйл мэдэгдэл хараахан холбогдоогүй. API нь серверийн validation, 16 KiB хэмжээний хязгаар, нэг имэйлээс 5/цаг, нийт 100/цаг хязгаар болон idempotency key ашиглана. Дахин оролдоход ижил мэдээлэлтэй хүсэлт давхар хадгалагдахгүй. Client-ийн тооцоолсон үнэ нь албан ёсны үнэ биш.
+Contact болон QuoteRequest нь `POST /api/requests` руу илгээж, PostgreSQL-ийн `form_requests` хүснэгтэд амжилттай хадгалсны дараа серверийн UUID дугаар харуулна. Шинэ хүсэлт бүрийн имэйл мэдэгдэл `form_notifications` дараалалд хамт хадгалагдаж, SMTP worker тусад нь илгээнэ. SMTP алдаа формын хадгалалт болон амжилтын хариуг саатуулахгүй. API нь серверийн validation, 16 KiB хэмжээний хязгаар, нэг имэйлээс 5/цаг, нийт 100/цаг хязгаар болон idempotency key ашиглана. Дахин оролдоход ижил мэдээлэлтэй хүсэлт давхар хадгалагдахгүй. Client-ийн тооцоолсон үнэ нь албан ёсны үнэ биш.
 
 Хэлийг `LanguageProvider` (`src/app/i18n.tsx`)-аар удирддаг, localStorage-д хадгална. Landing болон ServicesDetail / PriceCalculator / QuoteRequest / Chatbot бүгд `useT()`-ээр орчуулагдана. Дэд хуудсуудын текст `src/app/flow-copy.ts`-д бий; сонголтын утгууд хэлнээс үл хамаарах ID ашиглана.
 
@@ -64,7 +64,7 @@ npm run test:watch # тестийг өөрчлөлт бүрд ажиллуула
 5. GA4 Web stream → Enhanced measurement → Page views → Advanced settings дахь **Page changes based on browser history events**-ийг асаана. App Router шилжилтийг үүгээр хэмжинэ; давхар custom `page_view` илгээхгүй.
 6. Deploy-ийн дараа Analytics Realtime/DebugView дээр нүүр → `/services` → `/calculator` → `/quote`, browser back/forward шилжилтийг шалгана. Initial load болон шилжилт бүр нэг `page_view` үүсэх ёстой. Зар хаагч хэмжилтийг зогсоож болно.
 
-Формууд одоогоор backend-гүй тул form interactions хэмжилтийг GA4 дээр унтрааж, амжилттай lead гэж тооцохгүй. Код формын утга, имэйл, утас болон тайлбарыг custom event-р илгээхгүй.
+GA4-ийн автомат form interactions нь баазад хадгалагдсан хүсэлтийг батлахгүй тул амжилттай lead гэж тооцохгүй. Код формын утга, имэйл, утас болон тайлбарыг custom event-р илгээхгүй.
 
 Лавлах: [Next.js Google Analytics](https://nextjs.org/docs/app/guides/third-party-libraries#google-analytics), [GA4 SPA measurement](https://developers.google.com/analytics/devguides/collection/ga4/single-page-applications).
 
@@ -135,3 +135,40 @@ Internal — Provision.mn өмчийн материал.
 5. Production-д хоёр формын challenge, илгээлт, token хугацаа дуусах/дахин оролдох болон rate limit-ийг browser-оор шалгана. Шинэ token авахад idempotency key хадгалагдах тул сүлжээний дараах retry нь давхар бүртгэл үүсгэхгүй.
 
 Локал `.env.local`-д Cloudflare-ийн [test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/), `APP_ORIGIN=http://localhost:3000` ашиглана. Test keys-г production-д бүү ашигла. [Server verification](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/) болон [Traefik rate limits](https://doc.traefik.io/traefik/v3.5/reference/routing-configuration/http/middlewares/ratelimit/).
+
+
+### Gmail SMTP мэдэгдэл (PRO-83)
+
+1. Migration `001`-ийн дараа `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f deploy/migrations/002_form_notifications.sql` ажиллуулна. Хуучин хүсэлтүүдийг автоматаар имэйлээр илгээхгүй; шинэ кодын хадгалсан хүсэлт бүр нэг notification үүсгэнэ. Migration 002-г шинэ image deploy хийхээс **өмнө** ажиллуулах шаардлагатай.
+2. Gmail бүртгэл дээр 2-Step Verification асааж, [App password](https://support.google.com/accounts/answer/185833) үүсгэнэ. Үндсэн Gmail нууц үгийг ашиглахгүй.
+3. VPS `/opt/provision/provisionmn/database.env` (0600) файлд дараах runtime утгуудыг нэмнэ. Нууцыг repository, GitHub public variable эсвэл чатад оруулахгүй:
+
+   ```dotenv
+   MAIL_ENABLED=true
+   SMTP_USER=provision.solutions.mn@gmail.com
+   SMTP_PASSWORD=<Gmail App password>
+   MAIL_TO=ceo@provision.mn
+   ```
+
+4. Deploy/recreate хийсний дараа шинэ runtime тохиргоо уншигдана. Нэмэлт Compose service эсвэл public endpoint байхгүй. `src/instrumentation.ts` нь байнга ажилладаг VPS Node сервер дотор worker эхлүүлнэ; serverless орчинд энэ polling worker тохирохгүй. `MAIL_ENABLED` байхгүй/false үед worker асахгүй, дараалал баазад үлдэнэ. SMTP тохиргоо буруу бол засч restart хийнэ.
+5. Worker 10 секунд тутам тав хүртэл мэдэгдэл боловсруулна. Gmail `smtp.gmail.com:465` TLS ашиглана. Илгээгч болон хүлээн авагч зөвхөн серверийн тохиргооноос; Reply-To нь форм бөглөсөн хүний хаяг. Имэйл энгийн текст, хүсэлтийн дугаар, холбоо барих мэдээлэл, төслийн дэлгэрэнгүйтэй. Үнийн тооцоо албан ёсны санал биш гэдгийг тэмдэглэнэ.
+6. Алдааны дараа 1 минут, 5 минут, 30 минут, 2 цаг, 12 цагийн зайтай дахин оролдоно (нийт 6 оролдлого). Дараа нь `failed_at` тэмдэглэж операторын засвар хүлээнэ. Log-д нууц, имэйл агуулга, SMTP raw алдаа бичихгүй.
+
+Операторын шалгалт (хувийн мэдээлэл харуулахгүй):
+
+```sql
+SELECT count(*) FILTER (WHERE sent_at IS NOT NULL) AS sent,
+       count(*) FILTER (WHERE sent_at IS NULL AND failed_at IS NULL) AS pending,
+       count(*) FILTER (WHERE failed_at IS NOT NULL) AS failed
+FROM form_notifications;
+```
+
+Шалтгааныг зассаны дараа зөвхөн шаардлагатай failed хүсэлтийг дахин оролдуулах:
+
+```sql
+UPDATE form_notifications
+SET attempts = 0, failed_at = NULL, next_attempt_at = now()
+WHERE request_id = '<request UUID>' AND failed_at IS NOT NULL AND sent_at IS NULL;
+```
+
+Нэг request-д нэг notification, row lock + SKIP LOCKED нь зэрэг worker-уудын давхар илгээлтээс хамгаална. Sent болсон мэдэгдлийг дахин сонгохгүй. Гэхдээ SMTP хүлээн авсны дараа DB commit-оос өмнө сервер тасарвал дахин илгээгдэх боломжтой: SMTP нь exactly-once баталгаа өгөхгүй. Ижил Message-ID болон хүсэлтийн дугаар ашиглана. `sent_at` нь Gmail SMTP хүлээн авсныг заана; Inbox-д хүрснийг батлахгүй. Идэвхжүүлсний дараа бодит тест хүсэлтээр хүлээн авагчийн Inbox/Spam-ыг шалгана.

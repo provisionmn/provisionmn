@@ -16,6 +16,7 @@ vi.mock("pg", async (importOriginal) => {
   };
 });
 import { saveSubmission, submissionSchema } from "../src/server/requests";
+import { deliverNextNotification } from "../src/server/notifications";
 const enabled = Boolean(process.env.PG_INTEGRATION_URL);
 let pool: InstanceType<typeof RealPool>;
 beforeAll(async () => {
@@ -31,6 +32,9 @@ beforeAll(async () => {
     id uuid PRIMARY KEY, idempotency_key uuid UNIQUE NOT NULL, payload_hash text NOT NULL,
     kind text NOT NULL, email text NOT NULL, payload jsonb NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now())`);
+  await pool.query(`CREATE TEMP TABLE form_notifications (
+    request_id uuid PRIMARY KEY REFERENCES form_requests(id), attempts integer NOT NULL DEFAULT 0,
+    next_attempt_at timestamptz NOT NULL DEFAULT now(), sent_at timestamptz, failed_at timestamptz)`);
 });
 afterAll(async () => {
   if (enabled) await pool.end();
@@ -53,6 +57,28 @@ it.skipIf(!enabled)(
     const rows = await pool.query("SELECT payload FROM form_requests");
     expect(rows.rows).toHaveLength(1);
     expect(rows.rows[0].payload.name).toBe("O'Brien");
+    expect((await pool.query("SELECT * FROM form_notifications")).rows).toHaveLength(1);
+    const send = vi.fn().mockRejectedValueOnce(new Error("SMTP down")).mockResolvedValue(undefined);
+    await deliverNextNotification(send);
+    expect((await pool.query("SELECT attempts, sent_at, failed_at FROM form_notifications")).rows[0])
+      .toEqual({ attempts: 1, sent_at: null, failed_at: null });
+    expect(await deliverNextNotification(send)).toBe(false);
+    await pool.query("UPDATE form_notifications SET next_attempt_at = now()");
+    await Promise.all([deliverNextNotification(send), deliverNextNotification(send)]);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect((await pool.query("SELECT sent_at FROM form_notifications")).rows[0].sent_at).not.toBeNull();
+    // A permanently failing notification stops after the sixth attempt.
+    await pool.query("UPDATE form_notifications SET sent_at = NULL, attempts = 5, next_attempt_at = now()");
+    await deliverNextNotification(vi.fn().mockRejectedValue(new Error("SMTP down")));
+    const failed = (await pool.query("SELECT attempts, failed_at FROM form_notifications")).rows[0];
+    expect(failed.attempts).toBe(6);
+    expect(failed.failed_at).not.toBeNull();
+    expect(await deliverNextNotification(send)).toBe(false);
+    // Queue insertion failure must roll back the request in the same transaction.
+    await pool.query("ALTER TABLE form_notifications ADD CONSTRAINT test_enqueue_failure CHECK (false) NOT VALID");
+    await expect(saveSubmission(crypto.randomUUID(), data)).rejects.toThrow();
+    expect((await pool.query("SELECT * FROM form_requests")).rows).toHaveLength(1);
+    await pool.query("ALTER TABLE form_notifications DROP CONSTRAINT test_enqueue_failure");
     await expect(
       saveSubmission(key, { ...data, name: "Changed" }),
     ).rejects.toMatchObject({ status: 409 });
