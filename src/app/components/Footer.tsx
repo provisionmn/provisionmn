@@ -1,25 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { Github, Linkedin, Mail, Twitter, type LucideIcon } from "lucide-react";
+import { Github, Mail, type LucideIcon } from "lucide-react";
 import { Logo } from "./Logo";
 import { useT } from "../i18n";
 
-/**
- * Destinations live here rather than in the dictionary because they are the
- * same in every language. `href: null` means "no destination published yet" —
- * those entries render as plain text instead of a link, so the footer never
- * ships an `href="#"` that silently does nothing.
- */
-const socials: { icon: LucideIcon; label: string; href: string | null }[] = [
+// Only publish destinations confirmed by the owner (PRO-98).
+const socials: { icon: LucideIcon; label: string; href: string }[] = [
   { icon: Mail, label: "Email", href: "mailto:ceo@provision.mn" },
-  { icon: Github, label: "GitHub", href: null },
-  { icon: Linkedin, label: "LinkedIn", href: null },
-  { icon: Twitter, label: "Twitter", href: null },
+  { icon: Github, label: "GitHub", href: "https://github.com/provisionmn" },
 ];
 
-// Indexed against `t.footer.companyLinks` / `t.footer.serviceLinks`.
-const companyHrefs: (string | null)[] = ["/#about", "/#portfolio", null, null];
+const companyLinks = [
+  { key: "about", href: "/#about" },
+  { key: "portfolio", href: "/#portfolio" },
+] as const;
 const serviceHref = "/#services";
 
 export function Footer() {
@@ -37,18 +32,16 @@ export function Footer() {
               {t.footer.tagline}
             </p>
             <div className="flex items-center gap-3 text-muted-foreground">
-              {socials
-                .filter((s) => s.href)
-                .map(({ icon: Icon, label, href }) => (
-                  <a
-                    key={label}
-                    href={href as string}
-                    className="rounded-md hover:text-foreground transition-colors"
-                    aria-label={label}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </a>
-                ))}
+              {socials.map(({ icon: Icon, label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  className="rounded-md hover:text-foreground transition-colors"
+                  aria-label={label}
+                >
+                  <Icon className="h-5 w-5" />
+                </a>
+              ))}
             </div>
           </div>
 
@@ -75,32 +68,23 @@ export function Footer() {
               {t.footer.company}
             </h3>
             <ul className="space-y-3 text-sm">
-              {t.footer.companyLinks.map((c, i) => (
-                <li key={c}>
-                  {companyHrefs[i] ? (
-                    <Link
-                      href={companyHrefs[i] as string}
-                      className="text-foreground/80 hover:text-foreground transition-colors"
-                    >
-                      {c}
-                    </Link>
-                  ) : (
-                    <span className="text-muted-foreground/60">{c}</span>
-                  )}
+              {companyLinks.map(({ key, href }) => (
+                <li key={key}>
+                  <Link
+                    href={href}
+                    className="text-foreground/80 hover:text-foreground transition-colors"
+                  >
+                    {t.footer.companyLinks[key]}
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        {/* Policy links can be added once the owner supplies approved copy. */}
+        <div className="mt-12 pt-8 border-t border-border">
           <p className="text-xs font-mono text-muted-foreground">{rights}</p>
-          {/* Terms and privacy have no pages yet; shown as plain text until
-              real copy exists rather than as links that go nowhere. */}
-          <div className="flex items-center gap-6 text-xs text-muted-foreground/60">
-            <span>{t.footer.terms}</span>
-            <span>{t.footer.privacy}</span>
-          </div>
         </div>
       </div>
     </footer>
