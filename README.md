@@ -55,6 +55,40 @@ npm run test:watch # тестийг өөрчлөлт бүрд ажиллуула
 
 `tests/` дэх jsdom тестүүд тооцоолуурын үнэ, нэмэлт функц хасах, тайлбарын урт, calculator → quote prefill болон формын validation-ийг шалгана. Бодит browser layout, network/backend хүргэлтийг шалгахгүй. Тестийн үед зөвхөн Next navigation болон jsdom-д байхгүй хэмжилт/scroll API-г орлуулна.
 
+### PostgreSQL интеграцийн тест
+
+Node.js 22, npm болон Docker ажиллаж байх шаардлагатай. Цэвэр checkout дээр `npm ci` ажиллуулаад зөвхөн тестэд зориулсан түр PostgreSQL 18 контейнер асаана. Доорх хэрэглэгч/нууц үг нь зөвхөн энэ локал контейнерийн жишээ; production тохиргоо ашиглахгүй.
+
+```bash
+docker run --detach --rm --name provisionmn-pg-test \
+  -e POSTGRES_USER=provisionmn_test \
+  -e POSTGRES_PASSWORD=integration_test_only \
+  -e POSTGRES_DB=provisionmn_test \
+  -p 127.0.0.1:55432:5432 \
+  --health-cmd='pg_isready -U provisionmn_test -d provisionmn_test' \
+  --health-interval=2s --health-timeout=5s --health-retries=15 \
+  postgres:18
+# healthy болсон үед тест ажиллуулна:
+docker inspect --format '{{.State.Health.Status}}' provisionmn-pg-test
+export PG_INTEGRATION_URL='postgresql://provisionmn_test:integration_test_only@127.0.0.1:55432/provisionmn_test'
+npm test -- tests/request-storage.test.tsx  # зөвхөн PostgreSQL тест
+npm run lint
+npm test                                 # бүх тест, PostgreSQL орно
+npm run typecheck
+npm run build
+# Дууссаны дараа түр контейнер болон өгөгдлийг устгана:
+docker stop provisionmn-pg-test
+unset PG_INTEGRATION_URL
+```
+
+Docker-гүй бол локал PostgreSQL 18 дээр тусдаа `provisionmn_test` бааз үүсгээд schema үүсгэх эрхтэй тест хэрэглэгчийн URL-г `PG_INTEGRATION_URL`-д өгнө. `DATABASE_URL`-ийг тестийн холбоос болгон ашиглахгүй. URL заавал `provisionmn_test` баазыг заах ёстой; production бааз/хэрэглэгчийг ашиглаж болохгүй.
+
+Suite бүр UUID-тай тусдаа schema үүсгэж, `deploy/migrations/001_form_requests.sql`, `002_form_notifications.sql`-ийг ажиллуулна. Бүх connection зөвхөн тэр schema-г `search_path`-даа ашиглана (`public` fallback байхгүй). Тест бүрийн өмнө хоёр хүснэгтийг цэвэрлэж, suite дуусахад connection-уудыг хаан schema-г устгана. TEMP хүснэгт нь зөвхөн нэг session-д харагддаг тул ашиглахгүй. Процессыг хүчээр зогсоосон бол түр контейнерийг устгах нь үлдсэн schema-г хамт цэвэрлэнэ; native PostgreSQL ашигласан бол зөвхөн тухайн run-ийн `request_storage_…` schema-г цэвэрлэнэ.
+
+Тест нь дөрвөн өөр PostgreSQL backend зэрэг lock хүлээж байгааг баталж, idempotent retry, payload conflict, нэг илгээгчийн 5/цаг ба нийт 100/цаг хязгаарыг шалгана. Notification worker-ийн эхний илгээлтийг зориуд хүлээлгэж, өөр worker `SKIP LOCKED`-оор дараагийн мэдэгдлийг боловсруулахыг шалгана. Хүсэлт/outbox хамт commit, enqueue алдааны rollback, retry backoff, зургаа дахь оролдлогын terminal failure мөн шалгагдана. SMTP илгээлтийг орлуулдаг тул бодит имэйл явуулахгүй.
+
+`.github/workflows/docker.yml`-ийн `quality` job дээр healthcheck-тэй тусгаарласан PostgreSQL 18 service асаж, `npm test` алхамд `PG_INTEGRATION_URL` өгнө. Secret болон production бааз шаардлагагүй. `CI=true` үед URL дутвал suite алгасахын оронд шалгалт унана. Локалд URL өгөөгүй үед зөвхөн PostgreSQL suite алгасагдана; URL өгсөн ч баазтай холбогдохгүй бол алдаа гарна. CI-д quality амжилттай болсны дараа Dockerfile production build ажиллана.
+
 ## Google Analytics 4
 
 Бүх маршрут root layout дахь `@next/third-parties/google`-ийн `GoogleAnalytics` ашиглана. Скрипт hydration-ийн дараа ачаална. `NEXT_PUBLIC_GA_MEASUREMENT_ID` хоосон/буруу эсвэл `npm run dev` үед Analytics ачаалахгүй.
@@ -124,7 +158,7 @@ Internal — Provision.mn өмчийн материал.
 - VPS native PostgreSQL: `provisionmn` бааз, `provisionmn_app` role. Нууц тохиргоо `/opt/provision/provisionmn/database.env` (0600), host `172.18.0.1:5432`; Compose энэ файлыг runtime-д уншина.
 - Deploy хийхээс өмнө migration-г ажиллуулж, шинэ `deploy/docker-compose.yml`-ийг хостын `/opt/provision/provisionmn/docker-compose.yml` руу хуулна. CI нь энэ файлыг автоматаар sync хийдэггүй. Runtime тохиргоо бэлэн болсны дараа шинэ image deploy хийнэ.
 - Хүсэлт унших public API байхгүй. Эрхтэй оператор PostgreSQL-ээс хүсэлтүүдийг үзнэ. Backup-д `pg_dump -Fc provisionmn` ашиглаж, хандалт хязгаарласан хадгалалт болон retention-ийг тохируулна; энэ PR автомат backup эсвэл админ UI нэмэхгүй.
-- `PG_INTEGRATION_URL` тохируулсан үед `npm test -- tests/request-storage.test.tsx` бодит PostgreSQL дээр session-local TEMP хүснэгт ашиглан insert, concurrent retry, conflict, rate limit-ийг шалгана. Production хүснэгтэд тест өгөгдөл оруулахгүй.
+- PostgreSQL тестийн тусгаарласан бааз, олон connection, cleanup болон CI тохиргоог дээрх [PostgreSQL интеграцийн тест](#postgresql-интеграцийн-тест) хэсгээс үзнэ үү.
 - Хоёр форм Cloudflare Turnstile ашиглана. Сервер Siteverify-ээр success, hostname болон `form_request` action-ийг шалгана. Түлхүүр дутуу, token хүчингүй, эсвэл үйлчилгээ ажиллахгүй үед хүсэлт хадгалахгүй.
 - API-д Traefik RemoteAddr-аар IP бүрийн 5/минут (burst 10) хязгаар болон нийт 20 зэрэг хүсэлтийн хязгаар тавьсан. Database-ийн цагийн хязгаар давхар үйлчилнэ. Энэ нь шууд Traefik-д ханддаг одоогийн VPS-д зориулагдсан; CDN/proxy урд нь нэмбэл trusted proxy/IP тохиргоог дахин шалгана. `X-Forwarded-For`-ийг application дотроос шууд итгэж ашиглахгүй.
 
