@@ -12,7 +12,7 @@ import { useT } from "../i18n";
  * ships an `href="#"` that silently does nothing.
  */
 const socials: { icon: LucideIcon; label: string; href: string | null }[] = [
-  { icon: Mail, label: "Email", href: "mailto:hello@provision.mn" },
+  { icon: Mail, label: "Email", href: "mailto:ceo@provision.mn" },
   { icon: Github, label: "GitHub", href: null },
   { icon: Linkedin, label: "LinkedIn", href: null },
   { icon: Twitter, label: "Twitter", href: null },

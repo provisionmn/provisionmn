@@ -49,14 +49,14 @@ export function Contact() {
     {
       icon: Mail,
       label: t.contact.info.email,
-      value: "hello@provision.mn",
-      href: "mailto:hello@provision.mn",
+      value: "ceo@provision.mn",
+      href: "mailto:ceo@provision.mn",
     },
     {
       icon: Phone,
       label: t.contact.info.phone,
-      value: "+976 7777-7777",
-      href: "tel:+97677777777",
+      value: "+976 7211-2773",
+      href: "tel:+97672112773",
     },
     {
       icon: MapPin,
@@ -161,11 +161,11 @@ export function Contact() {
               {t.contact.sub}
             </p>
             <a
-              href="mailto:hello@provision.mn"
+              href="mailto:ceo@provision.mn"
               className="mt-10 inline-flex items-center gap-3 rounded-full border border-border bg-card px-7 py-3.5 font-mono text-sm text-foreground transition-colors hover:border-primary/50"
             >
               <Mail strokeWidth={1.5} className="h-4 w-4 text-brand" />
-              hello@provision.mn
+              ceo@provision.mn
             </a>
           </div>
         </div>
