@@ -60,7 +60,7 @@ it("rejects cross-origin, malformed and oversized requests", async () => {
     403,
   );
   expect(
-    (await POST(request({ ...valid, description: "a".repeat(17000) }))).status,
+    (await POST(request({ ...valid, description: "a".repeat(33000) }))).status,
   ).toBe(413);
   const malformed = request();
   malformed.headers.delete("idempotency-key");
@@ -120,4 +120,24 @@ it("sends the token to verification but does not persist it", async () => {
   expect(vi.mocked(saveSubmission).mock.calls[0][1]).not.toHaveProperty(
     "captchaToken",
   );
+});
+
+it("returns only safe field names for validation failures", async () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  const response = await POST(request({ ...valid, name: "n".repeat(121), email: "private-invalid-value" }));
+  expect(response.status).toBe(400);
+  expect(await response.json()).toEqual({ error: "invalid_request", fields: ["name", "email"] });
+  expect(warn).toHaveBeenCalledWith("Form validation rejected fields", "name,email");
+  expect(saveSubmission).not.toHaveBeenCalled();
+});
+
+it("accepts a schema-valid Unicode request near all field limits", async () => {
+  vi.mocked(saveSubmission).mockResolvedValue(id);
+  const response = await POST(request({
+    ...valid, name: "Ө".repeat(120), description: "Ө".repeat(5000),
+    company: "Ө".repeat(200), phone: "1".repeat(40), projectType: "Ө".repeat(120),
+    budget: "Ө".repeat(80), timeline: "Ө".repeat(80), teamSize: "Ө".repeat(80),
+    complexity: "Ө".repeat(80), features: Array(20).fill("Ө".repeat(80)), captchaToken: "x".repeat(2048),
+  }));
+  expect(response.status).toBe(201);
 });

@@ -1,5 +1,6 @@
 import { verifyTurnstile } from "../../../server/turnstile";
 import { z } from "zod";
+import { isSubmissionField } from "../../../shared/submission";
 import {
   saveSubmission,
   submissionSchema,
@@ -7,7 +8,7 @@ import {
 } from "../../../server/requests";
 
 export const runtime = "nodejs";
-const MAX_BYTES = 16 * 1024;
+const MAX_BYTES = 32 * 1024;
 const respond = (body: object, status: number) =>
   Response.json(body, {
     status,
@@ -52,7 +53,12 @@ export async function POST(request: Request) {
     return respond({ error: "invalid_request" }, 400);
   }
   const parsed = submissionSchema.safeParse(input);
-  if (!parsed.success) return respond({ error: "invalid_request" }, 400);
+  if (!parsed.success) {
+    const fields = [...new Set(parsed.error.issues.map((issue) => issue.path[0]).filter(isSubmissionField))];
+    // Field names only: never log input values, tokens or schema error messages.
+    console.warn("Form validation rejected fields", fields.join(","));
+    return respond({ error: "invalid_request", fields }, 400);
+  }
   const token =
     typeof input === "object" && input !== null && "captchaToken" in input
       ? input.captchaToken

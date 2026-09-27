@@ -134,3 +134,39 @@ vi.mock("../src/app/components/Turnstile", async () => {
     },
   };
 });
+
+it.each(["mn", "en"])("explains server email constraints before sending (%s)", async (lang) => {
+  localStorage.setItem("lang", lang);
+  const { container } = render(<LanguageProvider><Contact /></LanguageProvider>);
+  fireEvent.change(screen.getByLabelText(lang === "en" ? "Name" : "Нэр"), { target: { value: "Test" } });
+  fireEvent.change(screen.getByLabelText(lang === "en" ? "Email" : "И-мэйл"), { target: { value: "a..b@example.com" } });
+  fireEvent.change(screen.getByLabelText(lang === "en" ? "Brief" : "Төслийн товч тайлбар"), { target: { value: "A new order management website" } });
+  fireEvent.submit(container.querySelector("form")!);
+  expect(await screen.findByRole("alert")).toHaveTextContent(lang === "en" ? "Email: enter a valid address" : "Имэйл: зөв бичсэн хаяг");
+  expect(fetch).not.toHaveBeenCalled();
+  expect(screen.getByLabelText(lang === "en" ? "Email" : "И-мэйл")).toHaveValue("a..b@example.com");
+});
+
+it("sends normalized contact data without duplicating the brief", async () => {
+  const { container } = render(<LanguageProvider><Contact /></LanguageProvider>);
+  fireEvent.change(screen.getByLabelText("Нэр"), { target: { value: " Test " } });
+  fireEvent.change(screen.getByLabelText("И-мэйл"), { target: { value: "TEST@EXAMPLE.COM" } });
+  fireEvent.change(screen.getByLabelText("Төслийн товч тайлбар"), { target: { value: "Ө".repeat(5000) } });
+  fireEvent.submit(container.querySelector("form")!);
+  await screen.findByText("Хүсэлт хүлээн авлаа");
+  const body = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string);
+  expect(body).toMatchObject({ name: "Test", email: "test@example.com", description: "Ө".repeat(5000) });
+  expect(body).not.toHaveProperty("brief");
+});
+
+it("shows returned field guidance and preserves entered data on server validation failure", async () => {
+  vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 400, json: async () => ({ error: "invalid_request", fields: ["email", "untrusted-field"] }) } as Response);
+  const { container } = render(<LanguageProvider><Contact /></LanguageProvider>);
+  fireEvent.change(screen.getByLabelText("Нэр"), { target: { value: "Test" } });
+  fireEvent.change(screen.getByLabelText("И-мэйл"), { target: { value: "test@example.com" } });
+  fireEvent.change(screen.getByLabelText("Төслийн товч тайлбар"), { target: { value: "A new order management website" } });
+  fireEvent.submit(container.querySelector("form")!);
+  expect(await screen.findByRole("alert")).toHaveTextContent("Имэйл: зөв бичсэн хаяг");
+  expect(screen.queryByText("untrusted-field")).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Нэр")).toHaveValue("Test");
+});
