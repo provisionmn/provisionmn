@@ -39,13 +39,13 @@ beforeEach(() => {
 
 describe("calculator → quote", () => {
   it.each([
-    ["Вэб сайт", "Энгийн", 40, 3520000],
-    ["Мобайл апп", "Дундаж", 120, 10560000],
-    ["Odoo ERP", "Энтерпрайз", 480, 42240000],
-    ["Захиалгат шийдэл", "Төвөгтэй", 150, 13200000],
+    ["Вэб сайт", "Энгийн", 40, 3520000, 1],
+    ["Мобайл апп", "Дундаж", 120, 10560000, 3],
+    ["Odoo ERP", "Энтерпрайз", 480, 42240000, 12],
+    ["Захиалгат шийдэл", "Төвөгтэй", 150, 13200000, 4],
   ])(
     "calculates %s / %s and prefills the quote",
-    async (project, complexity, hours, price) => {
+    async (project, complexity, hours, price, weeks) => {
       mount();
       const user = userEvent.setup();
       await user.click(
@@ -58,6 +58,7 @@ describe("calculator → quote", () => {
         screen.getByRole("textbox"),
         "Харилцагчийн захиалга удирдах шинэ систем",
       );
+      expect(screen.getByText(`~${weeks} 7 хоног`)).toBeInTheDocument();
       await user.click(submit());
       expect(navigation.push).toHaveBeenCalledWith("/quote");
       const quote = JSON.parse(screen.getByTestId("quote").textContent!);
@@ -80,6 +81,7 @@ describe("calculator → quote", () => {
         )[complexity],
         estimatedHours: hours,
         estimatedPrice: price,
+        estimatedWeeks: weeks,
       });
       expect(screen.getByLabelText(/Төслийн дэлгэрэнгүй тайлбар/)).toHaveValue(
         quote.description,
@@ -87,6 +89,59 @@ describe("calculator → quote", () => {
       expect(
         screen.getByRole("combobox", { name: /Төслийн төрөл/ }),
       ).toHaveTextContent(project);
+    },
+  );
+
+  it.each(["urgent", "long"])(
+    "sends the displayed weeks to the API separately from the %s timeline",
+    async (timeline) => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+        ok: true,
+        json: async () => ({ id: "a13bd758-91c2-4db6-adc5-0e6de1575745" }),
+      } as Response);
+      mount();
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("radio", { name: /^Захиалгат шийдэл/ }));
+      await user.click(screen.getByRole("radio", { name: /^Төвөгтэй/ }));
+      await user.click(screen.getByRole("radio", { name: /^Яаралтай/ }));
+      await user.type(
+        screen.getByRole("textbox"),
+        "Захиалга удирдах шинэ систем хэрэгтэй",
+      );
+
+      const displayedWeeks = Number(
+        screen.getByText(/^~\d+ 7 хоног$/).textContent!.match(/\d+/)![0],
+      );
+      expect(displayedWeeks).toBe(4);
+      await user.click(submit());
+      expect(JSON.parse(screen.getByTestId("quote").textContent!)).toMatchObject({
+        estimatedWeeks: displayedWeeks,
+        timeline: "urgent",
+      });
+      const timelineSelect = screen.getByRole("combobox", { name: /Хугацаа/ });
+      expect(timelineSelect).toHaveTextContent("Яаралтай");
+      if (timeline === "long") {
+        timelineSelect.focus();
+        await user.keyboard("{ArrowDown}");
+        await user.click(
+          await screen.findByRole("option", { name: /Урт хугацаа/ }),
+        );
+      }
+      await user.type(screen.getByLabelText(/Овог нэр/), "Тест Хэрэглэгч");
+      await user.type(screen.getByLabelText(/Имэйл хаяг/), "test@example.com");
+      await user.type(screen.getByLabelText(/Утас/), "99112233");
+      await user.click(screen.getByRole("button", { name: "Хүсэлт илгээх" }));
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/requests",
+        expect.objectContaining({ method: "POST" }),
+      );
+      expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toMatchObject({
+        kind: "quote",
+        estimatedWeeks: displayedWeeks,
+        timeline,
+      });
     },
   );
 

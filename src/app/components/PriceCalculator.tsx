@@ -284,6 +284,7 @@ export function PriceCalculator() {
       description,
       estimatedPrice: estimate.price,
       estimatedHours: estimate.hours,
+      estimatedWeeks: estimate.weeks,
       createdAt: new Date().toISOString(),
     });
     router.push("/quote");
