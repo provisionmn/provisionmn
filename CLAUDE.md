@@ -2,6 +2,38 @@
 
 Repository guidance shared by Claude and Codex.
 
+## Linear issue titles
+
+Use `[PMN][TAG] Товч, тодорхой ажлын нэр` for Linear issues in this project.
+`[PMN]` identifies the provisionmn project in cross-project issue lists and
+must always come first. Follow it with exactly one task-type tag and one
+space before the summary. Choose the tag by the main purpose of the task:
+
+| Prefix | Purpose |
+| --- | --- |
+| `[FEAT]` | Add new functionality |
+| `[FIX]` | Correct a bug or incorrect behavior |
+| `[MOD]` | Change existing functionality or content |
+| `[TEST]` | Add or improve tests |
+| `[REFACTOR]` | Restructure code without changing behavior |
+| `[CHORE]` | Maintain tooling, configuration, dependencies or documentation |
+
+Write the summary in clear Mongolian; keep technical names where useful.
+Examples: `[PMN][FEAT] Хүсэлт ирэхэд имэйл мэдэгдэл илгээх`,
+`[PMN][FIX] Үнийн саналын хугацааг зөв дамжуулах`,
+`[PMN][CHORE] Linear даалгаврын нэрлэх дүрмийг баримтжуулах`.
+
+Apply this format when creating an issue or explicitly editing its title.
+Preserve an existing `[PMN]` and valid task-type tag; never duplicate either.
+For a legacy `[TAG]` title, prepend `[PMN]`. If the task's purpose changes,
+replace the task-type tag instead of appending another one. A status,
+description or PR-link update alone does not require renaming the issue.
+Do not bulk-rename historical issues unless the user requests it.
+
+This is a title convention: Linear's generated identifier (such as `PRO-104`)
+stays unchanged and is not repeated in the title. Follow the shared Linear
+workflow for project selection, issue reuse, status updates and PR links.
+
 ## Commands
 
 - `npm i` — install dependencies (plain `npm install`; no `.npmrc`, no peer-dep flags needed)
