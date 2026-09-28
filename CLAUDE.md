@@ -4,9 +4,10 @@ Repository guidance shared by Claude and Codex.
 
 ## Linear issue titles
 
-Use `[TAG] Товч, тодорхой ажлын нэр` for Linear issues in this project. The
-title has exactly one uppercase prefix followed by one space. Choose the tag
-by the main purpose of the task:
+Use `[PMN][TAG] Товч, тодорхой ажлын нэр` for Linear issues in this project.
+`[PMN]` identifies the provisionmn project in cross-project issue lists and
+must always come first. Follow it with exactly one task-type tag and one
+space before the summary. Choose the tag by the main purpose of the task:
 
 | Prefix | Purpose |
 | --- | --- |
@@ -18,13 +19,14 @@ by the main purpose of the task:
 | `[CHORE]` | Maintain tooling, configuration, dependencies or documentation |
 
 Write the summary in clear Mongolian; keep technical names where useful.
-Examples: `[FEAT] Хүсэлт ирэхэд имэйл мэдэгдэл илгээх`,
-`[FIX] Үнийн саналын хугацааг зөв дамжуулах`,
-`[CHORE] Linear даалгаврын нэрлэх дүрмийг баримтжуулах`.
+Examples: `[PMN][FEAT] Хүсэлт ирэхэд имэйл мэдэгдэл илгээх`,
+`[PMN][FIX] Үнийн саналын хугацааг зөв дамжуулах`,
+`[PMN][CHORE] Linear даалгаврын нэрлэх дүрмийг баримтжуулах`.
 
 Apply this format when creating an issue or explicitly editing its title.
-When a valid prefix already exists, preserve it unless the task's purpose has
-changed; replace an obsolete prefix instead of stacking prefixes. A status,
+Preserve an existing `[PMN]` and valid task-type tag; never duplicate either.
+For a legacy `[TAG]` title, prepend `[PMN]`. If the task's purpose changes,
+replace the task-type tag instead of appending another one. A status,
 description or PR-link update alone does not require renaming the issue.
 Do not bulk-rename historical issues unless the user requests it.
 
